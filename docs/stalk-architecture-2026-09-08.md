@@ -77,6 +77,76 @@
 5. **Mesh/groove emergence** — high-traffic edges become preferred paths
 6. **Wobble as engineering** — controlled, not avoided
 
+## Frequency: load-bearing, not optional (Bobby 2026-09-11 update)
+
+**Status correction:** frequency was a late addition in this 2026-09-08 doc (originally listed as "speculative, treat as hypothesis"). Bobby's 2026-09-11 update **promotes it to load-bearing architectural primitive.** Evidence:
+
+### Biological ground truth
+Neurons communicate via frequency-modulated spike trains, not just on/off. Brain function depends on:
+- **Phase coding** — phase of oscillation encodes information (theta/gamma coupling)
+- **Interference patterns** — superposition of oscillations from multiple neurons
+- **Near-field coupling** — adjacent neurons interact via local field effects (ephaptic coupling, LFPs)
+
+The neuron analogy is not metaphor. It is the engineering template.
+
+### Why braided stalks enable near-field frequency coupling
+Per `4d-heegaard-stalk-topology-2026-09-08.md`: stalks attach at BOTH inner and outer toroid surfaces (radial bridges). They braid around the toroid via `braid_force` (per v6.0 canonical). **Braided stalks share geometric neighborhood.**
+
+That neighborhood IS the near-field. Frequency coupling within the braided neighborhood is **architecturally free** — no new geometry needed, just signal processing on the existing braided topology.
+
+### Engineering elevation: frequency → near-field interference processing
+
+| Property | Old framing (2026-09-08) | New framing (2026-09-11) |
+|---|---|---|
+| Frequency status | Optional, hypothesis | **Load-bearing** |
+| Coupling mode | Single-channel glue | **Multi-channel interference** |
+| Range | Near-attachment only | **Near-field within braid** |
+| Mechanism | Unknown | EM/signal processing within braid |
+| Brain analogy | Loose metaphor | **Engineering template** |
+| Required for v6.1? | Test first | **Yes — signal processing layer** |
+
+### What this means for v6.1
+
+1. **Every braided stalk pair has a frequency channel.** Braid adjacency = frequency adjacency. No attachment needed.
+2. **Interference patterns carry information.** Amplitude, phase, frequency multiplexing on the same braid — like a phased-array antenna or cochlear tonotopy.
+3. **Mesh/groove emergence becomes frequency-channel allocation.** High-traffic braids lock to specific frequencies; low-traffic braids free.
+4. **Constitutional axes get frequency assignment.** Each of the 20 axes may correspond to a distinct frequency band (Hodge harmonic modes at different eigenvalues).
+
+### What we need to build (v6.1)
+
+```python
+class Stalk:
+    # existing v6.0
+    theta, phi, length, girth, sheave_idx
+    + Lennard-Jones force, braid force, Möbius twist
+    # v6.1 NEW — frequency layer
+    + frequency_channel: int          # assigned frequency band
+    + phase: float                    # current phase (0-2π)
+    + braid_neighbors: List[Stalk]     # braided (geometrically adjacent) neighbors
+    + interference_pattern: Tensor    # superposition with neighbors
+    + coupling_strength: float       # decreases with braid-distance
+    
+    def transmit(self, signal):
+        """Encode signal as interference pattern on braid neighborhood."""
+        for neighbor in self.braid_neighbors:
+            neighbor.phase += signal * self.coupling_strength
+            
+    def receive(self):
+        """Decode signal from interference pattern."""
+        return sum(n.phase * self.coupling_strength 
+                   for n in self.braid_neighbors)
+```
+
+**Each stalk has its own frequency channel.** Communication is interference pattern across braid neighbors. This is **wave-based information transmission**, not glue-based.
+
+### Open architecture questions added
+
+- **#64**: how does frequency-channel assignment work? Per-stalk unique, or sheaf-shared?
+- **#65**: what's the braid-distance metric for coupling decay? Geometric (along the toroid surface) or topological (braid crossings)?
+- **#66**: how do interference patterns compose across the whole braided structure? Phased-array analogy (constructive/destructive interference across the egg toroid)?
+
+---
+
 ## Code evolution: v6.0 → v6.1 (Bobby's design)
 
 ### Current v6.0 Stalk
