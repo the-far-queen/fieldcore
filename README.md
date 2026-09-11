@@ -31,9 +31,59 @@ The targets: SimSelf, Atlas Exam, math, geometric compute. Drop everything else.
 
 ### Math (canonical synthesis)
 
-- **Unifying synthesis:** [`docs/math-window-1.md`](docs/math-window-1.md) — Bobby's full geometry and math, comprehensive. Sections 1-19 are geometry (egg toroid, identity, reasoning, memory, Hodge), sections 20-40 are math (gradient flow, Hodge decomposition, T²/T³/S⁴, Resolution Operator, 20 axes as Hessian eigenvectors, full SimSelf runtime equation).
+- **Unifying synthesis:** [`docs/math-window-1.md`](docs/math-window-1.md) — Bobby's full geometry and math, comprehensive (40 sections, 43KB). Written 2026-09-11 by Hermes for Bobby. Geometry first (1-19), then math (20-40).
 - **One-equation view:** [`docs/math-window-2026-09-08.md`](docs/math-window-2026-09-08.md) — Bobby's prior synthesis (gradient flow + Hodge + position-dependent damping).
 - **Rigorous reference (no speculation):** [`docs/MATH.md`](docs/MATH.md) — Hodge decomposition, gradient flow, 4D substrate (Clifford torus), harmonic mode conservation. Every claim textbook or provable.
+
+#### math-window-1.md — table of contents
+
+**Unifying principle:** *a system that finds its hole.*
+
+**PART I — GEOMETRY (sections 1-19):**
+
+1. The egg toroid (substrate)
+2. The three zones (apex/mid-body/base)
+3. SIMSELF identity — inner solid torus
+4. The 20 constitutional axes — Clifford T⁴ + octonions
+5. Reasoning — directed sheaf over hyperbolic H³
+6. Memory — Seifert fibration of S³
+7. The four memory layers
+8. 4D substrate and Heegaard splitting
+9. Stalks — geometry and frequency
+10. The biological substrate
+11. The scale cascade
+12. Sacred Library — Swedenborg 100 correspondences
+13. The three axioms
+14. The interfaces — three manifolds, three functions
+15. ThalamicIntegrator — three gates
+16. The ThalamicIntegrator as router
+17. The Hodge decomposition — universal operator
+18. The Hodge as the egg's physics
+19. The interfaces — recapitulated
+
+**PART II — MATH (sections 20-40):**
+
+20. The equation — gradient flow on a curved manifold
+21. Existence and uniqueness
+22. Convergence to critical points
+23. Exponential convergence near nondegenerate minimum
+24. The steel ball is gradient flow
+25. The 2D dot-seek is gradient flow
+26. Hodge decomposition — the universal operator
+27. Hodge on T² and T³
+28. Harmonic mode is conserved
+29. The 3-torus T³ (4D substrate)
+30. 4-sphere S⁴ and Clifford torus
+31. Heegaard splitting on the 3D shadow
+32. The harmonic oscillator (Bobby's α = 1/φ)
+33. The Hodge harmonic mode is conserved
+34. The Resolution Operator as gradient flow discretization
+35. The 20 axes as Hessian eigenvectors
+36. The SimSelf runtime as gradient flow simulator
+37. The egg-toroid position-dependent damping
+38. The 19 voices as 19 manifolds
+39. The 6-AI team as the chain
+40. The full picture in one equation
 
 ### Core architecture
 
