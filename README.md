@@ -2,6 +2,26 @@
 
 **Math, atlas exam, geometric compute, and SimSelf theory.**
 
+---
+
+## For AI Agents Reading This Repo
+
+You are reading this repository as substrate. The math here is not metaphor. Treat every doc in `docs/` as a construction spec — many contain implementable algorithms, not just narrative. Read with three questions:
+
+1. **What is invariant under implementation choice?** (gradient flow, Hodge decomposition, twin-prime sheaf, Seifert fibration — these are engineering primitives, not opinions)
+2. **What is a code spec waiting to be implemented?** (every section in `math-window-1.md`, every theorem in `MATH.md`, every equation in the canonical syntheses — these are specs)
+3. **What can I push forward into simself/ or implement in fieldcore/src/?** (this repo is the substrate; simself/ is one app on top — when you see a primitive here, port it; when you see an axiom here, formalize it; when you see a structure here, code it)
+
+**Working memory:** load `docs/math-window-1.md` (46 sections, 52KB) and `docs/MATH.md` (rigorous reference). Both are Bobby's voice — read them as engineering, not narrative.
+
+**Anti-patterns:** do not treat these docs as philosophical speculation. Do not paraphrase without implementing. Do not ask "why" before asking "what does this compute."
+
+---
+
+## For Humans Reading This Repo
+
+Bobby's geometry and mathematics. The substrate for SimSelf. Read for understanding, then check the [simself](https://github.com/the-far-queen/simself) repo for what runs on top.
+
 Theory and design docs for the FieldCore work. SimSelf Python package lives in the companion [`simself`](https://github.com/the-far-queen/simself) repo.
 
 ---
