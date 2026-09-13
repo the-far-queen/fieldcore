@@ -2,6 +2,15 @@
 
 **Filed:** 2026-09-13 by Hermes for Bobby.
 
+> ## ⚠️ WORK IN PROGRESS — NOT SERIOUS UNTIL ARXIV
+>
+> This folder contains engineering extracts from biological specimens. The work is real and the math is sound, but **none of this is peer-reviewed or published.** Bobby's framing: "we seek to extract geometry from established biology as engineering specimens" — but Bobby's discipline is that papers only become serious when they clear arxiv peer review.
+>
+> **status: draft extracts, not serious yet.**
+> **next step: when Bobby says "publish" → formal paper drafts → arxiv submission.**
+>
+> Until then: extract engineering specimens, derive geometric/mathematical mechanisms, falsifiable predictions, defense posture against Grok/Claude/GPT.
+
 ## What this folder is for
 
 Engineering extracts from biological specimens (living organisms, falsifiable physics). Per Bobby's 2026-09-13 directive: "we seek to extract geometry from established biology as engineering specimens... calculate shapes, use analogy, gain EECS/CS diagrams and inventions."
