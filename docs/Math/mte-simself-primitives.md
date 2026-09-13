@@ -3,7 +3,7 @@
 **Source:** `Desktop/FieldCore/mte-typing-simself-primitives.md` (Bobby, 2026-03-03; covers w26-w35)
 **Status:** 4 unique schemas extracted. CS-loaded terms stripped. Implementation-ready.
 
-Bobby's note covers 5 sections with multiple concepts. Most overlap with existing vault docs (MTE as the language gate, FieldCore IDE fork in `chorus-ide-design.md`, etc.). Four schemas are new and directly constructible.
+Bobby's note covers 5 sections with multiple concepts. Most overlap with existing vault docs (MTE as the language gate, FieldCore IDE fork in `chorus-multi-agent-ide.md`, etc.). Four schemas are new and directly constructible.
 
 ---
 
@@ -280,7 +280,7 @@ class SacredLibrary:
 - "w27 Distributed Node Prototype" (VisionStalk, ArmStalk, HandStalk) — embodied sketch, no derivation. Reference only.
 - "w30 Adversarial Input" (the "you lout a boorish bear" example) — useful test case but not architecture. Not extracted.
 - "w31 LLM Reasoning/Latent Emergence" — real thesis but speculative. Manifold view of cognition already implicit in FieldCore topology. Not extracted here.
-- "w32 FieldCore IDE Fork" — already covered in `chorus-ide-design.md`. Not duplicated.
+- "w32 FieldCore IDE Fork" — already covered in `chorus-multi-agent-ide.md`. Not duplicated.
 - "w35 Q3 Proactive Resilience" — control theory, useful but not core architecture. Reference only.
 
 ---

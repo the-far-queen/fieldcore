@@ -64,7 +64,7 @@ The original notes contained a "manifesto block" + blockchain timestamping workf
 
 1. **Manifesto block**: license listed as "Apache 2.0 + CC BY-SA 4.0" — conflicts with MIT already on fieldcore and simself repos. Attribution pattern doesn't match established repos. Kept as design philosophy, dropped as deployable artifact.
 2. **Originstamp workflow**: pre-blockchain-trust workflow from older era. Not load-bearing for engineering.
-3. **MTE paper pitch**: covered by `kernel-design-2026-09-05.md` and `mmm-design.md` separately.
+3. **MTE paper pitch**: covered by `kernel-design-2026-09-05.md` and `multiple-meaning-measure.md` separately.
 
 ## Open
 

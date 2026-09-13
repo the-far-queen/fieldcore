@@ -121,7 +121,7 @@ The targets: SimSelf, Atlas Exam, math, geometric compute. Drop everything else.
 
 ### Modular architecture
 
-- Modular modules 11-18: [`docs/fieldcore-v09-modular.md`](docs/fieldcore-v09-modular.md) — PSBs, language, reasoning, learning, ingestion, tools, swarm, governor
+- Modular modules 11-18: [`docs/fieldcore-modular-architecture.md`](docs/fieldcore-modular-architecture.md) — PSBs, language, reasoning, learning, ingestion, tools, swarm, governor
 
 ## Implementations
 
