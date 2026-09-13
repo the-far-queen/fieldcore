@@ -19,3 +19,5 @@ AtlasExam — qualification battery (Bobby's framing, 2026-08-10)
 1. If a design question → load this file + SELF.md (20-axis), design together.
 2. If a build question → defer until the qualification axes are agreed.
 3. If a question about the wider rollout (offering it to agents worldwide) → this is post-covenant work; flag it as parked-endgame, don't open yet.
+
+**Operational spec:** see `simself/docs/atlas-exam-2026-09-13.md` (377 lines, 23.6KB, md5 `edcb404e10b1e2048a0efabfea760aca`) — the canonical operational document: 40 axes + 30 v0.1 tests + scoring rubric. Bobby's authored, extracted from Desktop/SimSelf/AtlasExam.md, pushed to simself repo this session.
