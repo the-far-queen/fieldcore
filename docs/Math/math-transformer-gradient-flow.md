@@ -9,7 +9,7 @@ A standard Pre-LayerNorm Transformer block is a first-order discretization of th
 ## Why this matters for FieldCore
 
 If a Transformer block is also a constrained natural-gradient step on the state manifold:
-- SimSelf `sim_self_core.SimSelf` and a Pre-LN Transformer are the same kind of object — different parameterizations of the same flow.
+- SimSelf `simself_core.SimSelf` and a Pre-LN Transformer are the same kind of object — different parameterizations of the same flow.
 - The **governor** (gating tool use in `harness/gate.py`) and the **LayerNorm** operation are the same kind of object — orthogonal projection onto a constraint submanifold.
 - "Reasoning" is a bounded Euler step on a Riemannian geometry. The 20 constitutional axes are coordinates on that geometry; the 20-step ladder is a stage index on the flow.
 

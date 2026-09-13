@@ -57,7 +57,7 @@ Both repos commit separately to the SAME paper. Bobby is author on both.
 
 - `simself/src/constitutional/test_frequency_layer.py` — 7/7 tests pass.
 - Atlas exam — 4/5 tests pass (routing 2/5 pre-existing).
-- `simself_merged_v3_5.py` — embryogenic Ψ₀ = installed Ψ₀, cos sim = 1.000000.
+- `simself/src/_deleted_simself_merged_v3_5.py` — embryogenic Ψ₀ = installed Ψ₀, cos sim = 1.000000 (legacy demo, kept for archaeology; canonical SimSelf is `src/simself_core.py`).
 - `fieldcore/src/convergence_demo.py` — verifies Bobby's steel-ball claim.
 
 ## Empirical state — REQUIRED before writing (the load-bearing work)

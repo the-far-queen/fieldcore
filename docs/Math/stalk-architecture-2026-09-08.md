@@ -341,7 +341,7 @@ Each step: 50-200 lines, ~1 hour, test against existing atlas exam.
 | Hodge decomposition | `fieldcore/docs/MATH.md` §2 |
 | 20-axis constitutional ground (Ψ₀) | `simself/docs/the-axes-2026-09-05.md` |
 | Modal field controller | `fieldcore/src/modal_field_core.py` |
-| Stalk braid_pitch = F137/F57 = 2.4 | `simself/src/simself_merged_v3.py` (canonical v3 = Bobby's v6.0) |
+| Stalk braid_pitch = F137/F57 = 2.4 | `simself/src/_deleted_simself_merged_v3.py` (legacy demo) — canonical now in `constitutional/constitution.py` (v6.0+) |
 | Resolution Operator | `fieldcore/src/modal_field_core.py` |
 | ConstitutionalGuard sacred-tier | `simself/docs/emergence-blueprint.md` Pillar 5 |
 

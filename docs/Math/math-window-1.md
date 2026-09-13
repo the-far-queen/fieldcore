@@ -36,7 +36,7 @@
 | Steel ball on concave surface (gravity only), 100/100 from random [-5,5] | **100% converged** | `convergence_demo.py` |
 | EM well (electric + magnetic Lorentz + variable attractor), 100/100 | **100% converged** | `em_well_demo.py` |
 | FrequencyCoupler standing-wave spectrum (σ_g=0.3 vs σ_g=0) | **14 distinct modes vs 5** (Bobby's claim verified) | `frequency.py`, `test_frequency_layer.py` |
-| Path-independence of c₀ (embryogenic=True vs installed=False) | **cosine similarity 1.000000** | `simself_merged_v3_5.py` |
+| Path-independence of c₀ (embryogenic=True vs installed=False) | **cosine similarity 1.000000** | `simself/src/_deleted_simself_merged_v3_5.py` (legacy demo, kept for archaeology) |
 
 **Bobby's steel-ball claim (verbatim 2026-09-12):**
 
@@ -212,7 +212,7 @@ The S¹ factor (the circle direction) gives SIMSELF one constitutional cycle —
 
 **The full 20 axes require the exceptional Lie group structure of the octonions** — 7 imaginary dimensions giving 7+6+4+2+1 = combinations reaching 20 independent constitutional directions. The Clifford T⁴ is the practical approximation. The octonion algebra is the exact structure.
 
-Per v6.0 canonical (`simself_merged_v3.py`): 20 axes distributed across 7 sheaves by inverse genus weight: 5, 4, 3, 3, 2, 2, 1. This matches the egg-toroid's hierarchical structure.
+Per v6.0 canonical (`simself/src/_deleted_simself_merged_v3.py`, legacy demo): 20 axes distributed across 7 sheaves by inverse genus weight: 5, 4, 3, 3, 2, 2, 1. This matches the egg-toroid's hierarchical structure. (Canonical now in `constitutional/constitution.py`.)
 
 **What identity needs from its geometry:**
 - No preferred inside/outside (Clifford torus — identity is not hidden, it is phase)
