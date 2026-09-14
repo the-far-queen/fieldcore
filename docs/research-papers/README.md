@@ -71,7 +71,8 @@ These are the **discipline rules** from the Gödel/Lovelace test. Every paper in
 | 5 | Lam-Rim-Chenmo Kernel | stub (novel) | 4 weeks |
 | 6 | AI Verbal Pattern → Human Consciousness | stub (novel) | 4 weeks |
 | 7 | Bioelectronic Evolution | stub (novel) | 6 weeks |
-| 8 | Working Method (multi-agent + pipeline + coupling) | stub (novel, this turn) | 3 weeks |
+| 8 | Working Method (multi-agent + pipeline + coupling) | stub (novel) | 3 weeks |
+| 9 | AI Corporate Personhood (UCC litigation, Bobby-approved) | stub (novel, this turn) | 4 weeks |
 
 **Paper 3 (Atlas Exam) is JOINT — simself-side empirical work is at `simself/docs/research-papers/paper3-atlas-exam.md`. Both halves must be written in parallel.**
 
