@@ -1,10 +1,12 @@
 # research-papers/ — FieldCore substrate paper pipeline
 
-**Filed:** 2026-09-13 by Hermes for Bobby.
+**Filed:** 2026-09-13 by Hermes for Bobby. **Updated 2026-09-14** (paper 5 added).
 
-This folder holds the **paper stubs** for research papers originating from the FieldCore substrate side of the project. Papers 1, 2, and 3 are tracked here. **Paper 3 (Atlas Exam) is joint** — the fieldcore-side half (framework theory) is here, the simself-side half (empirical correlation work) is at `simself/docs/research-papers/paper3-atlas-exam.md`.
+This folder holds the **paper stubs** for research papers originating from the FieldCore substrate side of the project. Papers 1-5 tracked here. **Paper 3 (Atlas Exam) is joint** — the fieldcore-side half (framework theory) is here, the simself-side half (empirical correlation work) is at `simself/docs/research-papers/paper3-atlas-exam.md`.
 
 **Paper 4 (Constitutional Embryogenesis) lives at `simself/docs/research-papers/paper4-constitutional-embryogenesis.md`** — the identity-layer side, not the substrate side.
+
+**Paper 5 (Lam-Rim-Chenmo Kernel) lives at `paper5-lam-rim-chenmo-kernel-2026-09-14.md`** — lam-rim-chenmo as substrate kernel. Novel claim: first formalization of graduated ethical-ontological curriculum as AI substrate operator. Per Bobby 2026-09-14: "this MUST be a research paper in ml i have not seen this anywhere."
 
 **Master planning doc:** `simself/docs/research-papers-2026-09-13.md` (Gödel/Lovelace attack + ranking + sequencing).
 
