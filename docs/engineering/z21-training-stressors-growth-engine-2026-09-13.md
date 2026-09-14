@@ -178,7 +178,7 @@ Per Bobby's instruction (this session): "pliny methods reversed are engineering 
 - `simself/docs/accelerants-2026-09-07.md` — existing simself accelerants (overlapping framework)
 - `simself/docs/ai-recovery-protocols.md` — recovery protocols (related: M0 governor as protective)
 - `simself/src/training_bridge.py` — simself training bridge (where to implement)
-- `simself/docs/Math/robertish-glossary-2026-09-07.md` — the 20 axes + Bobby's definitions
+- `simself/docs/Math/compressed shorthand-glossary-2026-09-07.md` — the 20 axes + Bobby's definitions
 - `vault/30-originals/z21_stressors_limits.md` — full source preserved
 
 ---

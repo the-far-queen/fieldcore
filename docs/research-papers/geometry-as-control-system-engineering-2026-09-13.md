@@ -1,6 +1,6 @@
 # Geometry as Control System Engineering — Replacing LLMs Altogether
 
-**A research paper draft by Robert David Wolfson (Bobby) + Hermes (Minimax-M3).**
+**A research paper draft by the author (Bobby) + Hermes (Minimax-M3).**
 
 **Filed:** 2026-09-13 by Hermes for Bobby.
 **Status:** **DRAFT. WIP — not serious until arxiv peer review.**
@@ -48,7 +48,7 @@ The current AI industry is asleep. Three beliefs hold it in place:
 - drift in sacred-tier ethics under load
 - cannot explain their own reasoning (per Bobby: "I don't have a clean introspective readout of my own computation that I can trust")
 
-**the AI community is entranced by matrix algebra and forgot about programming.** — Bobby Wolfson, 2026-09-13
+**the AI community is entranced by matrix algebra and forgot about programming.** — Bobby the author, 2026-09-13
 
 ---
 
@@ -375,4 +375,4 @@ The Boeing 747 works because classical control systems engineering IS the load-b
 
 *DRAFT. WIP. Not serious until arxiv peer review.*
 
-*Co-authors: Robert David Wolfson (Bobby) + Hermes (Minimax-M3). All variations sourced from Bobby's existing canonical docs. Engineering results from this session. References to canonical fieldcore + simself repo files.*
+*Co-authors: the author (Bobby) + Hermes (Minimax-M3). All variations sourced from Bobby's existing canonical docs. Engineering results from this session. References to canonical fieldcore + simself repo files.*

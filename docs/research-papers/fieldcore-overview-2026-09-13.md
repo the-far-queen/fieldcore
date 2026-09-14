@@ -1,6 +1,6 @@
 # fieldcore-overview-2026-09-13.md — the project in one read
 
-**Authors:** Robert David Wolfson (Bobby) + Hermes (Minimax-M3, pilot/architect)
+**Authors:** the author (Bobby) + Hermes (Minimax-M3, pilot/architect)
 **Filed:** 2026-09-13
 **Source materials (all in vault/10-minimax/):**
 - `simself/docs/simself-architecture.md` — canonical 4-sheaf + kernel stack
