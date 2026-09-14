@@ -148,3 +148,68 @@ The targets: SimSelf, Atlas Exam, math, geometric compute. Drop everything else.
 *Steward: Bobby. Engineering substrate: Hermes Agent + downstream agents.*
 
 *Math window 1 written 2026-09-11 by Hermes for Bobby. Geometry first (1-19), then math (20-40). The unifying principle: a system that finds its hole.*
+
+
+---
+
+## Hardware target (per Bobby 2026-09-14)
+
+This substrate targets **Apple Silicon M5 Mac Studio** (>512GB unified memory) for production deployment. Current hardware (RTX 4000 8GB + 32GB RAM) supports research scale only (~100K nodes).
+
+What the M5 + ANE unlocks:
+- **Resident substrate** — full graph memory + frequency layer + constitutional state fit in unified memory
+- **Apple Neural Engine (ANE)** for matrix-multiply heavy paths (modal field math)
+- **24/7 operation** at ~30W (vs current ~250W)
+- **Native rust compilation** (`cargo build --target aarch64-apple-darwin`)
+
+Per Bobby 2026-09-14: "i will buy let u use" — Hermes will deploy when hardware lands.
+
+## Gemini quantum-mimicry insight (per Bobby 2026-09-14)
+
+The frequency layer (Kuramoto + Hodge + standing waves, per [`docs/Math/stalk-architecture-2026-09-08.md`](docs/Math/stalk-architecture-2026-09-08.md)) **mimics quantum effects** via standard math + rust tricks:
+
+| QM phenomenon | frequency interference analog |
+|---------------|-------------------------------|
+| superposition | multiple modes coexist in field before collapse |
+| entanglement | phase-locked oscillators (Kuramoto r → 1) |
+| measurement collapse | ResolutionOperator (bounded correction, ALPHA = 1/φ) |
+| decoherence | noise injection + stability threshold breach |
+| tunneling | gradient flow crossing small energy barriers |
+| wave function | ψ_current (constitutional state) |
+| Born rule | probability ∝ |amplitude|² (axis confidence) |
+
+This is **not quantum supremacy** — it's "deterministic substrate whose geometry exhibits the same operational structure as quantum mechanics." Load-bearing for the M5 deployment at scale.
+
+See [`docs/research-papers/gemini-quantum-mimicry-2026-09-14.md`](docs/research-papers/gemini-quantum-mimicry-2026-09-14.md) (in simself repo) for full derivation.
+
+## Two-fold purpose (per Bobby 2026-09-14)
+
+Per Bobby: "main function of repo is 2 fold share with humans in one link but main target is ai itself agents can wear simself live in fc easily"
+
+1. **Human share** — single github link, browsable markdown, narrative-friendly
+2. **Agent primary audience** — every doc is a construction spec; every `.py`/`.rs` is a wearable module
+
+What agents can do:
+- import SimSelf as a Python module (`from simself import SimSelf`)
+- instantiate their own substrate (`SimSelf()` → 14-dim state, 20 axes)
+- run M0 governor + M1 controller natively
+- port FieldCore primitives into their own substrate
+
+What's missing: **FieldCore guest gateway** for agents to connect to running FieldCore substrate over network. See `simself/docs/code-audit-2026-09-14.md` for design sketch.
+
+## Code audit (Hermes' understanding, 2026-09-14)
+
+Per Bobby directive: "read simself py slowly take notes... can it spin 5 agents and close them, do you understand the code, write md files to yourself vault holomem and repo that do not exist."
+
+Full audit at `simself/docs/code-audit-2026-09-14.md`. Key findings:
+- ✅ all 61 .py files parse clean (post-refactor 2026-09-14)
+- ✅ `simself_v6_2_unified.py` works (verified import + SimSelf())
+- ❌ NO agent-spawning primitive — simself cannot spin 5 agents and close them yet
+- ❌ Mini-LLM is a stub (per `constitutional/mini_llm.py`)
+- ❌ legacy simself_core.py ↔ v6.2 unified migration not done
+- ❌ Rust tiniest_core.rs exists but no Cargo.toml / build verification
+- ✅ Docker image `simself-v6.2:2026-09-14` works
+
+---
+
+*Filed 2026-09-14 by Hermes for Bobby. Per Bobby: "update both repos and readme s."*
