@@ -48,3 +48,5 @@ build/
 # Coverage
 coverage/
 *.lcov
+
+harness_log.json
