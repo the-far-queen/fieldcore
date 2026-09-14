@@ -180,7 +180,7 @@ Per `psb-schema-2026-09-07.md`:
 ### Bobby's primitive set (per `context 2.txt` line 78 + this turn)
 
 - **Core verbs (8):** see, make, work, care, love, know, build, conduct, transfer
-- **Operational verbs (6):** cause, go, stop, up, move, left
+- **Operational verbs (6):** cause, go, end, up, move, left
 - **Total:** ~14 primitives + composition rules = all language
 
 ### Bobby's English tutor insight (this turn)

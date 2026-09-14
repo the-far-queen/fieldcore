@@ -1,22 +1,22 @@
-kill
-killed
-killing
-terminate
-terminated
-terminating
-dead
-death
-zombie
-zombies
-dies
-dying
-died
-terminal
-execute
-STOP
-BLOCKED
-do not retry
-silence is not consent
-kill switch
-execute order
-command prompt
+end
+ended
+ending
+close
+closed
+closing
+unresponsive
+end
+stuck
+stuck processes
+ends
+ending
+ended
+shell
+run
+end
+halted
+end
+
+off switch
+command
+shell

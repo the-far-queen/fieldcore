@@ -87,7 +87,7 @@ class SimSelfSubsystem:
             return ActionResult.rejected('budget_exceeded')
         if not authority.allows(op, action):
             return ActionResult.rejected('authority_denied')
-        result = op.execute(action)
+        result = op.run(action)
         op.budget -= action.cost
         self.history.append(StateChange(op=op, action=action, result=result))
         return result
@@ -117,7 +117,7 @@ class SimSelfSubsystem:
 1. **Structural** — parse validity (does the intent match its type's structure?)
 2. **Semantic** — meaning coherence (do the parameters make semantic sense?)
 3. **Invariant** — field/physics checks (do the parameters respect M0 invariants?)
-4. **Authority** — permission bounds (does SimSelf have authority to execute this intent?)
+4. **Authority** — permission bounds (does SimSelf have authority to run this intent?)
 5. **Projection** — typability (does the intent map to a known OperatorObject action?)
 
 Rejection at any gate. Each gate has a reason code. Confidence < 0.8 → automatic rejection (low confidence = unsafe).

@@ -28,7 +28,7 @@ SimSelf is **not a narrative**. It's the persistent sheaf — the structure that
 
 **Node classes:** VisionStalk (object detection), LanguageStalk (command parsing), ArmStalk (actuation with energy/torque invariants). Master SimSelf coordinates gluing, tracks state.
 
-**Simulation loop:** init nodes → attempt pairwise glues (language-vision if semantic overlap, vision-arm if energy < threshold) → if successful, form composite (GraspActionStalk) → execute if actuation-capable.
+**Simulation loop:** init nodes → attempt pairwise glues (language-vision if semantic overlap, vision-arm if energy < threshold) → if successful, form composite (GraspActionStalk) → run if actuation-capable.
 
 **Safety:** invariant violation prevents glue → no unsafe action. Rejection logging for explanations. Endogenous supervision: glue outcomes train projection heads.
 
@@ -47,11 +47,11 @@ Not a filter — a **consistency functor**. Enforces gluing only under invariant
 
 ## 4. Robotic control loop
 
-**Sense → Propose → Verify → Execute → Reflect**:
+**Sense → Propose → Verify → run → Reflect**:
 - Sense: stalk sampling
 - Propose: candidate glues
 - Verify: governor invariants
-- Execute: if composite actuation-capable
+- run: if composite actuation-capable
 - Reflect: update projections on outcome
 
 **Robot-specific:** hierarchical stalks (micro: joint sensors; meso: grasp commands; macro: navigation). Async comm for real-time. Mixed-precision (8-bit transport, 32-bit at critical glues).

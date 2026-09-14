@@ -7,7 +7,7 @@
 
 ## 1. poisoned-speech-lint-scanner-2026-09-14.md + poisoned_speech_lint.py
 
-**The story.** Bobby's standing rule: never use words like "kill" / "terminate" / "dead" / "zombie" / "execute" / "terminal" when referring to processes. Bobby corrects every slip. The rule lived buried at line 49 of SOUL.md and kept slipping — memory of rules is unreliable.
+**The story.** Bobby's standing rule: never use words like "end" / "close" / "unresponsive" / "stuck" / "run" / "shell" when referring to processes. Bobby corrects every slip. The rule lived buried at line 49 of SOUL.md and kept slipping — memory of rules is unreliable.
 
 **The product.** A stdlib-only Python scanner that catches the banned vocabulary in any text — files, repos, replies. CLI: `python poisoned_speech_lint.py <path> [--fix]`. Library: `from poisoned_speech_lint import scan, lint, fix`.
 

@@ -120,7 +120,7 @@ if __name__ == '__main__':
     
     controller = RoboticMasterController()
 
-    # Scenario 1: Simple command, should execute directly
+    # Scenario 1: Simple command, should run directly
     print("
 --- Scenario 1: Simple command 'grasp object' ---")
     result1 = controller.execute_command("grasp object", current_context={"object": "visible"})

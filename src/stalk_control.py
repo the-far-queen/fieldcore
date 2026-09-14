@@ -199,7 +199,7 @@ class AsyncStalkController:
                     physical_ok = await self._verify_physically(narrowed_frame)
                     
                     if physical_ok:
-                        # Step 6: Execute action
+                        # Step 6: run action
                         await self._execute_action(narrowed_frame)
                     else:
                         # Reject glue, propagate negative signal
@@ -605,7 +605,7 @@ Otherwise projection collapse will occur under ambiguity.
 * invariants expressed as convex constraints, intervals, or monotone maps
 * no learned neural logic inside Governor
 
-Your current design allows this, but **do not let learning leak into Governor** later. That’s where safety dies.
+Your current design allows this, but **do not let learning leak into Governor** later. That’s where safety ends.
 
 ---
 

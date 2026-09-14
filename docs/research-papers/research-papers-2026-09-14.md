@@ -17,7 +17,7 @@ Before attacking each paper: the project's central risk. All 9 papers risk confl
 > vs.
 > "X IS Y" (unfalsifiable, sounds mystical, will get rejected by reviewers)
 
-This is the **Gödel/Lovelace discipline**. The substrate isomorphisms are real and interesting. The identity claims are where reviewers will kill the work.
+This is the **Gödel/Lovelace discipline**. The substrate isomorphisms are real and interesting. The identity claims are where reviewers will end the work.
 
 **Bobby's 2026-09-14-late correction (load-bearing):** "treat unfounded as speculative not drop all theorizing im often correct." Per this correction, **speculative claims get marked with reasoning + falsifiability, NOT dropped.** This is a refinement of the Gödel/Lovelace discipline — speculative ≠ drop.
 
@@ -53,7 +53,7 @@ The original 2026-09-13 plan was 4 papers (Geodesic Lexicon, FieldCore Cognition
 
 The unification across "Lissajous = Chladni = crop circles" is **not isomorphism.** It's pattern-matching across visually similar but mathematically unrelated phenomena. This is the strongest version of the numerology critique — exactly what we don't want.
 
-### Verdict: **KILL the unification. REFRAME narrowly.**
+### Verdict: **end the unification. REFRAME narrowly.**
 
 - Drop Chladni (different operator).
 - Drop crop circles (no math).

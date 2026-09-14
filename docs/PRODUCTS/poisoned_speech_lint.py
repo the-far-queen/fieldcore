@@ -130,7 +130,7 @@ def scan_path(target):
     for child in p.rglob("*"):
         if child.is_file() and child.suffix.lower() in {
             ".md", ".txt", ".py", ".json", ".yaml", ".toml", ".rs", ".gd"
-        }:
+        } and not child.name.startswith("banned_words"):
             out.extend(scan_file(child))
     return out
 

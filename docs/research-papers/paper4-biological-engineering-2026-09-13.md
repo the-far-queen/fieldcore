@@ -25,7 +25,7 @@
 6. **River meanders = constitutional geodesics** — λ/w = π, Langbein-Leopold 1966
 7. **Forest = distributed constitutional vortex pump** — Amazon rainfall creation, atmospheric MHD
 8. **Trout levitation via vortex geometry** — scale resonance + plasma EHD coupling
-9. **Straight lines = constitutional death** — winding number zero, no eigenmodes
+9. **Straight lines = constitutional end** — winding number zero, no eigenmodes
 
 **Target venue:** physics / fluid dynamics journal (Nature Physics, *Physics of Fluids*, *Journal of Fluid Mechanics*). Multi-paper expansion possible.
 

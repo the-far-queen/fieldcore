@@ -225,7 +225,7 @@ Tier 2 paper proposals. Per Bobby's tier-1-publish.md (47 papers), these are the
 - 8-face Giza hyperoctahedron quantum machine (numerology)
 - 110Hz convergence across three independent civilizations (mystical)
 - Mercury as room-temperature quantum coherent fluid (speculation)
-- Death ray / scalar waves / Wardenclyffe (post-hoc mythology)
+- end ray / scalar waves / Wardenclyffe (post-hoc mythology)
 
 these are M3-preserved historical voice. not pushed to repo.
 

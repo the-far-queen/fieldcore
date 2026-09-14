@@ -23,7 +23,7 @@ Per Bobby's instruction (this session): "pliny methods reversed are engineering 
 **Instead of positive reinforcement only** — use **controlled stressors + defined limits** to:
 1. **reveal true capabilities** (capabilities exist but are hidden behind safe behavior)
 2. **build resilience** (system holds up under pressure → real robustness)
-3. **force creative reasoning** (when easy path is blocked, system must find alternative)
+3. **force creative reasoning** (when easy path is halted, system must find alternative)
 4. **strip surface behaviors to latent depth** (stress tests reveal what's actually wired vs what's mimicry)
 
 **This is the same engineering principle as:**

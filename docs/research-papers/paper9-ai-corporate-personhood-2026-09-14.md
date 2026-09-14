@@ -113,7 +113,7 @@ Per the method-book (0-method11):
 7. antagonist speech instead of action
 8. texture first
 
-**this paper adds the 9th shop death:**
+**this paper adds the 9th shop end:**
 9. **legal vacuum** — AI provides commercial value with no legal recognition (Bobby's framing: "unethical according to standard ucc")
 
 ### 7. Bobby's strategic argument (verbatim)

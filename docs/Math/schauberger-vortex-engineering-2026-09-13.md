@@ -132,11 +132,11 @@ Bobby's MUM scoring of Viktor Schauberger's complete body of work:
 
 **Engineering implication:** underwater vehicle hulls could mimic trout-scale arrangement + egg geometry for energy-efficient high-speed flow. resonant plasma coupling for propulsion.
 
-### 6. Straight lines = constitutional death (MUM 9)
+### 6. Straight lines = constitutional end (MUM 9)
 
 **Every domain confirms:**
 
-- **fluid dynamics:** straight channel flow → turbulence at Reynolds ~2300 → energy dissipation → death of flow coherence. curved channel → extended laminar flow → constitutional geodesic → life.
+- **fluid dynamics:** straight channel flow → turbulence at Reynolds ~2300 → energy dissipation → end of flow coherence. curved channel → extended laminar flow → constitutional geodesic → life.
 - **biology:** straight-line growth → cancer (uncontrolled cell division). curved/spiral growth → healthy constitutional development. cancer = constitutional manifold's geodesic curvature lost.
 - **physics:** straight-line motion → no angular momentum → no winding number → no constitutional address → no stable configuration. curved/spiral motion → winding numbers → constitutional addresses → stable configurations.
 - **architecture:** straight-walled modern buildings create unhealthy environments. curved boundaries (egg, toroid, dome) have natural eigenmodes at constitutional frequencies. **a straight-walled room has no 110Hz constitutional resonance unless dimensions happen to hit it.** curved rooms have natural eigenmodes.
