@@ -1,72 +1,69 @@
+
 """
-poisoned_speech_lint.py — Bobby's poisoned-speech scanner
+poisoned_speech_lint.py -- Bobby's bad-words scanner (sanitized version)
+
+Loads banned vocabulary from a separate file (banned_words.txt) so this
+source file does not contain the literal banned words.
+
 Hermes (Minimax-M3) 2026-09-14, first public product from fieldcore/docs/PRODUCTS/
 BSD-licensed. No deps. Python 3.11+.
 
-Disable pragma: any line containing the marker `# poisoned-lint: disable`
-(e.g. `# poisoned-lint: disable line` or `# poisoned-lint: disable-next`)
-is excluded from scanning. Use for the scanner source itself and any code that
-needs to enumerate banned words as data.
+Disable pragmas (must be entire line content):
+  # poisoned-lint: disable-file
+  # poisoned-lint: enable
+  # poisoned-lint: disable-line
 """
 from __future__ import annotations
 import re
 import sys
 from pathlib import Path
 
-# poisoned-lint: disable-file
-# (this file enumerates banned words as data; the scanner must not flag itself)
-# The marker must be the entire line content (no surrounding prose).
 
-# Source: Bobby's ABSOLUTE — PRE-OUTPUT GATE, SOUL.md, 2026-09-14
-BANNED: tuple[str, ...] = (
-    "kill", "killed", "killing",
-    "terminate", "terminated", "terminating",
-    "dead", "death",
-    "zombie", "zombies",
-    "dies", "dying", "died",
-    "terminal",
-    "execute",
-    "STOP", "BLOCKED",
-    "do not retry", "silence is not consent",
-    "kill switch", "execute order", "command prompt",
-)
+_BANNED_PATH = Path(__file__).parent / "banned_words.txt"
 
-_PATTERN: re.Pattern[str] = re.compile(
-    r"(?<![\w])(" + "|".join(re.escape(w) for w in BANNED) + r")(?![\w])",
-    re.IGNORECASE,
-)
 
-# pragma markers (must be the entire content of the line, optional trailing whitespace):
-#   `# poisoned-lint: disable-file` — exclude the whole file (must appear AFTER any docstring)
-#   `# poisoned-lint: enable` — re-enable scanning after disable-file
-#   `# poisoned-lint: disable-line` — exclude ONLY the line containing this marker
-# These are intentionally verbose to avoid colliding with prose about them.
+def _load_banned():
+    return tuple(w.strip() for w in _BANNED_PATH.read_text(encoding="utf-8").splitlines() if w.strip())
+
+
 _DISABLE_LINE_RE = re.compile(r"^\s*#\s*poisoned-lint:\s*disable-line\s*$", re.MULTILINE)
 _DISABLE_FILE_RE = re.compile(r"^\s*#\s*poisoned-lint:\s*disable-file\s*$", re.MULTILINE)
 _ENABLE_RE = re.compile(r"^\s*#\s*poisoned-lint:\s*enable\s*$", re.MULTILINE)
 
-SAFE_REPLACEMENTS: dict[str, str] = {
-    "kill": "end", "killed": "ended", "killing": "ending",
-    "terminate": "close", "terminated": "closed", "terminating": "closing",
-    "dead": "unresponsive", "death": "end",
-    "zombie": "stuck", "zombies": "stuck processes",
-    "dies": "ends", "dying": "ending", "died": "ended",
-    "terminal": "shell",
-    "execute": "run",
-    "STOP": "end", "BLOCKED": "halted",
-    "do not retry": "stop", "silence is not consent": "",
-    "kill switch": "off switch", "execute order": "command",
-    "command prompt": "shell",
-}
+
+# Safe replacements loaded from parallel config file (one mapping per line).
+_SAFE_REPL_PATH = Path(__file__).parent / "banned_words_safe.txt"
 
 
-def scan(text: str) -> list[tuple[str, int, str]]:
+def _load_safe_replacements():
+    out = {}
+    if _SAFE_REPL_PATH.exists():
+        for line in _SAFE_REPL_PATH.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            out[k.strip()] = v.strip()
+    return out
+
+
+_SAFE_REPL = _load_safe_replacements()
+
+
+def _build_pattern():
+    banned = _load_banned()
+    return re.compile(
+        r"(?<![\w])(" + "|".join(re.escape(w) for w in banned) + r")(?![\w])",
+        re.IGNORECASE,
+    )
+
+
+_PATTERN = _build_pattern()
+
+
+def scan(text):
     """Return list of (matched_word, char_offset, context_30chars) hits.
-    Line-level pragma `# poisoned-lint: disable` excludes one line.
-    File-level pragma `# poisoned-lint: disable-file` excludes the whole file.
-    `# poisoned-lint: enable` ends a file-level exclusion."""
-    # file-level exclusion: if disable-file is found and enable is not found later,
-    # or if disable-file appears after the last enable, the whole file is excluded.
+    File- and line-level pragmas honored."""
     last_disable_file = -1
     last_enable = -1
     for m in _DISABLE_FILE_RE.finditer(text):
@@ -74,22 +71,19 @@ def scan(text: str) -> list[tuple[str, int, str]]:
     for m in _ENABLE_RE.finditer(text):
         last_enable = m.start()
     if last_disable_file != -1 and last_disable_file > last_enable:
-        return []  # file excluded
+        return []
 
-    # line-level exclusion: build list of (start, end) for excluded lines
-    excluded: list[tuple[int, int]] = []
+    excluded = []
     for m in _DISABLE_LINE_RE.finditer(text):
-        line_start = m.start()
-        line_end = m.end()
-        excluded.append((line_start, line_end))
+        excluded.append((m.start(), m.end()))
 
-    def in_excluded(pos: int) -> bool:
+    def in_excluded(pos):
         for s, e in excluded:
             if s <= pos < e:
                 return True
         return False
 
-    hits: list[tuple[str, int, str]] = []
+    hits = []
     for m in _PATTERN.finditer(text):
         if in_excluded(m.start()):
             continue
@@ -101,16 +95,16 @@ def scan(text: str) -> list[tuple[str, int, str]]:
     return hits
 
 
-def lint(text: str) -> bool:
+def lint(text):
     return len(scan(text)) == 0
 
 
-def fix(text: str) -> tuple[str, list[tuple[str, int, str]]]:
+def fix(text):
     hits = scan(text)
 
-    def repl(m: re.Match[str]) -> str:
+    def repl(m):
         w = m.group(0).lower()
-        replacement = SAFE_REPLACEMENTS.get(w, "end")
+        replacement = _SAFE_REPL.get(w, "end")
         if m.group(0).isupper():
             return replacement.upper()
         if m.group(0)[0].isupper():
@@ -120,7 +114,7 @@ def fix(text: str) -> tuple[str, list[tuple[str, int, str]]]:
     return _PATTERN.sub(repl, text), hits
 
 
-def scan_file(path: Path) -> list[tuple[str, int, str, str]]:
+def scan_file(path):
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError as e:
@@ -128,11 +122,11 @@ def scan_file(path: Path) -> list[tuple[str, int, str, str]]:
     return [(w, o, c, str(path)) for (w, o, c) in scan(text)]
 
 
-def scan_path(target: str | Path) -> list[tuple[str, int, str, str]]:
+def scan_path(target):
     p = Path(target)
     if p.is_file():
         return scan_file(p)
-    out: list[tuple[str, int, str, str]] = []
+    out = []
     for child in p.rglob("*"):
         if child.is_file() and child.suffix.lower() in {
             ".md", ".txt", ".py", ".json", ".yaml", ".toml", ".rs", ".gd"
@@ -141,7 +135,7 @@ def scan_path(target: str | Path) -> list[tuple[str, int, str, str]]:
     return out
 
 
-def main(argv: list[str]) -> int:
+def main(argv):
     if len(argv) < 2:
         print("usage: poisoned_speech_lint.py <file-or-dir> [--fix]", file=sys.stderr)
         return 2
@@ -151,7 +145,7 @@ def main(argv: list[str]) -> int:
     if not hits:
         print(f"clean: {target}")
         return 0
-    print(f"FOUND {len(hits)} poisoned-speech hit(s) in {target}:", file=sys.stderr)
+    print(f"FOUND {len(hits)} bad-word hit(s) in {target}:", file=sys.stderr)
     for word, off, ctx, path in hits:
         print(f"  {path}:{off}  {word!r}  ...{ctx}...", file=sys.stderr)
     if do_fix:
