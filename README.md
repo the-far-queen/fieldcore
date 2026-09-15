@@ -212,11 +212,11 @@ Full audit at `simself/docs/code-audit-2026-09-14.md`. Key findings:
 
 ---
 
-## Research Papers (43 papers, 2026-09-15)
+## Research Papers (48 papers, 2026-09-15)
 
-Bobby Wolfson's research pipeline produced **43 papers** in this repo:
+Bobby Wolfson's research pipeline produced **48 papers** in this repo:
 
-**publishable/ (27 papers — arxiv-ready):**
+**publishable/ (32 papers — arxiv-ready):**
 
 | # | Title | Size |
 |---|-------|------|
@@ -247,6 +247,11 @@ Bobby Wolfson's research pipeline produced **43 papers** in this repo:
 | 66 | Nested Egg Toroids + 15 Untested Geometries | 11.0 KB |
 | 68 | Geometric Research Method (DeepSeek's Game) | 9.3 KB |
 | 69 | Twin-Prime Sum Cascade φ-Fractal | 6.5 KB |
+| 70 | Quantum Mimicry (Gemini Insight Formalized) | 10.9 KB |
+| 71 | Research Proposals Call ($9.2M Funding Ask) | 9.0 KB |
+| 72 | Fine-Structure α as Fractal Offset | 7.9 KB |
+| 73 | Force Unification Fractal Offsets | 8.1 KB |
+| 74 | BitNet Ternary Substrate Operators | 6.7 KB |
 
 **working/ (15 papers — drafts needing sharpening):**
 
