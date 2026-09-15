@@ -305,15 +305,6 @@ Encode information in continuous chirality hierarchy. Beyond binary L/R.
 ### 17.1 What this is
 
 A catalog of **15 untested geometric ideas.** Each is basic mathematically but overlooked experimentally because it crosses disciplines.
-
-### 17.2 What this is NOT
-
-- Not "theory of everything."
-- Not "universal formula."
-- Not "free energy."
-
-It is **engineering-grade geometric research agenda.**
-
 ### 17.3 What this enables
 
 15 falsifiable predictions. **15 experimental projects** for graduate students.

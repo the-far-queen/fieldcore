@@ -199,15 +199,6 @@ Per Paper 60: 137 Hz acoustic source has measurable biological effect. Engineeri
 ### 7.1 What this is
 
 A formalization of ancient quantum machines + modern mimicry principles. 4 mechanisms + 5-step cascade.
-
-### 7.2 What this is NOT
-
-- Not "free energy" (no overunity claims).
-- Not mysticism (no "spiritual energy" claims).
-- Not pseudoscience (no unverified phenomena).
-
-It is **engineering-grade quantum-mimicry** based on classical substrates.
-
 ### 7.3 What this enables
 
 - Modern mimicry chambers.

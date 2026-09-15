@@ -200,15 +200,6 @@ Bobby's self-reported:
 ### 6.1 Why this matters
 
 A compound system that improves 5 physiological axes simultaneously has **non-linear returns**. Investment in early optimization pays off across all axes.
-
-### 6.2 What this is NOT
-
-- Not a substitute for medical care.
-- Not a cure for chronic disease.
-- Not a guaranteed outcome.
-
-It is a **practice pattern** with measurable physiological effects.
-
 ### 6.3 What this IS
 
 - RCT protocol.

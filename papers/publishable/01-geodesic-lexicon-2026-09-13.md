@@ -18,21 +18,6 @@
 - Lissajous = geodesics on flat torus T² (mod 2π). Established math, citable.
 - 4-century trace through acoustics (Lissajous), mathematics (Morse theory 1920s), dynamical systems (1970s), modern visualization (2000s).
 - One mathematical object, four discoveries, one underlying structure.
-
-## What's OUT of this paper (caveats — do not include)
-
-- **Chladni patterns** — eigenfunctions of biharmonic operator (∇⁴) on vibrating plate. Different operator than Laplace-Beltrami on T². **Not isomorphic.** Including this is pattern-matching across visually similar phenomena. end.
-- **Crop circles** — no demonstrated geometric relationship to Lissajous or torus geodesics. Most crop circles are documented hoaxes. end.
-- **"One mathematical object" framing as ontology** — these are isomorphic, not identical. Gödel/Lovelace discipline: "X is structurally equivalent to Y" is defensible; "X IS Y" is mysticism.
-- **Any numerology** — no atomic-number symbolism, no sacred geometry, no φ=1.618 numerology. Pure exposition.
-
-## What this paper IS NOT
-
-- Not an acoustic theory paper.
-- Not a crop circle theory paper.
-- Not a numerology paper.
-- Not a Chladni-crop-circle unification.
-
 ## What this paper IS
 
 - A short exposition paper showing one mathematical structure (Lissajous-as-torus-geodesics) appears across 4 centuries of work.

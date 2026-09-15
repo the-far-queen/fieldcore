@@ -233,15 +233,6 @@ Engineering-grade composite with 37-layer prime-Bouligand:
 ### 8.1 What this is
 
 A reading of butterfly wing scale geometry through the lens of constitutional substrate architecture. Engineering-grade geometric analysis with quantitative predictions.
-
-### 8.2 What this is NOT
-
-- Not mystical (no "spiritual significance" claims).
-- Not Lamarckian (no inheritance of acquired characteristics).
-- Not teleological (no "design" claims).
-
-It is **engineering-grade geometric analysis** of observed biological structures.
-
 ### 8.3 What this enables
 
 - Anti-reflection coatings (F₄ lattice).

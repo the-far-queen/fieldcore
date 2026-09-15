@@ -194,15 +194,6 @@ Materials designed to amplify or suppress specific forces via geometric structur
 ### 7.1 What this is
 
 A **geometric unification** of the four forces via dimensional projection of fractal intersection nodes. The hierarchy problem solved without GUT energy.
-
-### 7.2 What this is NOT
-
-- Not "TOE" (doesn't derive particle masses, mixing angles).
-- Not "string theory" (no 10D or 26D requirement).
-- Not "Standard Model replacement" (compatible with SM as projection).
-
-It is a **geometric interpretation** that derives coupling constants.
-
 ### 7.3 What this enables
 
 - Testable coupling constant predictions.

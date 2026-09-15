@@ -218,15 +218,6 @@ Design devices exploiting (2,3) hexagonal nodes for field amplification. 1000× 
 ### 9.1 What this is
 
 A formalization of Gemini's quantum-mimicry insight. 4 specific mechanisms + engineering applications.
-
-### 9.2 What this is NOT
-
-- Not "free energy" (no overunity claims).
-- Not "quantum computer" (no qubits).
-- Not "unified theory."
-
-It is **engineering-grade quantum-mimicry via classical substrate.**
-
 ### 9.3 What this enables
 
 - Modern mimicry chambers.

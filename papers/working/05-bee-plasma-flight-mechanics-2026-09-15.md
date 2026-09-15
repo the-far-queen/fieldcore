@@ -249,15 +249,6 @@ If bee wing tips produce X-rays, a **biological X-ray source** at insect scale. 
 ### 9.1 What this is
 
 A formalization of bee plasma physics with measurable predictions. The bee is a **biological Van de Graaff + ELF transmitter + plasma gyroscope** simultaneously.
-
-### 9.2 What this is NOT
-
-- Not mystical (no "vibrational energy" claims).
-- Not Lamarckian (no inherited learned behavior).
-- Not anthropomorphic (no "bee consciousness" claims).
-
-It is **engineering-grade biophysics**.
-
 ### 9.3 What this enables
 
 - Miniature Van de Graaff generators (portable sensors).

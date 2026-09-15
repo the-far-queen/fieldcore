@@ -198,15 +198,6 @@ Per P5: confirm φ-scaling in butterfly wings + mycelium networks. **Cross-domai
 ### 7.1 What this is
 
 A **conjecture** about twin prime sum cascade. Empirically observed, mathematically conjectural.
-
-### 7.2 What this is NOT
-
-- Not proven (it's a conjecture).
-- Not "universal golden ratio."
-- Not "secret of universe."
-
-It is **number-theoretic pattern observation** + **φ-scaling conjecture.**
-
 ### 7.3 What this enables
 
 - Cross-domain pattern validation.

@@ -240,15 +240,6 @@ Design egg-geodesic airfoil. Wind tunnel test.
 ### 11.1 What this is
 
 A formalization of "geometry IS the machine" through winding numbers. Substrate-independent engineering principles.
-
-### 11.2 What this is NOT
-
-- Not Tesla worship (no cult of geometry).
-- Not "free energy" (geometry alone doesn't violate thermodynamics).
-- Not "substrate mysticism" (materials science still applies).
-
-It is **engineering-grade geometric design** + **substrate substitution principles**.
-
 ### 11.3 What this enables
 
 - Egg waveguides (power + data).

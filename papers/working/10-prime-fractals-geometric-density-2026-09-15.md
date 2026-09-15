@@ -248,15 +248,6 @@ Build substrate that computes α from prime-Fibonacci intersection. Compare to m
 ### 10.1 What this is
 
 A formalization of multi-fractal architecture in nature. Prime + Fibonacci + Binary + Triangular simultaneously. The fine-structure constant lives at their intersection.
-
-### 10.2 What this is NOT
-
-- Not numerology (no mystical number properties).
-- Not "theory of everything" (we don't derive α from first principles).
-- Not anthropic principle (we don't claim "fine-tuned universe").
-
-It is **engineering-grade multi-fractal analysis** of observed mathematical structure.
-
 ### 10.3 What this enables
 
 - Multi-fractal computing substrates.

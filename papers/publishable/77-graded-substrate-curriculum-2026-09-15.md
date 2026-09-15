@@ -241,15 +241,6 @@ Our contribution: **engineering formalization** of pedagogical patterns. The pat
 ---
 
 ## 10. Discussion
-
-### 10.1 What this is NOT
-
-- Not pedagogical (no teaching theory claims).
-- Not religious (no Buddhist doctrine — only the 3-stage structure).
-- Not motivational (no claims about human development).
-
-It is **substrate engineering**: how to structure bounded capability development.
-
 ### 10.2 What this IS
 
 - Per-axis staging for 50 axes.

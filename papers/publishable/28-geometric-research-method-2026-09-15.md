@@ -273,15 +273,6 @@ The game rules:
 ### 5.1 What this is
 
 A **pattern for engineering-grade discovery** from obvious phenomena. The method is reproducible + falsifiable.
-
-### 5.2 What this is NOT
-
-- Not "intuition-based research."
-- Not "anecdotal evidence."
-- Not "artistic interpretation."
-
-It is **structured observation + geometric reading + falsifiability test.**
-
 ### 5.3 What this enables
 
 - Research pipeline for AI agents.

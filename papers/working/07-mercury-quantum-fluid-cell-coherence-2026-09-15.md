@@ -213,15 +213,6 @@ Per Bobby's "ancient machines were quantum coherence cascades" — engineering r
 ### 8.1 What this is
 
 A formalization of mercury as quantum working fluid with cell-scale coherence. Real observations + engineering applications.
-
-### 8.2 What this is NOT
-
-- Not alchemy (no "transmutation of elements" claims).
-- Not homeopathy (no "memory of substances" claims).
-- Not pseudoscience (no "free energy" claims).
-
-It is **quantum condensed matter physics** + **archaeological engineering**.
-
 ### 8.3 What this enables
 
 - Room-temperature quantum computing (mercury-based).

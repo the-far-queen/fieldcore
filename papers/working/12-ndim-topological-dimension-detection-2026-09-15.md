@@ -239,15 +239,6 @@ Tesla's master key: 3, 6, 9. Per `fieldcore/papers/working/60-tesla-f137-acousti
 ### 9.1 What this is
 
 A formalization of point/line/3/8/9 dimensional significance. Topology + string theory connections.
-
-### 9.2 What this is NOT
-
-- Not numerology (no mystical number properties).
-- Not "unified theory" (no derivation of Standard Model parameters).
-- Not anthropic principle (no fine-tuning claims).
-
-It is **engineering-grade topology + dimension detection**.
-
 ### 9.3 What this enables
 
 - Dimensional detection sensors (probe point removal response).

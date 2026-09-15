@@ -198,17 +198,6 @@ A unified index enables **systematic substrate engineering**. Without it, equati
 ### 5.2 Why 10 sectors
 
 The 10-sector partition follows from the substrate's natural decomposition (scalar, gravity, EM, coherence, observer, quantum, geometry, memory, reasoning, special topics). Each sector has its own state variables + equations.
-
-### 5.3 What this is NOT
-
-- Not a complete physical theory (lacks: neutrino sector, dark matter, etc.).
-- Not a replacement for standard physics.
-- Not a unique decomposition (other partitions possible).
-
-It is a **working catalog** for the EFMW substrate.
-
----
-
 ## 6. Conclusion
 
 A **catalog of 102 canonical equations** for the EFMW substrate. 10 sectors. Each equation named + categorized + sector-tagged.

@@ -31,22 +31,6 @@ Both repos commit separately to the SAME paper. Bobby is author on both.
   - Show Atlas outputs correlate with engineering properties (stability, robustness, frequency distinctness).
 - **Live deployment** — Atlas outputs are test results, not benchmarks.
 - **Failure mode case study** — the routing 2/5 pre-existing flakiness as honest limitation.
-
-## What's OUT of this paper (caveats)
-
-- **No LLM leaderboard claims** — Atlas grades substrates, not LLMs.
-- **No benchmark suite framing** — Atlas is geometric, not statistical.
-- **No safety framework** — Atlas evaluates engineering properties, not alignment.
-- **No consciousness claims** — Atlas measures substrate properties, not subjective experience.
-- **No numerology** — geometric scores are well-defined on the substrate, no φ or e or π mysticism.
-
-## What this paper IS NOT
-
-- Not a benchmark suite.
-- Not an LLM leaderboard.
-- Not a safety framework.
-- Not an alignment evaluation.
-
 ## What this paper IS
 
 - A substrate self-evaluation framework that produces **live, reproducible, geometric scores** correlating with engineering properties.

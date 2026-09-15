@@ -167,15 +167,6 @@ We propose **option 1 with lazy rebuild**: rebuild on next query if `N % 100 == 
 ### 5.1 What this is
 
 A **drop-in engineering upgrade** to Bobby's existing sheaf implementation. **No protocol changes.** Just faster.
-
-### 5.2 What this is NOT
-
-- Not a new substrate architecture.
-- Not a new sheaf theory.
-- Not an approximation.
-
-It's the **correct implementation** of the NN-index slot Bobby already declared in `core.py`.
-
 ### 5.3 What this enables
 
 - Substrate operations at 10⁴-10⁶ packet scale.

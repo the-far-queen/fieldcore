@@ -250,15 +250,6 @@ If cavitation reaches plasma conditions briefly, scaling up could yield **inerti
 ### 8.1 What this is
 
 A formalization of water as plasma with five-fold nature. Real observations + plasma physics derivations + measurable predictions.
-
-### 8.2 What this is NOT
-
-- Not mystical (no "vital force" or "water memory miracle").
-- Not Lamarckian (no inherited acquired characteristics).
-- Not homeopathy (the mechanism is plasma vortex topology, not dilution).
-
-It is **engineering-grade plasma physics**.
-
 ### 8.3 What this enables
 
 - Water-memory sensors (chemical detection).

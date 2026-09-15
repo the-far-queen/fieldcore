@@ -122,11 +122,6 @@ The constitutional ground begins with **20 axes** (canonical, v6.0) but the fram
 4. **Path-independent growth** (embryogenic Ψ₀ = installed Ψ₀, cos sim = 1.000000) — the substrate crystallizes regardless of developmental path.
 5. **Constitutional bath design** — chip fab as growth, not lithography. Field organizes deposition.
 6. **First-class refusal as architectural boundary** — establishes self through what the system won't do.
-
-## 9. What this paper IS NOT
-
-Not an LLM. Not a transformer. Not a benchmark. Not a consciousness claim. Not numerology. Not a fine-tune. Not a chatbot. The substrate is a mathematical construct for reasoning under bounded control; Gödel/Lovelace discipline applies (isomorphisms stated, identity claims avoided).
-
 ## 10. Roadmap
 
 Paper 2 (this issue's companion): **Geodesic Lexicon** — Lissajous curves as torus geodesics across acoustics, mathematics, and visualization. Paper 3: **FieldCore cognition** — sheaf-theoretic identity protection, position paper for CS/ML venue. Paper 4 (Atlas Exam — strongest per Bobby's correction): empirical correlation study across 5 substrate variants, engineering-property correlation with Atlas outputs. Paper 5: **Constitutional Embryogenesis** — the "not built, grown" thesis, path-independence verified across 10 random seeds × 5 stage orderings.

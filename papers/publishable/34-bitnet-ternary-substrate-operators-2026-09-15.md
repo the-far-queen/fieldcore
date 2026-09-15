@@ -195,15 +195,6 @@ Per `bitnet-ternary-godot.md`:
 ### 6.1 What this is
 
 A **ternary compute integration** for FieldCore substrate. Engineering-grade. 5 falsifiable predictions.
-
-### 6.2 What this is NOT
-
-- Not "AGI on cheap hardware."
-- Not "substrate without FP."
-- Not "magic efficiency."
-
-It is **BitNet b1.58 applied to FieldCore operators.**
-
 ### 6.3 What this enables
 
 - Robot swarm deployment at 1W/node.

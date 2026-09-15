@@ -275,15 +275,6 @@ Vehicle body shapes following trout geometry + φ-flow → low-energy navigation
 ### 10.1 What this is
 
 A formalization of Schauberger's empirical observations through constitutional physics. 18 assertions scored by MUM, top-tier formalized with 4 engineering mechanisms.
-
-### 10.2 What this is NOT
-
-- Not mysticism (no "vital force" as spirit).
-- Not homeopathy (no "water memory" as memory of substances).
-- Not free energy (no violations of thermodynamics).
-
-It is **constitutional physics** applied to fluid dynamics + vortex engineering.
-
 ### 10.3 What this enables
 
 - Implosion engines (4× amplification).

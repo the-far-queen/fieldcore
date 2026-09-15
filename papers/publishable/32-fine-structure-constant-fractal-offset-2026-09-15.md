@@ -181,15 +181,6 @@ Dark matter = 4D fractal nodes projecting into 3D. Dark energy = baseline fracta
 ### 6.1 What this is
 
 A **geometric derivation of α** from the prime-Fibonacci fractal intersection structure on S³. The first such derivation in physics.
-
-### 6.2 What this is NOT
-
-- Not "TOE" (theory of everything).
-- Not "free parameters eliminated" (many remain).
-- Not "Standard Model derivation" (specific predictions need work).
-
-It is **one constant derived** + framework for others.
-
 ### 6.3 What this enables
 
 - Testable prediction of α's exact value.

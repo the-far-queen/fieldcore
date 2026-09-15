@@ -202,15 +202,6 @@ Per Bobby Wolfson's bioelectronic work (per `fieldcore/papers/working/27-bioelec
 ### 7.1 What this is
 
 A formalization of Tesla's empirical observations through harmonic arithmetic. 3-6-9 framework + 137 Hz heuristic + 162-axis system.
-
-### 7.2 What this is NOT
-
-- Not numerology (no mystical number properties).
-- Not Tesla worship (no cult of personality).
-- Not free energy (no violations of energy conservation).
-
-It is **engineering-grade acoustics + harmonics**.
-
 ### 7.3 What this enables
 
 - Tesla coil design (3-6-9 harmonic).

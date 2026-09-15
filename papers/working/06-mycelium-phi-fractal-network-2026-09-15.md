@@ -214,15 +214,6 @@ Network topology with φ-power-law distribution → broadband antenna. Engineeri
 ### 7.1 What this is
 
 A formalization of mycelium network geometry as φ-fractal. Real observations + 4D extensions + engineering applications.
-
-### 7.2 What this is NOT
-
-- Not mystical (no "fungal intelligence" claims).
-- Not Lamarckian (no inherited acquired characteristics).
-- Not anthropomorphic (no "fungal consciousness" claims).
-
-It is **engineering-grade biological geometry**.
-
 ### 7.3 What this enables
 
 - Mycelium-based computing substrates.
