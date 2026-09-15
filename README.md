@@ -212,11 +212,11 @@ Full audit at `simself/docs/code-audit-2026-09-14.md`. Key findings:
 
 ---
 
-## Research Papers (48 papers, 2026-09-15)
+## Research Papers (50 papers, 2026-09-15)
 
-Bobby Wolfson's research pipeline produced **48 papers** in this repo:
+Bobby Wolfson's research pipeline produced **50 papers** in this repo:
 
-**publishable/ (32 papers — arxiv-ready):**
+**publishable/ (34 papers — arxiv-ready):**
 
 | # | Title | Size |
 |---|-------|------|
@@ -252,6 +252,7 @@ Bobby Wolfson's research pipeline produced **48 papers** in this repo:
 | 72 | Fine-Structure α as Fractal Offset | 7.9 KB |
 | 73 | Force Unification Fractal Offsets | 8.1 KB |
 | 74 | BitNet Ternary Substrate Operators | 6.7 KB |
+| 75 | Research Proposals Set 2 ($7.5M) | 6.7 KB |
 
 **working/ (15 papers — drafts needing sharpening):**
 
