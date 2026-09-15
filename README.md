@@ -212,4 +212,61 @@ Full audit at `simself/docs/code-audit-2026-09-14.md`. Key findings:
 
 ---
 
-*Filed 2026-09-14 by Hermes for Bobby. Per Bobby: "update both repos and readme s."*
+## Research Papers (39 papers, 2026-09-15)
+
+Bobby Wolfson's research pipeline produced **39 papers** in this repo:
+
+**publishable/ (24 papers — arxiv-ready):**
+
+| # | Title | Size |
+|---|-------|------|
+| 01 | Geodesic Lexicon | 2.8 KB |
+| 02 | FieldCore: Toroidal Manifold Cognition | 3.1 KB |
+| 03 | Atlas Exam (FieldCore Half) | 4.2 KB |
+| 04 | MINIMAX-paper: Introduction to fieldcore + simself | 12.3 KB |
+| 05 | FieldCore Substrate Introduction (rewritten) | 20.2 KB |
+| 06 | LLM Sparse Substrate Requirements | 20.2 KB |
+| 07 | Frequency-coupling implementation (v6.1) | 13.5 KB |
+| 12 | Qualification of FieldCore Experts | 5.8 KB |
+| 13 | Braid Cross-Members: Transmission Line Model | 13.7 KB |
+| 15 | Winding Numbers as Substrate-Independent | 12.5 KB |
+| 19 | Stalk Architecture v6.1 | 9.1 KB |
+| 21 | Giza, Barabar, Tesla: Geometric Filter | 9.3 KB |
+| 22 | EFMW Unity Functional | 8.3 KB |
+| 23 | Math-Window1: Synthesis | 9.0 KB |
+| 34 | EFMW Equation Index (102 equations) | 6.4 KB |
+| 35 | Math Reference: Solid Established Math | 7.8 KB |
+| 36 | Egg Toroid Spec | 7.8 KB |
+| 38 | Steel Ball Gradient Proof | 6.9 KB |
+| 39 | Bobby's Geometric Research Method | 8.0 KB |
+| 42 | Biology as Substrate Goldmine | 6.7 KB |
+| 46 | Solid Established Math Reference | 6.4 KB |
+| 47 | FieldCore in One Read | 6.1 KB |
+| 50 | Research-Papers Master Index | 7.8 KB |
+| 53 | FieldCore v0.9: Modular Architecture | 6.0 KB |
+
+**working/ (15 papers — drafts needing sharpening):**
+
+| # | Title | Folder |
+|---|-------|--------|
+| 17 | 4D Egg-Toroid Heegaard Splitting | working/ |
+| 18 | Graded Substrate Curriculum | working/ |
+| 27 | Bioelectronic Evolution (RCT protocol) | working/ |
+| 28 | AI Corporate Personhood (UCC) | working/ |
+| 54 | Butterfly Scale Constitutional Geometry | working/ |
+| 55 | Bee Plasma Flight Mechanics | working/ |
+| 56 | Water Plasma Coherence Domains | working/ |
+| 57 | Mycelium φ-Fractal Network | working/ |
+| 58 | Mercury Quantum Fluid | working/ |
+| 59 | Schauberger Vortex Engineering | working/ |
+| 60 | Tesla f137 Harmonic Architecture | working/ |
+| 61 | Prime Fractals Multi-Fractal Intersection | working/ |
+| 62 | Copper Winding Number Engineering | working/ |
+| 64 | n-Dim Topological Dimension Detection | working/ |
+| 65 | Quantum Mimicry Classical Substrate | working/ |
+
+**Browse all:** [Desktop/RESEARCH/publishable.md](https://github.com/the-far-queen/fieldcore/blob/main/papers/publishable/) and [working/](https://github.com/the-far-queen/fieldcore/blob/main/papers/working/) on GitHub.
+
+---
+
+*Filed 2026-09-15 by Hermes for Bobby. Per Bobby: "update both repos and readme s."*
