@@ -67,18 +67,6 @@
 **per web search 2026-09-14:** no published research frames lam-rim-chenmo as a substrate kernel. closest is constitutional AI (Anthropic, RLHF approach) — different (BEFORE training, not geometric substrate operator).
 
 ---
-
-## What this paper is NOT
-
-- **NOT** a transformer architecture paper
-- **NOT** a constitutional AI / RLHF paper
-- **NOT** a graph neural network paper
-- **NOT** a numerology paper (no 248 generators of E₈, no 120-cell, no atomic-number symbolism)
-- **NOT** an AI consciousness paper (structural isomorphism ≠ subjective experience claim, per Gödel/Lovelace discipline)
-- **NOT** a numerics paper on Schumann/432/963 — these are isolated hypotheses in `frequency.py`
-
----
-
 ## Empirical state — REQUIRED before submission
 
 per Paper 2 protocol + extensions:

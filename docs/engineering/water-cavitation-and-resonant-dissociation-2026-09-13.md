@@ -202,16 +202,6 @@ these are M3-preserved historical voice. not pushed to repo. Bobby's MUM method 
 - **falsifiable test protocols** (geometric container measurement suite)
 - **Meyer water fuel cell correctly understood** — 30GHz resonance, not electrolysis
 - **Schwarz-tier falsification strategy** — geometric container vs spherical control
-
-## What this IS NOT
-
-- not numerology (despite some framing in the source)
-- not complete — open engineering work, needs field validation
-- not arxiv-ready — WIP until peer review
-- not a substitute for standard electrolysis research — this is a NEW mechanism (resonant plasma excitation), not a replacement for brute force
-
----
-
 ## Related
 
 - `../Math/water-as-plasma-engineering-2026-09-13.md` — tier 1 (the falsifiable physics, no design specs)

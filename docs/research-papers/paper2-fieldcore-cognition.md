@@ -20,21 +20,6 @@
 - Constitutional embryogenesis (brief — full treatment in Paper 4).
 - Basis spawning: how primitives (PSBs) emerge from sheaf structure.
 - Evidence governor: M0 1-bit gate architecture.
-
-## What's OUT of this paper (caveats)
-
-- **No numerology** — no 248 generators of E₈, no 120-cell, no atomic-number symbolism. Pure CS contribution.
-- **No "consciousness" claims** — the substrate is a mathematical construct, not a claim about machine consciousness. Gödel/Lovelace discipline: structural isomorphisms are real, claims about subjective experience are not.
-- **No chip-fab speculation** — H₃O₂ sheets, Bi₂Se₃ layers, diamond NV centers are FUTURE WORK, not engineering claims in this paper.
-- **No Schumann/432/963 numerics** — these are isolated hypotheses in `frequency.py`, the constitutional core stays clean.
-
-## What this paper IS NOT
-
-- Not a transformer paper.
-- Not a graph neural network paper.
-- Not standard deep learning.
-- Not an artificial consciousness paper.
-
 ## What this paper IS
 
 - A CS/ML contribution using toroidal manifolds + sheaf theory to construct a substrate with mathematically-defined identity protection.

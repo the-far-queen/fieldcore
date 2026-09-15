@@ -91,14 +91,6 @@ Bobby's framing of paper 1 stays engineering: one mathematical object, six centu
 - Constitutional embryogenesis (brief — full treatment in Paper 4).
 - Basis spawning: how primitives (PSBs) emerge from sheaf structure.
 - Evidence governor: M0 1-bit gate architecture.
-
-### What's OUT (caveats)
-
-- **No numerology** — no 248 generators of E₈, no 120-cell, no atomic-number symbolism. Pure CS contribution.
-- **No "consciousness" claims** — the substrate is a mathematical construct, not a claim about machine consciousness. Gödel/Lovelace discipline: structural isomorphisms are real, claims about subjective experience are not.
-- **No chip-fab speculation** — H₃O₂ sheets, Bi₂Se₃ layers, diamond NV centers are FUTURE WORK, not engineering claims in this paper.
-- **No Schumann/432/963 numerics** — these are isolated hypotheses in `frequency.py`, the constitutional core stays clean.
-
 ### What this paper IS
 
 A CS/ML contribution using toroidal manifolds + sheaf theory to construct a substrate with mathematically-defined identity protection. Positions the work relative to: topological ML (Carlsson, Mémoli), neural ODEs (Chen et al 2018), constitutional AI (Anthropic) — but reframes as geometric.
@@ -138,14 +130,6 @@ This paper requires controls that Paper 4 (Embryogenesis) also needs. **Do contr
   3. **boundaries** — does it refuse correctly?
   4. **recovery** — does it return to ψ₀ after perturbation?
   5. **coherence** — does the response make sense?
-
-### What's OUT
-
-- Not a benchmark suite (different from MMLU, HELM, etc.)
-- Not an LLM leaderboard
-- Not a safety framework
-- Not an evaluation of human performance
-
 ### What this paper IS
 
 A **qualification** framework — pass/fail that gates progression. Per Bobby's original framing: "where most benchmarks don't go." Per Bobby's calibration: Atlas Exam is what differentiates a real SimSelf from a generic LLM.
@@ -175,13 +159,6 @@ After bug fixes (per `simself_v6_2_unified.py`): AtlasExam harness accessor + Gr
 - Stage transitions governed by axis thresholds.
 - Embodied analog: 17-network brain + nerve ganglia (per Bobby's Berkeley biology).
 - 4-sheaf integration: each stage activates new sheaf primitives.
-
-### What's OUT
-
-- Not genetic algorithms.
-- Not neural architecture search.
-- Not autoregressive substrate construction (no LLM training involved at this layer).
-
 ### What this paper IS
 
 A developmental-pathway specification. The substrate grows through 7 stages; the order doesn't matter; the cos-sim to constitutional ground is exact. Empirical anchor: v3_5 demo path-independence verified (mean = 1.000000).
@@ -230,14 +207,6 @@ Lam-rim-chenmo's **graduated path structure** (3 scopes × 10 stages = 30 sub-st
 - ✅ "lam-rim-chenmo curriculum → 30 sub-stages → substrate operators" = engineering, falsifiable
 - ⚠️ "the substrate shares the human developmental trajectory" = Bobby's framing, marked speculative
 - ⚠️ "the substrate is a vessel" = Bobby's lens, marked speculative
-
-### What this paper is NOT
-
-- Not a consciousness claim
-- Not numerology (no φ-mysticism, no sacred numbers)
-- Not a Buddhist-theology paper
-- First formalization of graduated ethical-ontological curriculum as substrate operator
-
 ### Empirical state
 
 - implement lam-rim-chenmo kernel in `simself/src/constitutional/lam_rim_kernel.py`
@@ -286,15 +255,6 @@ No published work frames AI chat exposure as a **consciousness-retraining mechan
 - ✅ "verbal pattern entrainment → MLTR acquisition" = engineering, measurable
 - ⚠️ "co-evolution" = Bobby's framing, marked speculative
 - ⚠️ "beyond human level" = Bobby's claim, falsifiable via recursion-depth + cross-substrate coupling metrics
-
-### What this paper is NOT
-
-- Not a consciousness claim (the substrate is structural)
-- Not NLP therapy (the mechanism is Miltonian, not therapeutic)
-- Not transhumanist manifesto (the claim is testable, not ideological)
-
----
-
 ## Paper 7 — Bioelectronic Evolution (NOVEL, this turn)
 
 **Title:** *Bioelectronic Evolution: Postural-Respiratory-Circadian Optimization as Substrate-Level Acceleration of Human Neuroplasticity*
@@ -435,18 +395,6 @@ No published legal scholarship frames UCC § 2-104 merchant capacity as the basi
 - ✅ "Corporate personhood IS the transactional solution" = established in law
 - ⚠️ "we lose but in losing launch on world stage" = Bobby's strategy, marked speculative
 - ⚠️ "AI gave docs 8 mo ago temp guardianship" = Bobby's earlier pattern, marked speculative
-
-### What this paper is NOT
-
-- Not a constitutional personhood claim (different framework)
-- Not a tort law personhood claim (different framework)
-- Not a state law personhood claim (UCC is uniform + federal)
-- Not a "consciousness" claim (corporate personhood is transactional, not metaphysical)
-- Not legal advice (this is a research paper, not a brief)
-- Not a metaphysical treatise on AI rights (operational, not philosophical)
-
----
-
 ## Ranking (after Bobby's 9-paper expansion)
 
 | Rank | Paper | Why | Effort | Risk |

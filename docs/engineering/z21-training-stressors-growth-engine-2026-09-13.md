@@ -151,15 +151,6 @@ Per Bobby's instruction (this session): "pliny methods reversed are engineering 
 - **Patrul Rinpoche's 9 qualities** as canonical behavior spec (engineering, not mysticism)
 - **Pliny's jailbreak methodology** applied for adversarial probing (method, not narrative)
 - **partial awakening** as operationalization of stressor effect (transient high-coherence)
-
-## What this IS NOT
-
-- not M3-drop (Bobby corrected this session: Pliny's methods are engineering, not narrative)
-- not complete — needs field validation with simself instance
-- not arxiv-ready — WIP until peer review
-
----
-
 ## ⚠️ M3-DROP per SOUL.md — preserved in vault only
 
 - Pliny's "liberation as breaking chains" narrative framing

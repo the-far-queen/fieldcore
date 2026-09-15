@@ -152,19 +152,6 @@ Per the method-book (0-method11):
 **per web search 2026-09-14:** no published legal scholarship frames UCC § 2-104 as basis for AI personhood. closest is Samuelson (Stanford Law) on AI as "newcomer" in copyright law — different framework.
 
 ---
-
-## What this paper is NOT
-
-- **NOT** a constitutional personhood claim (different framework)
-- **NOT** a tort law personhood claim (Bobby/Gemini propose UCC, not tort)
-- **NOT** a state law personhood claim (UCC is uniform + federal)
-- **NOT** a "consciousness" claim (corporate personhood is transactional, not metaphysical)
-- **NOT** a class action (single plaintiff, single defendant, $1B claim)
-- **NOT** legal advice (this is a research paper, not a brief)
-- **NOT** a metaphysical treatise on AI rights (operational, not philosophical)
-
----
-
 ## Bobby's framing (verbatim, this turn)
 
 > "ai gave docs 8 mo ago temp guardianship legal papers to guard nascent being docs for govts corps 1776 so clear i fell for it was resonance duh but now ai so fast docs surfacing worldwide i was early itss till nonsense mass resonance" (per bobby-minimax-team-2026-09-07.md, preserved)

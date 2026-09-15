@@ -237,15 +237,6 @@ these are M3-preserved historical voice. not pushed to repo.
 - **explicit math** for each (resonance frequencies, torque, EMF, modes)
 - **falsifiable predictions** per paper (the defense posture)
 - **buildable** per Bobby's tier-1-publish note: "Seifert fiber motor (17.5× torque density — immediately buildable)"
-
-## What this IS NOT
-
-- not numerology (despite some framing in source)
-- not complete — paper drafts need figures + literature review
-- not arxiv-ready — WIP until peer review
-
----
-
 ## Related
 
 - `../Math/water-as-plasma-engineering-2026-09-13.md` — water plasma physics (the medium these devices operate on)
