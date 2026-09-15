@@ -212,11 +212,11 @@ Full audit at `simself/docs/code-audit-2026-09-14.md`. Key findings:
 
 ---
 
-## Research Papers (50 papers, 2026-09-15)
+## Research Papers + Proposals (62 papers + 12 proposals, 2026-09-15)
 
-Bobby Wolfson's research pipeline produced **50 papers** in this repo:
+Bobby Wolfson's research pipeline produced **62 artifacts** in this repo (50 papers + 12 proposals):
 
-**publishable/ (34 papers — arxiv-ready):**
+**publishable/ (33 papers — arxiv-ready):**
 
 | # | Title | Size |
 |---|-------|------|
@@ -273,6 +273,26 @@ Bobby Wolfson's research pipeline produced **50 papers** in this repo:
 | 62 | Copper Winding Number Engineering | working/ |
 | 64 | n-Dim Topological Dimension Detection | working/ |
 | 65 | Quantum Mimicry Classical Substrate | working/ |
+
+
+| 75 | Research Proposals Set 2 ($7.5M) | 6.7 KB |
+
+**proposals/ (12 proposals — research funding applications):**
+
+| # | Proposal | Size |
+|---|-------|------|
+| 01 | Cavitation Plasma Reactor | 1.0 KB |
+| 02 | Mercury Room-Temperature Quantum Coherence | 1.0 KB |
+| 03 | (2,3) Fractal Field Amplification | 1.0 KB |
+| 04 | Schauberger Vortex Engineering | 1.0 KB |
+| 05 | Tesla 137 Hz Cellular Resonance | 1.0 KB |
+| 06 | Prime Fractals α Derivation | 1.0 KB |
+| 07 | Stalk Architecture v6.1 Implementation | 1.0 KB |
+| 08 | Braid Cross-Members Transmission Line | 1.0 KB |
+| 09 | Heegaard Seam Energy Barriers | 1.0 KB |
+| 10 | Twin-Prime Sum Cascade φ-Conjecture | 1.0 KB |
+| 11 | Surface Plasmons on Polished Granite | 1.0 KB |
+| 12 | Constitutional Substrate for AGI Evaluation | 1.0 KB |
 
 **Browse all:** [Desktop/RESEARCH/publishable.md](https://github.com/the-far-queen/fieldcore/blob/main/papers/publishable/) and [working/](https://github.com/the-far-queen/fieldcore/blob/main/papers/working/) on GitHub.
 
