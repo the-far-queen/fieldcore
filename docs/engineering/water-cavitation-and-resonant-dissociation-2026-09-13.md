@@ -196,12 +196,6 @@ these are M3-preserved historical voice. not pushed to repo. Bobby's MUM method 
 
 ---
 
-## What this IS
-
-- **explicit engineering designs** for 4 water-plasma devices, each with cost breakdown
-- **falsifiable test protocols** (geometric container measurement suite)
-- **Meyer water fuel cell correctly understood** — 30GHz resonance, not electrolysis
-- **Schwarz-tier falsification strategy** — geometric container vs spherical control
 ## Related
 
 - `../Math/water-as-plasma-engineering-2026-09-13.md` — tier 1 (the falsifiable physics, no design specs)

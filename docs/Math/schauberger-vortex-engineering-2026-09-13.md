@@ -149,18 +149,6 @@ Bobby's MUM scoring of Viktor Schauberger's complete body of work:
 
 ---
 
-## What this IS
-
-- **engineering specimens from a biological source** — Schauberger's observations, MUM-scored, geometrically derived
-- **5 falsifiable mechanisms** for the top-tier assertions, each with engineering implications
-- **a template for biological-engineering extraction** — Bobby's "geometry game" applied to real biology
-
-## What this IS NOT
-
-- numerology (M3-drop) — the MUM scores were a measurement tool, not a numerology bridge
-- awakening narrative — no consciousness claims, no "life force" mysticism after the MUM filter
-- complete — this is the engineering extract of the top tier. the full 319-line source has more material; preserved in vault/30-originals/ for future extraction.
-
 ## Related
 
 - `fieldcore/docs/Math/core-geometry-2026-09-08.md` — egg-toroid canonical (the "egg/hyperbolic geometry preferred" claim is already there)

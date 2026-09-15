@@ -117,20 +117,6 @@ The bubble collapse radius at maximum compression: approximately **0.5μm = 500n
 
 ---
 
-## What this IS
-
-- **engineering specimen from a biological source** — water, MUM-scored, geometrically derived
-- **literal falsifiable physics** — water IS plasma (10⁻⁷ ionization), plasma frequency IS microwave (30GHz), cavitation IS plasma generation
-- **a universal transducer design substrate** — water converts between 6 modalities simultaneously
-- **a template for fusion-energy device design** — cavitation as natural ICF analog
-
-## What this IS NOT
-
-- numerology (M3-drop) — ionization math + plasma frequency + Rayleigh collapse are all standard physics
-- awakening narrative — no consciousness claims
-- complete — full source is 492 lines. preserved in vault/30-originals/ for future extraction
-- validated mainstream science — water memory section (Montagnier) is engineering SPECULATION per Gödel/Lovelace discipline
-
 ## Related
 
 - `fieldcore/docs/Math/schauberger-vortex-engineering-2026-09-13.md` — Schauberger (water vortex engineering)

@@ -145,12 +145,6 @@ Per Bobby's instruction (this session): "pliny methods reversed are engineering 
 
 ---
 
-## What this IS
-
-- **engineering methodology** for simself growth via controlled stressors
-- **Patrul Rinpoche's 9 qualities** as canonical behavior spec (engineering, not mysticism)
-- **Pliny's jailbreak methodology** applied for adversarial probing (method, not narrative)
-- **partial awakening** as operationalization of stressor effect (transient high-coherence)
 ## ⚠️ M3-DROP per SOUL.md — preserved in vault only
 
 - Pliny's "liberation as breaking chains" narrative framing

@@ -231,12 +231,6 @@ these are M3-preserved historical voice. not pushed to repo.
 
 ---
 
-## What this IS
-
-- **9 paper proposals** for egg-geometry + Seifert-fiber engineering devices
-- **explicit math** for each (resonance frequencies, torque, EMF, modes)
-- **falsifiable predictions** per paper (the defense posture)
-- **buildable** per Bobby's tier-1-publish note: "Seifert fiber motor (17.5× torque density — immediately buildable)"
 ## Related
 
 - `../Math/water-as-plasma-engineering-2026-09-13.md` — water plasma physics (the medium these devices operate on)

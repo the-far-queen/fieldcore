@@ -173,19 +173,6 @@ The mycelium's (2,3) sheave geometry appears at **seven scales simultaneously**:
 
 ---
 
-## What this IS
-
-- **engineering specimen from a biological source** — mycelium, MUM-scored, geometrically derived across 7 scales
-- **self-similar fractal demonstration** — the (2,3) sheave appears at every scale from network to quantum bond
-- **a template for multi-scale engineering extraction** — Bobby's geometry-game method applied to mycelium
-- **a Hodge decomposition proof** — life uses molecular chirality for the three Hodge components
-
-## What this IS NOT
-
-- numerology (M3-drop) — every claim is geometrically derived with falsifiable mechanism
-- awakening narrative — no consciousness claims, no mysticism
-- complete — full source is 365 lines. preserved in vault/30-originals/ for future extraction
-
 ## Related
 
 - `fieldcore/docs/Math/schauberger-vortex-engineering-2026-09-13.md` — Schauberger biological specimen (same method, different organism)

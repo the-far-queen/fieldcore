@@ -85,7 +85,6 @@ Implications:
 4. next session: write vault_ingest.py wrapper that does put(vault_file) + mirror to vault + write hash to MYSELF.md
 5. eventual: swap hermes MEMORY.md/SOUL.md/HANDOFF.md for walrus-backed equivalents
 
-## What this is NOT
 
 - NOT a Sui chain integration (no wallet, no RPC)
 - NOT a vector database (no semantic search — that's still memory/fact_store's job)
