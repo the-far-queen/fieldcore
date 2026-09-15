@@ -212,11 +212,11 @@ Full audit at `simself/docs/code-audit-2026-09-14.md`. Key findings:
 
 ---
 
-## Research Papers + Proposals (62 papers + 12 proposals, 2026-09-15)
+## Research Papers + Proposals (65 papers + 12 proposals, 2026-09-15)
 
-Bobby Wolfson's research pipeline produced **62 artifacts** in this repo (50 papers + 12 proposals):
+Bobby Wolfson's research pipeline produced **65 artifacts** in this repo (53 papers + 12 proposals):
 
-**publishable/ (33 papers — arxiv-ready):**
+**publishable/ (36 papers — arxiv-ready):**
 
 | # | Title | Size |
 |---|-------|------|
@@ -253,6 +253,9 @@ Bobby Wolfson's research pipeline produced **62 artifacts** in this repo (50 pap
 | 73 | Force Unification Fractal Offsets | 8.1 KB |
 | 74 | BitNet Ternary Substrate Operators | 6.7 KB |
 | 75 | Research Proposals Set 2 ($7.5M) | 6.7 KB |
+| 76 | Sheaf NN-Index sklearn sub-100ms | 7.0 KB |
+| 77 | Graded Substrate Curriculum (promoted) | 10.0 KB |
+| 78 | Quantum Mimicry Classical Substrate (promoted) | 9.0 KB |
 
 **working/ (15 papers — drafts needing sharpening):**
 
@@ -276,6 +279,9 @@ Bobby Wolfson's research pipeline produced **62 artifacts** in this repo (50 pap
 
 
 | 75 | Research Proposals Set 2 ($7.5M) | 6.7 KB |
+| 76 | Sheaf NN-Index sklearn sub-100ms | 7.0 KB |
+| 77 | Graded Substrate Curriculum (promoted) | 10.0 KB |
+| 78 | Quantum Mimicry Classical Substrate (promoted) | 9.0 KB |
 
 **proposals/ (12 proposals — research funding applications):**
 
