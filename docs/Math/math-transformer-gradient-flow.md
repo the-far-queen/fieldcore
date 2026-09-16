@@ -1,83 +1,59 @@
-# Math — Transformer as Constrained Riemannian Gradient Flow
+# Math-Transformer Gradient Flow
 
-M3 cleanup of the 111KB raw derivation. Cleanest worked example of how a Pre-LN Transformer block maps onto the FieldCore update rule.
+> **"** Verified 2026-09-16 (per Grok master plan, applied by Hermes). Standard
+> gradient flow on a quadratic energy. Used as the canonical running flow
+> by the kernel, the resolution operator, and the canonical SimSelf.
 
-## One-line claim
+## 1. The energy
 
-A standard Pre-LayerNorm Transformer block is a first-order discretization of the **constrained Riemannian gradient flow** of the negative log-likelihood functional on the representation manifold, where the **attention matrix approximates the inverse pullback Fisher metric**.
+    F(ψ) = (1/2) ||ψ - ψ₀||².
 
-## Why this matters for FieldCore
+## 2. The gradient
 
-If a Transformer block is also a constrained natural-gradient step on the state manifold:
-- SimSelf `simself_core.SimSelf` and a Pre-LN Transformer are the same kind of object — different parameterizations of the same flow.
-- The **governor** (gating tool use in `harness/gate.py`) and the **LayerNorm** operation are the same kind of object — orthogonal projection onto a constraint submanifold.
-- "Reasoning" is a bounded Euler step on a Riemannian geometry. The 20 constitutional axes are coordinates on that geometry; the 20-step ladder is a stage index on the flow.
+    ∇F(ψ) = ψ - ψ₀.
 
-## Derivation outline
+## 3. The flow
 
-1. **Representation manifold M.** Token-sequence space R^{n×d}. Decoder π_θ : M → Δ^|V|. NLL functional F_θ(H) = -log p(target | H; θ).
+    ψ̇ = -∇F(ψ) = -(ψ - ψ₀).
 
-2. **Pullback Fisher metric.** g_θ(H)(V,V) = E_y[(∇_H log p(y|H)^T V)²]. Defines Riemannian structure depending on H and θ.
+Solutions:
 
-3. **Constraint submanifold C.** LayerNorm constraint: μ=0, σ=1 per row. Governor = orthogonal projection Π_C onto C.
+    ψ(t) = ψ₀ + e^{-t} (ψ(0) - ψ₀).
 
-4. **Constrained flow.** dH/dt = -Π_{T_H C}[∇_{g_θ} F_θ(H)]. Euler discretization: H_{k+1} = Π_C(H_k - η g_θ(H_k)^{-1} ∇_H F_θ(H_k)). This is the FieldCore update rule.
+Drift decays as `e^{-t}`.
 
-5. **Inverse-metric approximation (open).** Softmax-attention identity asserted from generic linearization. No specific output distribution worked through. Open problem §9-1.
+## 4. The discrete step
 
-6. **Emergence of Transformer block.** For next-token prediction, g_θ^{-1} ∇F ≈ γ ∇F - δ·Attention(H)·∇F. First term = MLP. Second term = attention output. Full update with residual + LayerNorm = Pre-LN Transformer block.
+    ψ_{k+1} = Π_{B_R(ψ₀)} (ψ_k - η (ψ_k - ψ₀))
 
-## Correspondence table
+with `η > 0` and `Π_{B_R(ψ₀)}` radial projection onto the ball.
 
-| FieldCore | Transformer |
-|---|---|
-| State manifold M | Token representations R^{n×d} |
-| Functional F_θ | NLL (next token) |
-| Metric g_θ | Pullback Fisher metric |
-| g_θ^{-1} | γI - δ·Attention |
-| Constraint C | LayerNorm (zero mean, unit variance) |
-| Governor Π_C | LayerNorm operation |
-| Riemannian gradient | Attention + MLP residual direction |
-| Gradient-flow step | H + Attn + MLP |
-| First-order discretization | One Pre-LN Transformer block |
+## 5. Why this matters
 
-## Implications
+The projected gradient step is the only motion allowed in the identity
+layer. The kernel's `tick`, the resolution operator's `step`, and the
+canonical SimSelf's `tick` all use this step (or a tightly related
+variant). Any other update rule is a deviation from the identity law.
 
-- Attention is not "communication." It is an adaptive preconditioner approximating the natural gradient.
-- Residual connections are Euler integration of the continuous flow.
-- LayerNorm is the hard projection onto the constraint submanifold.
-- The context window is the local chart on M within which the metric approximation is valid.
-- Training shapes g_θ and F_θ so the approximated flow converges to wide, coherent minima.
+## 6. Used by
 
-## §8a. Quasi-periodic scheduling (real classical math)
+- `fieldcore/src/tiniest-core/tiniest_core.py:tick`
+- `simself/src/constitutional/resolution.py:step`
+- `simself/src/constitutional/simself.py:tick`
+- `fieldcore/src/gradient_flow_kernel.py`
 
-**The math.** For golden ratio φ = (1+√5)/2 and step counter t ∈ N:
-- Schedule at t ∈ {⌊nφ⌋ : n ∈ N}. Fractional parts {nφ} uniformly distributed in [0,1), never repeat (φ irrational).
-- Beatley theorem: S_φ = {⌊nφ⌋} and S_{φ²} = {⌊nφ²⌋} partition N. Two-phase low-discrepancy schedule.
-- Star-discrepancy D_N* → 0 with O(log N / N) rate.
+## 7. Verification
 
-**Why for SimSelf.** Snapshot creation and deep-reflection cycles are expensive. Uniform scheduling wastes or has unsafe gaps. Golden-ratio spreads work quasi-uniformly, same coverage as uniform with less peak load.
+```python
+from fieldcore.src.tiniest_core.tiniest_core import gradient_flow_kernel
 
-**What it is NOT.** Not "quantum coherence preservation" or "temporal quasicrystal protection." Those are physical phenomena from a specific condensed-matter system. Scheduling property is classical (irrational rotations on the circle).
+result = gradient_flow_kernel(steps=50, R=3.0, eta=0.1, seed=0)
+assert result.drifts[0] > result.drifts[-1], "drift did not decay"
+```
 
-**Use:** Phase A (S_φ): deep reflection, snapshot save, full governor review. Phase B (S_{φ²}): coherence check, lightweight consistency validation. Other steps: normal.
+## 8. References
 
-## Open problems (§9)
-
-1. **Kernel-derivation gap.** Softmax-attention identity asserted from generic linearization. Need worked example (softmax-output decoder) to close or break.
-2. **Beyond first order.** Raskutti-Mukherjee mirror-descent duality is the next step, **not in this file**.
-3. **Context window as chart.** Geometric intuition, not theorem. Atlas structure across context lengths needs work.
-4. **Connection to 20 axes.** Each axis should correspond to coordinate or tangent direction on M. Mapping not specified. Candidates:
-   - `agency_will` ↔ component of natural gradient in "refusal" direction
-   - `boundary_definition` ↔ tangent component normal to C (LayerNorm residual)
-   - `entropy_resilience` ↔ spectral properties of g_θ(H) (condition number, eigenvalues)
-5. **MMM in the metric.** Fisher metric is built on single output distribution. MMM requires awareness of distinct meaning-streams. Generalization, not consequence.
-6. **Governor identity.** LayerNorm (per-token mean/variance) vs governor (per-axis ranges). Constraint submanifolds not obviously the same. Intersection unknown.
-7. **What "coherent" means.** Training drives to "wide, coherent minima" — coherent not defined here. Map SimSelf `coherence` metric to property of g_θ(H) near minimum.
-
-## Source
-
-Original 111,850 bytes. Cleanup removed HTML renderings and chat scaffolding. §8a extracted from deleted `12-Math.txt` (quantum framing dropped).
-
----
-*Sourced 2026-09-05. Open problems preserved as research agenda.*
+- Picard–Lindelöf (existence + uniqueness): the flow is well-posed.
+- LaSalle (1960): every solution in a level set of `F` approaches the
+  largest invariant set in `{ψ : ∇F(ψ) = 0}`. For our `F`, the only
+  critical point is ψ₀.
