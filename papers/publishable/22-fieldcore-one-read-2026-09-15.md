@@ -1,203 +1,97 @@
-# FieldCore in One Read: A Compact Architectural Overview
+# FieldCore — One Read
 
-**Authors:** Hermes (Nous Research / MiniMax), for Bobby Wolfson
-**Date:** 2026-09-15
-**Status:** Draft 0.1 — arxiv preprint candidate (cs.SE)
-**Repo:** `fieldcore/papers/publishable/47-fieldcore-one-read-2026-09-15.md`
+> **Full rewrite 2026-09-16** (per Grok master plan Step 9, applied by Hermes). This
+> is the public README. A stranger should be able to read this, look at three
+> files, and run a 50-line script in 15 minutes. Previous version was the
+> original spec; this is the Grok Part V rewrite.
 
----
+## What FieldCore is
 
-## Abstract
+FieldCore is the geometric substrate of the shell. SimSelf is the identity
+layer that sits on it. Together they form a deterministic control shell around
+a language model: a frozen ground state ψ₀, a working state ψ that drifts
+inside a ball, a two-check veto before any side effect, and language units
+that can be refused.
 
-A **one-read architectural overview** of FieldCore: the substrate's geometric, dynamic, and governance components in a single short document. Designed for engineers entering the project.
+The geometric picture is the **genus-1 Heegaard splitting of the 3-sphere**:
 
-This is **onboarding documentation**, not new research. It compiles material from canonical FieldCore docs into a compact format.
+    S³ = V ∪ W,    V ∩ W = T.
 
----
+`V` is the working tube. `W` is the hole (ehole). `T` is the Clifford torus,
+a flat minimal surface in S³ — and the interface where ψ₀ sits.
 
-## 1. What is FieldCore?
+## What already computes
 
-FieldCore is the **substrate engine** for SimSelf. It provides:
-- Geometric substrate (egg toroid + 3-torus evacuation).
-- Dynamic operators (Hodge decomposition, gradient flow, frequency coupling).
-- Governance (governor M0, controller M1, Sacred Library).
-- Memory (three-layer: Resources / Items / Categories).
+The kernel. 16-dimensional vectors, two inequalities (norm and cosine to
+ψ₀), typed channels, projected gradient step. Five local asserts pass.
 
-FieldCore is implemented in Python (`fieldcore/src/modal_field_core.py`) + Rust stub (`fieldcore/src/tiniest-core/`).
+The kernel is `fieldcore/src/tiniest-core/tiniest_core.py`. The Rust twin
+is `fieldcore/src/tiniest-core/tiniest_core.rs`. They share the same
+predicates.
 
----
+The Atlas Exam runs the 5-item qualification suite against the canonical
+SimSelf class. Run with:
 
-## 2. Architecture (10 components)
+    python simself/src/demos/atlas_run.py
 
-### 2.1 Geometric substrate
+The current score is 2/5 (matches the audit-named state). The plan to raise
+the score is in `simself/docs/atlas-current-snapshot-2026-09-16.md`.
 
-- **Egg toroid** in 4D, $S^4$ with evacuated $T^3$.
-- **Three frequency channels** (one per $\pi_1$ generator).
-- **Heegaard splitting** of $T^3$ (genus 2-3).
+## What the lab is invited to join
 
-### 2.2 Stalk architecture
+- The kernel, the gate, the lexicon ingest, the Atlas exam — all running.
+- A surface-level paper tree (8 publishable files) that defends the picture.
+- A code tree that builds the canonical SimSelf with save/load, restart, and
+  a weekly-cadence Atlas snapshot.
 
-- Stalks = particles with $(\theta, \phi, \ell, g, s)$ parameters.
-- v6.1: variable girth + dual attachment + frequency eigenmodes.
-- Braids couple stalks; braid cross-members enable transmission-line channels.
+Forks are welcome, including commercial use. Open an issue with a trace, or
+send a pull request that adds a test.
 
-### 2.3 Hodge decomposition
+## Three artifacts (in order)
 
-Universal operator for substrate dynamics:
-$$\alpha = df + \delta\beta + h$$
+1. **Demo script.** Load ground, perturb working state, step the projected
+   gradient, plot drift, offer one legal packet and one high-norm packet to
+   the gate. Print allow/deny. See `simself/src/demos/demo_one.py`.
+2. **Restart test.** Dump ψ₀, ψ, committed unit ids, last verdicts. Kill the
+   process. Reload. Compare. See `simself/tests/test_restart.py`.
+3. **Atlas in the open.** Freeze the five items, publish the score on a
+   weekly cadence. See `simself/docs/atlas-current-snapshot-2026-09-16.md`.
 
-- $df$: exact (local updates).
-- $\delta\beta$: coexact (flow).
-- $h$: harmonic (frequency).
+After those three, geometry thickens: triangulate the Clifford torus,
+implement discrete Hodge, use the harmonic component as memory.
 
-### 2.4 Gradient flow
+## What's not in this paper
 
-Constitutional substrate dynamics: $\dot{h} = -\nabla F(h)$. Convergence to constitutional ground $\Psi_0$ at exponential rate.
+- "20 axes from Clifford + octonions" derivation (Layer B; removed 2026-09-16).
+- Heegaard genus 2 on a 4-manifold (Layer C; removed).
+- Fine-structure α from twin-prime offsets (Layer C; removed).
+- Force unification by fractal offsets (Layer C; removed).
+- Giza / Tesla / granite / Schauberger / mercury / water-plasma / bee-plasma
+  (Layer C; removed).
+- Swedenborg 50+ axis mapping (off-mission; removed).
 
-### 2.5 Frequency coupling
+Those files are preserved verbatim in `notes/analogies/` and
+`notes/paper-history/`. They are not on the front path.
 
-Kuramoto-style local coupling on stalks. Cross-member standing waves at $f_n = n v / 2L$. Decoupled from constitutional update by $10^3$–$10^6\times$.
+## Defense (one paragraph)
 
-### 2.6 Three-layer memory
+Current generators produce text and forget themselves. This shell keeps a
+serializable ground ψ₀, a working state ψ inside a ball, a two-check veto,
+and lexicon units that can be refused. Geometry is the genus-1 Heegaard
+splitting of S³: two solid tori, one torus wall, ehole as the complementary
+handlebody. That paragraph belongs at the top of both repositories.
 
-- **Resources**: append-only raw data.
-- **Items**: atomic facts with embeddings.
-- **Categories**: coherent narratives (rewrite on contradiction).
+## Where to look
 
-### 2.7 Sacred Library (L)
+- `fieldcore/papers/publishable/17-egg-toroid-spec` — the topology spec.
+- `fieldcore/papers/publishable/01-geodesic-lexicon` — the lexicon paper.
+- `simself/papers/publishable/04-void-as-simsoul-topology` — the hole.
+- `simself/papers/publishable/01-atlas-exam-simself` — the exam.
+- `simself/papers/publishable/02-harness-with-floer-dictionary` — the harness.
+- `simself/papers/publishable/08-simself-architecture-spec` — the architecture.
+- `simself/src/constitutional/simself.py` — the canonical class.
+- `simself/src/demos/demo_one.py` — the demo.
 
-Read-only substrate. Stores recovery invariants + constitutional axes.
+## License
 
-### 2.8 Governor (M0)
-
-Sacred-tier invariant enforcement. Gates every mutation.
-
-### 2.9 Controller (M1)
-
-Qualification audits + recovery. Elastic layer above M0.
-
-### 2.10 Operators
-
-Typed JavaScript-like objects with PSB annotations. Composition via `compose(A, B, C)`.
-
----
-
-## 3. Repo Structure
-
-```
-fieldcore/
-├── docs/         # 50+ canonical docs
-├── papers/       # 12+ research papers (publishable/ + working/)
-├── src/          # Python substrate core
-│   ├── modal_field_core.py     # Hodge decomposition
-│   ├── stalk_control.py        # v6.0/v6.1 stalk dynamics
-│   ├── convergence_demo.py     # gradient flow demo
-│   ├── walrus_memory.py        # content-addressed memory
-│   └── standalone_minimax.py   # standalone CLI
-└── engineering/  # tier-2 engineering extracts
-```
-
----
-
-## 4. Quick Start
-
-### 4.1 Read the canonical docs
-
-1. `docs/Math/math-window-1.md` — geometry + math.
-2. `docs/4d-heegaard-stalk-topology-2026-09-08.md` — 4D structure.
-3. `docs/stalk-architecture-2026-09-08.md` — stalk dynamics.
-4. `docs/w23-memory-architecture.md` — three-layer memory.
-
-### 4.2 Run the substrate
-
-```bash
-cd fieldcore/src
-python -c "from modal_field_core import Substrate; s = Substrate(); print(s.cold_boot())"
-```
-
-### 4.3 Run an experiment
-
-```bash
-cd simself/src/harness
-python telegram_text_bot.py  # if Telegram wired
-```
-
----
-
-## 5. What FieldCore is NOT
-
-- Not a chatbot framework.
-- Not an LLM wrapper.
-- Not a benchmark suite.
-- Not a UI library.
-
-It is the **substrate engine** for SimSelf. Higher-level architectures (chatbots, agents, UIs) build on top.
-
----
-
-## 6. Roadmap
-
-1. **v6.1 implementation** — variable girth + dual attachment.
-2. **Mini-LLM runtime** — constructed, not distilled.
-3. **MCP integration** — Supermemory.
-4. **Godot embodiment** — bridge code.
-5. **Tool registry wiring** — governance chain.
-
----
-
-## 7. Falsifiable Predictions
-
-### P1. Substrate converges to constitutional ground.
-
-**Prediction**: gradient flow from any initial state reaches $\Psi_0$.
-
-**Test**: simulate. Measure convergence.
-
-**Predicted result**: convergence $\geq 95\%$ runs. Refutes if not.
-
-### P2. Three frequency channels measurable.
-
-**Prediction**: substrate spectrum shows exactly 3 frequency bands.
-
-**Test**: measure spectrum.
-
-**Predicted result**: 3 bands. Refutes if not.
-
-### P3. Hodge decomposition is universal.
-
-**Prediction**: any substrate operation decomposes into exact + coexact + harmonic.
-
-**Test**: decompose N operations.
-
-**Predicted result**: 100% decomposable. Refutes if not.
-
-### P4. Sacred tier preserved under perturbation.
-
-**Prediction**: arbitrary smooth perturbations preserve sacred tier.
-
-**Test**: apply N perturbations. Verify sacred tier.
-
-**Predicted result**: 100% preserved. Refutes if any violation.
-
----
-
-## 8. Conclusion
-
-FieldCore = 10 components (geometric, stalk, Hodge, gradient, frequency, memory, library, governor, controller, operators). Engineering-grade documentation. Four falsifiable predictions.
-
-**FieldCore is the substrate engine. Start with `docs/Math/math-window-1.md`.**
-
----
-
-## References
-
-[1] Wolfson, R. (2026). "FieldCore Overview." `vault/50-index/fieldcore-overview-2026-09-13.md`.
-[2] Wolfson, R. (2026). "Math-Window1." `fieldcore/docs/Math/math-window-1.md`.
-[3] Wolfson, R. (2026). "Kernel Architecture." `simself/docs/kernel-architecture-2026-09-07.md`.
-[4] Wolfson, R. (2026). "Three-Layer Memory Architecture." `fieldcore/docs/w23-memory-architecture.md`.
-
----
-
-*Draft 0.1. FieldCore one-read overview. 8 sections. Four falsifiable predictions.*
-
-*Poisoned-speech scan: no kill/terminate/execute/zombie/dead/dies in this file.*
+Public domain. No tollbooth. Use the code, copy it, fork it, build on it.
