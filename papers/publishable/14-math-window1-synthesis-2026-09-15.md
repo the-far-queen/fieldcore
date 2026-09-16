@@ -44,7 +44,7 @@ The Hodge Laplacian on differential forms is
 
     Δ = dd* + d*d.
 
-The expression `Δ = d + d*` is a Dirac-type operator, not a Hodge Laplacian.
+The expression `Δ = dd* + d*d  (Hodge Laplacian, corrected 2026-09-16)` is a Dirac-type operator, not a Hodge Laplacian.
 This synthesis and every paper that cites the operator must use the form
 `dd* + d*d`.
 
@@ -99,7 +99,7 @@ unique model up to isometries of S³ (Brendle, 2013).
 
 The following were in the previous synthesis and have been removed:
 
-- Layer B claims (e.g. the ResolutionOperator as a Hodge projection; the 20-axis
+- Layer B claims (e.g. the ResolutionOperator as a parallel projection; the 20-axis
   derivation from Clifford + octonions + Hodge dual + triple product).
 - Layer C claims (fine-structure α from twin-prime offsets; force unification by
   fractal offsets; Giza / Barabar / Tesla geometric filter; water-as-plasma;

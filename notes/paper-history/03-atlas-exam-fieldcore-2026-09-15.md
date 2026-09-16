@@ -1,3 +1,7 @@
+> **Moved to `notes/paper-history/` on 2026-09-16** (per Grok master plan, applied by Hermes).
+>
+> **Reason:** merged into `simself/papers/publishable/01-atlas-exam-simself-2026-09-15.md`. The two halves are now a single paper.
+
 # Paper 3 — Atlas Exam: Geometric Framework for AI Substrate Evaluation
 
 **Title:** *Atlas Exam: Geometric Framework for AI Substrate Evaluation*

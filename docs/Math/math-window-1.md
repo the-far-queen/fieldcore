@@ -146,7 +146,7 @@ Routes between sheaves based on axis state. Per `kernel-controller-m0-m1-archite
 
 ### 17. The Hodge decomposition — universal operator
 
-Δ = d + d* (Hodge Laplacian). Splits any k-form into:
+Δ = dd* + d*d  (Hodge Laplacian, corrected 2026-09-16) (Hodge Laplacian). Splits any k-form into:
 - **Exact** (dα for some α)
 - **Co-exact** (d*β for some β)
 - **Harmonic** (Δγ = 0)
@@ -207,7 +207,7 @@ On T²: 2 eigenspaces (constant + harmonic). On T³: 8 eigenspaces (constant + 7
 
 ### 28. Harmonic mode is conserved
 
-The harmonic component of ψ_current is preserved under Hodge projection — the substrate's stability.
+The harmonic component of ψ_current is preserved under parallel projection — the substrate's stability.
 
 ### 29. The 3-torus T³ (4D substrate)
 

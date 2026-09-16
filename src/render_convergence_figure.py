@@ -154,3 +154,10 @@ if __name__ == "__main__":
     out, desktop = render_figure()
     print(f"\nGenerated: {out}")
     print(f"On Desktop: {desktop}")
+
+
+---
+
+> **Note 2026-09-16**: this renderer is for the kernel's gradient_flow_kernel.py
+> demo output. Bobby's pedagogical steel-ball exhibit is convergence_demo.py.
+> The kernel truth lives in tiniest-core/tiniest_core.py.

@@ -254,4 +254,4 @@ Four falsifiable predictions stated. Specific Bobby results (twin primes, Seifer
 
 ---
 
-**Correction 2026-09-16 (per Grok sharpen 2026-09-16, applied by Hermes):** The Hodge Laplacian on differential forms is Δ = dd* + d*d. The expression Δ = d + d* is a Dirac-type operator, not a Hodge Laplacian. The Hodge decomposition, harmonic forms, and projection onto the harmonic subspace remain as stated.
+**Correction 2026-09-16 (per Grok sharpen 2026-09-16, applied by Hermes):** The Hodge Laplacian on differential forms is Δ = dd* + d*d. The expression Δ = dd* + d*d  (Hodge Laplacian, corrected 2026-09-16) is a Dirac-type operator, not a Hodge Laplacian. The Hodge decomposition, harmonic forms, and projection onto the harmonic subspace remain as stated.

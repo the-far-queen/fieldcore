@@ -72,7 +72,7 @@ Per `fieldcore/docs/Math/math-window-1.md` (75KB, Bobby's full geometry + math):
 
 ### Mathematical operators
 
-- **Hodge decomposition** (per §17) — universal operator: Δ = d + d*; splits fields into exact + co-exact + harmonic
+- **Hodge decomposition** (per §17) — universal operator: Δ = dd* + d*d  (Hodge Laplacian, corrected 2026-09-16); splits fields into exact + co-exact + harmonic
 - **Gradient flow** (per §20) — `dh/dt = -∇F(h)`, converges to ψ₀ from any starting point
 - **Standing waves** (per `frequency.py`) — Kuramoto dynamics + harmonic modes
 

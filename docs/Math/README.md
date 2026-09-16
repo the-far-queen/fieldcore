@@ -39,4 +39,4 @@ This is the corrected statement used across both repos:
 
     Δ = dd* + d*d        (Hodge Laplacian on differential forms)
 
-NOT `Δ = d + d*` (which is a Dirac-type operator, not a Hodge Laplacian).
+NOT `Δ = dd* + d*d  (Hodge Laplacian, corrected 2026-09-16)` (which is a Dirac-type operator, not a Hodge Laplacian).
