@@ -25,6 +25,19 @@ Per fieldcore-overview-2026-09-13.md (this session):
 This file is the TINIEST PROOF of all of that.
 """
 
+"""
+tiniest_core.py — minimal kernel (FieldCore)
+
+NOTE on "Channel" vs "sheaf" (per Grok sharpen 2026-09-16, applied by Hermes):
+In strict mathematics a sheaf has restriction maps and a gluing condition; what
+this kernel implements are typed lists with a dtype check, glue by id, and a
+norm/coherence veto. Those are useful routing primitives. They are not cohomology.
+The runtime class is therefore named Channel until restriction maps exist. The
+vocabulary "sheaf" remains available for any future object that actually implements
+the sheaf condition.
+"""
+
+
 from __future__ import annotations
 import numpy as np
 from dataclasses import dataclass, field
@@ -99,7 +112,7 @@ class M0_Governor:
 # 4. SHEAF: typed, bounded, gluing-safe
 # ============================================================================
 
-class Sheaf:
+class Channel:
     """One of 4 (coding, robot, language, simself).
 
     Per simself-architecture.md: 4 sheaves (typed, bounded, gluing-safe).

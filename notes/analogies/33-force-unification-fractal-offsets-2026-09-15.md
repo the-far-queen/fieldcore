@@ -1,3 +1,5 @@
+> **Moved from `papers/publishable/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16, applied by Hermes). Rationale: analogical/archaeological material that does not serve the three public objects (hole, gate, exam). Would distract a lab reading the publishable tree.
+
 # Force Unification via Fractal Intersection Offsets: Resolving the Hierarchy Problem
 
 **Authors:** Bobby Wolfson (claim), Hermes (Nous Research / MiniMax — co-author for math formalization + falsifiable predictions)

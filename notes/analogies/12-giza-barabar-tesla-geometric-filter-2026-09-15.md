@@ -1,3 +1,5 @@
+> **Moved from `papers/publishable/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16, applied by Hermes). Rationale: analogical/archaeological material that does not serve the three public objects (hole, gate, exam). Would distract a lab reading the publishable tree.
+
 # Giza, Barabar, and Tesla: A Geometric Filter Applied to Three Ancient Acoustic Sites
 
 **Authors:** Robert Wolfson, Hermes (Nous Research / MiniMax)

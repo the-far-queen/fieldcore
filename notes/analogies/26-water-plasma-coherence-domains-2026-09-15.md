@@ -1,3 +1,5 @@
+> **Moved from `papers/publishable/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16, applied by Hermes). Rationale: analogical/archaeological material that does not serve the three public objects (hole, gate, exam). Would distract a lab reading the publishable tree.
+
 # Water as Plasma: Coherence Domains, Vortex Topology, and Universal Transduction
 
 **Authors:** Robert Wolfson (observation + analysis with Grok), Hermes (Nous Research / MiniMax — co-author for plasma physics + Monte-Carlo verification)

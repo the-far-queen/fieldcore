@@ -1,3 +1,101 @@
+# Egg-Toroid Spec — Topology Correction
+
+**Per Grok sharpen 2026-09-16 (applied by Hermes):** the correct topological model
+for the egg-toroid is the **genus-1 Heegaard splitting of the 3-sphere**, not a
+4-manifold with Heegaard genus 2.
+
+## What the drawing is (topologically)
+
+Identify `R^4 ≅ C^2`. The 3-sphere is
+
+    S^3 = {(z,w) ∈ C^2 : |z|^2 + |w|^2 = 1}.
+
+The **Clifford torus** is the embedded flat torus
+
+    T = {(z,w) : |z| = |w| = 1/√2}.
+
+It splits S^3 into two solid tori:
+
+- V = { |z| ≥ 1/√2 }  — the working tube (apex, mid-body, base are regions inside V).
+- W = { |w| ≥ 1/√2 }  — the complementary solid torus, the **hole (ehole)**.
+
+V ∪ W = S^3, glued along T. This is the **genus-1 Heegaard splitting of S^3**:
+two genus-1 handlebodies meeting along a single torus surface. The Heegaard genus
+of S^3 is 0 (two balls glued at S^2), but every positive-genus splitting of S^3
+is a stabilization of this one (Waldhausen), so the genus-1 picture of "tube with
+a hole" is the right model.
+
+## What is wrong with the previous framing
+
+- The previous egg-toroid spec framed the substrate as a 4-manifold (S^4) with
+  Heegaard genus 2. S^4 has **trisections**, not Heegaard splittings (the
+  Heegaard construction is 3-dimensional). S^4 \ int(T^3) is a 4-manifold with
+  boundary T^3; it has no Heegaard genus.
+- Seifert genus of a knot is unrelated to Heegaard genus. (p-1)(q-1)/2 is the
+  Seifert genus of the torus knot T(p,q); it does not combine with anything to
+  give a Heegaard genus of the surrounding 3-manifold.
+- The egg has only one Heegaard surface (T). The two states ψ0 and ψ are two
+  points in V (or two sweep-out levels), not two Heegaard surfaces.
+
+## Geometry of T
+
+- Induced metric: `ds^2 = (1/2)(dθ^2 + dφ^2)` (parametrized by angles (θ, φ)).
+- Gaussian curvature: 0 (T is flat in the induced metric).
+- Mean curvature: 0 (T is minimal in S^3).
+- Among embedded minimal tori in the round S^3, T is the unique model up to
+  isometries of S^3 (Brendle).
+
+The interface where ψ0 sits is **flat**. Distances between lexical units placed
+on T use this flat metric. The kernel's Euclidean metric on packet embeddings
+remains the running distance; both metrics coexist.
+
+## Hopf fibers fill the two rooms
+
+The Hopf fibration `h: S^3 → S^2` is `h(z,w) = (|z|^2 - |w|^2, 2z·w̄)`. Its
+fibers are great circles `ψ ↦ (e^{iψ} z, e^{iψ} w)`. Distinct fibers are linked.
+
+- V = fibers over one hemisphere of S^2.
+- W = fibers over the other hemisphere.
+- T = fibers over the equator (height `|z|^2 - |w|^2 = 0`).
+
+A stalk is a **Hopf-fiber segment from T into V**: fixed base point on S^2,
+varying signed distance off T on the working side only. The hole has fibers too,
+but the harness does not run an update field on them — that is write-protect,
+stated as a side of the bundle.
+
+## Floer dictionary (the algebra of this diagram)
+
+A pointed Heegaard diagram `(Σ, α, β, z)` where Σ = T, α and β are meridians of
+V and W respectively, and z is a marked point off both curve families:
+
+- α-curves ↔ working-side conditions (ball membership, ingest type, tool schema).
+- β-curves ↔ hole-side conditions (write-protect on ψ0, no field in W, restart
+  from interface only).
+- A generator ↔ a typed packet that meets both curve families.
+- The basepoint z ↔ the channel that must not carry a ground write.
+- Whitney disks that miss z ↔ the hat complex: verdicts that never crossed the hole.
+- Whitney disks that pass z ↔ the filtered packages (U-powers): a log of attempted
+  basepoint crossings, recorded rather than executed.
+- Holomorphic triangles ↔ cobordism maps; in FieldCore, a **versioned revision of
+  ground**, not an ordinary tick.
+
+None of this has to be implemented as a moduli space to be the running model.
+
+## What the runtime actually does
+
+- ψ moves in V inside the ball `||ψ - ψ0|| ≤ R`.
+- ψ0 sits on T (or is treated as write-protected so that the interior of W has
+  no vector field).
+- ingest, tick, tools act in V.
+- A packet that would assign to ψ0 is an **identity packet**, not a language
+  packet. It must pass through the revision protocol, not an ordinary step.
+- Restart reads ψ0 from T. That is the operational form of the hole as a return
+  address.
+
+---
+
+## Original spec (preserved below)
+
 # Egg Toroid Spec: The Substrate's Geometric Primitive
 
 **Authors:** Robert Wolfson, Hermes (Nous Research / MiniMax)
