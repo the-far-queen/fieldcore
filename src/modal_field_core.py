@@ -15,10 +15,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from .tiniest_core.tiniest_core import (
+from tiniest_core.tiniest_core import (
     install_ground,
     project_ball,
-    step,
     energy,
     DEFAULT_R,
     DEFAULT_ETA,
@@ -29,7 +28,7 @@ def substrate_step(psi: np.ndarray, psi0: np.ndarray,
                    eta: float = DEFAULT_ETA,
                    R: float = DEFAULT_R) -> np.ndarray:
     """One substrate step: the projected gradient step on F."""
-    return step(psi, psi0, eta=eta, R=R)
+    return project_ball(psi - eta * (psi - psi0), psi0, R)
 
 
 def substrate_energy(psi: np.ndarray, psi0: np.ndarray) -> float:

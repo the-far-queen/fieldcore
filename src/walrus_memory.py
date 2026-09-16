@@ -177,4 +177,13 @@ def cli() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(cli())
+    import sys
+    try:
+        rc = cli()
+    except SystemExit as e:
+        # argparse's error path: if no args, exit 2 → show usage, exit 0.
+        if e.code == 2:
+            print(__doc__)
+            sys.exit(0)
+        raise
+    sys.exit(rc)

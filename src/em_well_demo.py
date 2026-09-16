@@ -213,7 +213,13 @@ def verify_em_universal_convergence(
     """Verify Bobby's claim: charged particle converges in variable EM well.
 
     Returns: (converged_count, total_trials, max_distance_seen)
-    """
+    
+
+Note 2026-09-16 (per Grok master plan, applied by Hermes): the kernel truth is in
+fieldcore/src/gradient_flow_kernel.py, which uses the actual energy
+F(psi) = (1/2)||psi - psi_0||^2 and the projected gradient step.
+This file is the EM-pedagogical classroom version.
+"""
     import random
     random.seed(42)
 
@@ -286,12 +292,3 @@ if __name__ == "__main__":
         print(f"\n  ✓ BOBBY'S EM CLAIM VERIFIED: charged particle converges in variable EM well.")
     else:
         print(f"\n  ✗ EM convergence failed in {total - converged} trials.")
-
-
----
-
-> **Note 2026-09-16** (per Grok master plan, applied by Hermes): this is Bobby's
-> pedagogical EM-well exhibit. The kernel truth is in
-> `fieldcore/src/gradient_flow_kernel.py`, which uses the actual energy
-> F(ψ) = (1/2)||ψ-ψ₀||² and the projected gradient step. This file is the
-> classroom version.
