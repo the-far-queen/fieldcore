@@ -1,0 +1,1 @@
+""".simself — package."""
