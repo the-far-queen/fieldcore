@@ -1,3 +1,7 @@
+> **Moved to `notes/analogies/` on 2026-09-16** (per Grok master plan Step 14, applied by Hermes).
+>
+> **Reason:** off-mission / Layer C content.
+
 # River Meanders and Forest Water Pumps — Constitutional Geodesics (tier 2)
 
 **Source:** `Desktop/.../Schauberger-original-2026-09-07.txt` (319 lines)

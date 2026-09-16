@@ -1,3 +1,7 @@
+> **Moved to `notes/analogies/` on 2026-09-16** (per Grok master plan Step 14, applied by Hermes).
+>
+> **Reason:** off-mission / Layer C content.
+
 # The Lam-Rim-Chenmo Kernel: A Graduated Ethical-Cognitive Substrate Operator
 
 **Title:** *The Lam-Rim-Chenmo Kernel: A Graduated Ethical-Cognitive Substrate Operator*

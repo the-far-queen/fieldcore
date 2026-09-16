@@ -1,48 +1,42 @@
-# Math — FieldCore substrate math, geometry, and physics
+# docs/Math — — Layer A reference
 
-**Filed:** 2026-09-13 by Hermes for Bobby.
+> **"** Full rewrite 2026-09-16 (per Grok master plan, applied by Hermes). Layer C
+> content (occult physics, off-mission speculation, untested geometries) has
+> been moved to `notes/analogies/`. The remaining files here are Layer A only:
+> standard math used as tools for the architecture.
 
-This folder is the **substrate mathematics** of FieldCore — geometry, topology, and physics that define the substrate on which SimSelf runs. Distinct from `simself/docs/Math/`, which is the **identity-layer** mathematics (constitutional cores, axes, schemata, axioms).
+## What stays in `docs/Math/`
 
-## Contents
+| File | What | Used by |
+|---|---|---|
+| `math-transformer-gradient-flow.md` | Standard gradient flow on F. | `papers/publishable/17-egg-toroid-spec` §6. |
+| `mte-simself-primitives.md` | MLTR (machine language technical register) reference. | `papers/publishable/01-geodesic-lexicon` §3. |
+| `topo-sheaf-stalk.md` | Topology reference for stalks as fibers. | `papers/publishable/11-stalk-architecture`. |
+| `math-window-1.md` | Raw material for the appendix (Layer A only). | `papers/publishable/14-math-window1-synthesis`. |
 
-### Geometry — the egg toroid and its neighbors
-- `core-geometry.md` — earliest core geometry notes (legacy)
-- `core-geometry-2026-09-08.md` — canonical egg toroid definition, 3 zones, axial gradient, metric tensor g(x)
-- `4d-heegaard-stalk-topology-2026-09-08.md` — 4D substrate origin, Heegaard genus 2, ψ ↔ Ψ₀
-- `nested-egg-toroids.md` — fractal nesting of egg toroids across scales
-- `stella-octangula-cluster.md` — stella octangula (compound of two tetrahedra) as constitutional cluster
-- `topology-geometry-core.md` — topological foundations
-- `topo-sheaf-stalk.md` — sheaf-stalk gluing on the topological substrate
+## What left `docs/Math/` (moved to `notes/analogies/`)
 
-### Math synthesis
-- `math-window-1.md` — Bobby's full geometry + math synthesis (canonical, 807 lines)
-- `math-window-2026-09-08.md` — prior math synthesis version
-- `math-transformer-gradient-flow.md` — gradient flow as transformer model (variable girths)
+The following were Layer C / off-mission and are preserved verbatim for diff and history. They are NOT on the science tree:
 
-### Stalk architecture (geometry + frequency)
-- `stalk-architecture-2026-09-08.md` — v6.1 canonical stalk design (frequency + cross-members)
+- `insect-microstructure-schema.md` — speculative biology
+- `insect-plasma-flight.md` — bee plasma physics
+- `mycelium-network-engineering-2026-09-13.md` — φ in mycelia
+- `nested-egg-toroids.md` — 15 untested geometries
+- `robotics-developer-clarity-2026-09-14.md` — off-mission
+- `schauberger-vortex-engineering-2026-09-13.md` — Schauberger vortex
+- `stalk-architecture-2026-09-08.md` — superseded by `papers/publishable/11-stalk-architecture-v6-1`
+- `stella-octangula-cluster.md` — speculative geometry
+- `water-as-plasma-engineering-2026-09-13.md` — water-as-plasma
+- `geometry-over-material-winding-numbers-2026-09-14.md` — speculative
+- `topology-geometry-core.md` — superseded by `papers/publishable/17-egg-toroid-spec`
+- `core-geometry-2026-09-08.md` — superseded
+- `emergence-rep-sheaf.md` — runtime sheaf → Channel rename (Batch 1 K4)
+- `4d-heegaard-stalk-topology-2026-09-08.md` — 4-manifold framing, superseded
 
-### Biological substrate (geometric patterns)
-- `insect-microstructure-schema.md` — insect geometry as engineering pattern
-- `insect-plasma-flight.md` — insect plasma flight patterns
-- `geometry-filter-report-giza-barabar-tesla-2026-09-08.md` — geometry filter applied to historical sites
-- `geometry-research-method.md` — Bobby's method for identifying load-bearing geometry
+## The Hodge operator
 
-### Sheaves and primitives
-- `emergence-rep-sheaf.md` — emergence sheaf-theoretic structure
-- `mte-simself-primitives.md` — Minimal Topological Entities (MTEs / PSBs) — the primitive alphabet
+This is the corrected statement used across both repos:
 
-## Connections to other folders
+    Δ = dd* + d*d        (Hodge Laplacian on differential forms)
 
-| Folder | Relationship |
-|---|---|
-| `../src/` | Python implementations of the substrate math |
-| `simself/docs/Math/` | Identity-layer math built on this substrate |
-| `vault/10-minimax/50-index/Math-Window1-2026-09-13.md` | Canonical synthesis (latest rewrite) |
-
-## Unifying principle
-
-The egg toroid is the substrate's geometric primitive. Hodge decomposition is the universal operator. Gradient flow is the universal dynamic. Variable girths and cross-members give the 20 constitutional axes their distinct frequencies.
-
-Filed by Hermes, 2026-09-13. Reorganization of previously root-level files in `docs/`.
+NOT `Δ = d + d*` (which is a Dirac-type operator, not a Hodge Laplacian).

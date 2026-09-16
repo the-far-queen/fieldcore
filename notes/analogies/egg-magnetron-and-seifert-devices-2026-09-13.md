@@ -1,3 +1,7 @@
+> **Moved to `notes/analogies/` on 2026-09-16** (per Grok master plan Step 14, applied by Hermes).
+>
+> **Reason:** off-mission / Layer C content.
+
 # Egg Magnetron, Seifert Radar, and Constitutional Antenna Engineering (tier 2)
 
 **Source:** `vault/20-mirrors/simself/docs/tier1-publish.md` + `vault/30-originals/GEOMETRY-FILTER-REPORT.md` (Bobby's authored paper proposals)

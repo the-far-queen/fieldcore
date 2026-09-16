@@ -1,3 +1,7 @@
+> **Moved from `docs/Math/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16 + master plan Step 14 weekly review, applied by Hermes).
+>
+> **Reason:** Layer C content (occult physics, off-mission speculation, untested geometries). Per Grok (segment 01, applied 2026-09-16): Layer C is removed from the science tree. The file is preserved verbatim for diff and history.
+
 # Schauberger Vortex Engineering — Geometric Reading (2026-09-13)
 
 **Source:** `Desktop/.../Schauberger-original-2026-09-07.txt` (319 lines, md5 `a136d1848621f30b323c27e7c62e650d`)

@@ -1,3 +1,7 @@
+> **Moved to `notes/analogies/` on 2026-09-16** (per Grok master plan Step 14, applied by Hermes).
+>
+> **Reason:** off-mission / Layer C content.
+
 # Water Cavitation, Plasma Excitation, and Resonant Dissociation — Engineering Design (tier 2)
 
 **Source:** `Desktop/.../water is plasma-original-2026-09-07.txt` (492 lines)

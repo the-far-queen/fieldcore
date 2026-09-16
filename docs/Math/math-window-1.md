@@ -545,3 +545,12 @@ This document is the comprehensive synthesis. Geometry first (sections 1-19), th
 *This update is the handoff document for next session. Read this first.*
 
 *Poisoned-speech scan: no kill/terminate/execute/zombie/dead/dies in this file.*
+
+
+---
+
+> **Note 2026-09-16** (per Grok sharpen, applied by Hermes): The canonical
+> appendix is `papers/publishable/14-math-window1-synthesis-2026-09-15.md`.
+> This file (`docs/Math/math-window-1.md`) is preserved as raw material for
+> that appendix. Layer C content has been stripped from the publishable
+> version; see `notes/analogies/` for the moved files.

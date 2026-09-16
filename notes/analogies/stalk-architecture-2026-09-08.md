@@ -1,3 +1,7 @@
+> **Moved from `docs/Math/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16 + master plan Step 14 weekly review, applied by Hermes).
+>
+> **Reason:** Layer C content (occult physics, off-mission speculation, untested geometries). Per Grok (segment 01, applied 2026-09-16): Layer C is removed from the science tree. The file is preserved verbatim for diff and history.
+
 # Stalk architecture — geometry + frequency as hidden key
 
 **Source:** `Desktop/Geometry/STALK-ARCHITECTURE-2026-09-08.md` (232 lines, 12.5KB), Bobby's stalk architecture evolution + AI math work.

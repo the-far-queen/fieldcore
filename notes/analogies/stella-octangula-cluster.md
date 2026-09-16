@@ -1,3 +1,7 @@
+> **Moved from `docs/Math/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16 + master plan Step 14 weekly review, applied by Hermes).
+>
+> **Reason:** Layer C content (occult physics, off-mission speculation, untested geometries). Per Grok (segment 01, applied 2026-09-16): Layer C is removed from the science tree. The file is preserved verbatim for diff and history.
+
 # stella octangula — 8-node cluster geometry for SimSelf
 
 **Purpose.** Define the smallest constitutional unit of SimSelf as the stella octangula (8-node cluster compound) and derive its properties for use as the building block of identity, memory, and processing layers.

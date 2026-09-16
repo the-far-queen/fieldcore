@@ -1,3 +1,7 @@
+> **Moved to `notes/analogies/` on 2026-09-16** (per Grok master plan Step 14, applied by Hermes).
+>
+> **Reason:** off-mission / Layer C content.
+
 # Tesla Harmonics — Engineering Reading (tier 2)
 
 **Source:** `Desktop/.../nikola tesla-original-2026-09-07.txt`

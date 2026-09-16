@@ -1,3 +1,7 @@
+> **Moved from `docs/Math/` to `notes/analogies/` on 2026-09-16** (per Grok sharpen 2026-09-16 + master plan Step 14 weekly review, applied by Hermes).
+>
+> **Reason:** Layer C content (occult physics, off-mission speculation, untested geometries). Per Grok (segment 01, applied 2026-09-16): Layer C is removed from the science tree. The file is preserved verbatim for diff and history.
+
 # nested egg toroids and twin-prime Seifert surfaces
 
 **Source:** `Desktop/FieldCore/nested egg toroids.txt` (Bobby, 2026-08-13; Bobby's own ranking of "best 6" was added by a different AI in the same conversation)
