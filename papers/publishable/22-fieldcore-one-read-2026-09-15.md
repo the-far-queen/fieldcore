@@ -34,8 +34,9 @@ SimSelf class. Run with:
 
     python simself/src/demos/atlas_run.py
 
-The current score is 2/5 (matches the audit-named state). The plan to raise
-the score is in `simself/docs/atlas-current-snapshot-2026-09-16.md`.
+The current score is 5/5 as of 2026-09-17 (Batch 2 + Step 3 complete; harness
+gate wired everywhere; restart test passing on canonical SimSelf). The plan
+to keep the score is in `simself/docs/atlas-current-snapshot-2026-09-16.md`.
 
 ## What the lab is invited to join
 
