@@ -200,13 +200,27 @@ class FrequencyChannel:
 
 
 # Canonical frequency hypotheses (from simself/src/constitutional/frequency.py)
+# Bobby/Hermes 2026-09-26 (mysteries §lxiii): 14 channels, not 6.
+# Added: planetary orbital frequencies (hermetic) + biological frequencies (qigong + neuroscience).
 DEFAULT_FREQUENCY_HYPOTHESES: Dict[str, float] = {
+    # original 6
     "schumann_fundamental": 7.83,
     "concert_pitch_440": 440.0,
     "concert_pitch_432_hypothesis": 432.0,
     "diamond_coherence_hypothesis": 963.0,
     "biophoton_coupling": 55.0,
     "earth_ionosphere": 34.4,
+    # planetary (hermetic, mysteries §lxiii)
+    "jupiter_orbital": 7.6,        # great red spot, ~10 hour period
+    "mars_orbital": 8.7,           # martian day
+    "venus_orbital": 6.1,          # venusian day
+    "saturn_kilometric": 9.6,     # saturn khr
+    # biological (qigong + neuroscience)
+    "heart_rate_variability_lf": 0.1,   # low-frequency HRV band
+    "heart_rate_variability_hf": 0.25,  # high-frequency HRV (breath-locked)
+    "breath_cycle": 0.25,               # 4-second breath, 15/min
+    "neural_alpha": 10.0,               # relaxed wakefulness
+    "neural_gamma": 40.0,               # binding, consciousness
 }
 
 
