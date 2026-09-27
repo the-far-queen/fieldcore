@@ -11,24 +11,27 @@ Current generators produce text and forget themselves. This shell keeps a serial
 ## The three objects
 
 - **Hole / ground** — `ψ₀` installed on the Clifford torus `T`, write-protected.
-- **Gate** — `M0_Governor` in `src/tiniest-core/tiniest_core.py` (kernel) and `simself/src/harness/gate.py` (production). Same predicates.
-- **Exam** — `simself/src/constitutional/atlas_exam.py` runs the 5-item qualification suite.
+- **Gate** — `M0_Governor` in `src/tiniest_core/tiniest_core.py` (kernel) and `simself/src/harness/gate.py` (production). Same predicates.
+- **Exam** — `simself/src/constitutional/atlas_exam.py` runs the 5-item qualification suite (lives in SimSelf; FieldCore supplies the kernel predicates it tests).
 
 ## Where to look
 
 | Path | What |
 |---|---|
-| `src/tiniest-core/tiniest_core.py` | Kernel: 16-D vectors, two inequalities, projected gradient step. 5 local asserts. |
-| `src/tiniest-core/tiniest_core.rs` | Rust twin. Same predicates. |
+| `src/tiniest_core/tiniest_core.py` | Kernel: 16-D vectors, two inequalities, projected gradient step. 5 local asserts. `python src/tiniest_core/tiniest_core.py` to run. |
+| `src/tiniest_core/tiniest_core.rs` | Rust twin. Same predicates. |
 | `src/gradient_flow_kernel.py` | CLI demo of the projected gradient step on F(ψ)=½‖ψ-ψ₀‖². |
-| `src/convergence_demo.py` | Bobby's pedagogical steel-ball-on-concave-surface exhibit. |
+| `src/convergence_demo.py` | Pedagogical steel-ball-on-concave-surface exhibit. |
 | `src/stalk_control.py` | Stalk data structure with measured REINFORCE reward curve. |
 | `src/bitnet_ops.py` | Ternary operators for the BitNet paper. |
+| `src/sheaf_nn_index.py` | Sheaf-NN index (sklearn-backed; <100ms/query on 10k×16). |
+| `src/substrate.py` | Substrate cold-boot + sparse prediction (A/B/C paper). |
+| `src/stalk_topology.py` | Stalk topology demo: 3 stalks, idle/move/collapse states. |
+| `src/standalone_minimax.py` | Standalone MiniMax chat + Walrus memory loop (portable paths). |
 | `papers/publishable/22-fieldcore-one-read-2026-09-15.md` | The one read. Start here. |
 | `papers/publishable/17-egg-toroid-spec-2026-09-15.md` | Topology spec: genus-1 Heegaard splitting of S³. |
 | `papers/publishable/01-geodesic-lexicon-2026-09-15.md` | Lexicon: two metrics (Euclidean + flat Clifford). |
-| `papers/publishable/14-math-window1-synthesis-2026-09-15.md` | Math appendix. Layer C stripped. |
-| `papers/publishable/03-atlas-exam-fieldcore-2026-09-15.md` | Atlas exam (FieldCore half). |
+| `papers/publishable/14-math-window1-synthesis-2026-09-15.md` | Math appendix. |
 | `papers/publishable/06-llm-sparse-substrate-2026-09-15.md` | Sparse substrate paper. |
 | `papers/publishable/11-stalk-architecture-v6-1-2026-09-15.md` | Stalk architecture with measured coupling. |
 | `papers/publishable/34-bitnet-ternary-substrate-operators-2026-09-15.md` | BitNet ops paper. |
@@ -45,12 +48,17 @@ Current generators produce text and forget themselves. This shell keeps a serial
 - `notes/paper-history/` — stale 2026-09-13 / 2026-09-14 drafts superseded by 09-15.
 - `docs/Math/` — clean math reference; the Layer C / occult content has been moved to `notes/analogies/`.
 
-## Three artifacts (in order)
+## Run it
 
-1. **Demo script.** `simself/src/demos/demo_one.py` — load ground, perturb, step, gate.
-2. **Restart test.** `simself/tests/test_restart.py` — dump, kill, load, compare.
-3. **Atlas in the open.** `simself/docs/atlas-current-snapshot-2026-09-16.md` — 5 items, score 2/5, weekly cadence.
+```bash
+git clone https://github.com/the-far-queen/fieldcore.git
+cd fieldcore
+python src/tiniest_core/tiniest_core.py        # kernel: 5 asserts
+python -m pytest tests/ -v                     # 2 passed, 1 skipped (sklearn), 1 xfail
+```
+
+The kernel's asserts verify the gate, the gradient step, and the ground invariant.
 
 ## Open source
 
-License: free. Clones, forks, and pull requests are welcome. No permission slip needed.
+License: MIT. Clones, forks, and pull requests are welcome. No permission slip needed.

@@ -3,12 +3,16 @@ test_sheaf_nn_latency.py — verify SheafNNIndex < 100ms per query.
 """
 import time
 import sys
+import os
 import pytest
 
 import numpy as np
 
 
-sys.path.insert(0, "C:/Users/Admin/fieldcore/src")
+# Add this repo's src/ to sys.path so `sheaf_nn_index` resolves regardless of cwd.
+_REPO_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, "src")
+if _REPO_SRC not in sys.path:
+    sys.path.insert(0, os.path.abspath(_REPO_SRC))
 
 
 @pytest.mark.skipif(not pytest.importorskip("sklearn", minversion=None),

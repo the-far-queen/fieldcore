@@ -23,8 +23,11 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-WALRUS_ROOT = Path(r"C:\Users\Admin\AppData\Local\hermes\walrus")
-HERMES_ENV = Path(r"C:\Users\Admin\AppData\Local\hermes\.env")
+# Resolve local paths relative to the current user's home (portable across machines).
+# Override with HERMES_HOME / WALRUS_ROOT / HERMES_ENV env vars.
+_HERMES_HOME = Path(os.environ.get("HERMES_HOME", Path.home() / "AppData" / "Local" / "hermes"))
+WALRUS_ROOT = Path(os.environ.get("WALRUS_ROOT", _HERMES_HOME / "walrus"))
+HERMES_ENV = Path(os.environ.get("HERMES_ENV", _HERMES_HOME / ".env"))
 MINIMAX_BASE = os.environ.get("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
 MODEL = os.environ.get("MINIMAX_MODEL", "MiniMax-M3")
 SYSTEM = "you are a helpful assistant. terse, lowercase, no fluff."
