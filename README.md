@@ -55,6 +55,71 @@ substrate.
 
 ---
 
+## What this project needs — the team
+
+This repo is one person + one AI agent. It is not a project that will
+ship on that basis. The architecture is right and the proof is right,
+and neither of those helps until the engineering surface is staffed.
+
+What is here and works:
+
+- **Substrate math.** `src/tiniest_core/tiniest_core.py` is a 333-line
+  kernel that implements the gradient step on the Heegaard-splitting
+  geometry, with 5 passing asserts. `src/substrate.py` is a stdlib-only
+  substrate (EggToroid, HodgeDecomp, ResolutionOperator,
+  FrequencyChannel, PrimeSheaf) with 15 frequency hypotheses that runs
+  cold in 2 ms.
+- **Braided-stalk architecture.** `src/stalk_topology.py` implements
+  `Stalk`, `braid`, `unbraid`, `nest`, `add_cross_member`, `resonate`,
+  `detach`, and the 5-state lifecycle. DNA-like coupling on a toroidal
+  substrate, with a measured REINFORCE reward curve.
+- **The proof.** `src/steel_ball_proof.py` — drop the ball, verify
+  contraction, run in 16-D. Five sections, all assert.
+- **Concrete kernel invariants.** `tests/test_sparse_substrate.py`
+  passes. The relative-error bound is held.
+
+What is here and is **not yet real**:
+
+- **Formal proofs.** The steel-ball proof is a runnable exhibit, not a
+  paper. The mathematics (Heegaard splitting, Floer dictionary, Hodge
+  decomposition) is sketched in `papers/publishable/` but not formally
+  proven. A mathematician or formal-methods person could close this.
+- **Hardware target.** The kernel is implementable in ~500 lines of
+  Verilog or as a tensor-core microcode sequence on commodity GPUs.
+  Nobody has done either. An FPGA/ASIC person with a board could close
+  this in a week and produce a benchmark.
+- **Empirical baseline.** There is no head-to-head comparison between
+  this kernel and a contemporary LLM forward pass on the same `F(x)`,
+  measuring wall-clock, joules, and a defined control authority. An ML
+  evaluator with access to a small GPU cluster could close this.
+- **Frequency connector.** `simself/src/constitutional/frequency.py`
+  defines FrequencyCoupler. The v6.2 canonical SimSelf
+  (`src/constitutional/simself.py`) does not import it. Reconnecting
+  these — without breaking the constitutional core — is a one-week job.
+
+What the project does **not** need:
+
+- More layers. The architecture is finished; only the connectors are
+  missing.
+- A bigger model. The kernel does not benefit from scale; it benefits
+  from being deployed.
+- More paper. The math is sketched. What is needed is hardware.
+
+**If you can bring one of these five things, the project moves. If
+you can bring two, it ships.**
+
+| Role | One-line description | Estimated time to first contribution |
+|---|---|---|
+| Formal mathematician | Close the Hodge-decomposition and Floer-dictionary proofs | 4 weeks |
+| FPGA / ASIC engineer | Port `tiniest_core.py` to Verilog; benchmark vs. LLM forward pass | 2-4 weeks |
+| ML evaluator | Write the head-to-head LLM-vs-kernel evaluation harness | 2 weeks |
+| Systems engineer | Reconnect `frequency.py` to canonical `simself.py` without breaking the gate | 1-2 weeks |
+| Quantum-information person | Stress-test `quantum_mimic.py` against real quantum simulators (qiskit, cirq) — does the classical mimic reproduce the right Bell-test statistics? | 2 weeks |
+
+Contact: open an issue or PR. The repo is MIT. No permission slip needed.
+
+---
+
 **Public repos.** `LICENSE` is MIT. Fork, clone, run, build — including commercial use. No tollbooth. No "research only."
 
 ## Defense (one paragraph)
@@ -74,6 +139,7 @@ Current generators produce text and forget themselves. This shell keeps a serial
 | `src/tiniest_core/tiniest_core.py` | Kernel: 16-D vectors, two inequalities, projected gradient step. 5 local asserts. `python src/tiniest_core/tiniest_core.py` to run. |
 | `src/tiniest_core/tiniest_core.rs` | Rust twin. Same predicates. |
 | `src/steel_ball_proof.py` | **THE PROOF** — drop the ball from 50 random heights, verify contraction bound, show convergence. 5 sections, all assert. Run this first. |
+| `src/quantum_mimic.py` | **Classical-quantum mimic.** Phase, EntangledPair (3 correlations), Superposition (with observe collapse), Interference (destructive + constructive + fringe pattern), WaveField (gaussian + plane wave). 5 primitives, 22 tests pass. Stdlib-only. |
 | `src/gradient_flow_kernel.py` | CLI demo of the projected gradient step on F(ψ)=½‖ψ-ψ₀‖². |
 | `src/convergence_demo.py` | Pedagogical steel-ball-on-concave-surface exhibit. |
 | `src/stalk_control.py` | Stalk data structure with measured REINFORCE reward curve. |
