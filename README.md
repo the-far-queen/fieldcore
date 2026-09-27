@@ -140,6 +140,7 @@ Current generators produce text and forget themselves. This shell keeps a serial
 | `src/tiniest_core/tiniest_core.rs` | Rust twin. Same predicates. |
 | `src/steel_ball_proof.py` | **THE PROOF** — drop the ball from 50 random heights, verify contraction bound, show convergence. 5 sections, all assert. Run this first. |
 | `src/quantum_mimic.py` | **Classical-quantum mimic.** Phase, EntangledPair (3 correlations), Superposition (with observe collapse), Interference (destructive + constructive + fringe pattern), WaveField (gaussian + plane wave). 5 primitives, 22 tests pass. Stdlib-only. |
+| `src/scanner/` | **Daily repo scanner (v0).** Read-only GitHub search + filter pipeline. Writes `candidates.json` + `summary.md` to `vault/10-minimax/40-scratch/scans/<date>/`. Stdlib-only. 15 tests pass. v0 does NOT call any LLM and does NOT generate patches — those are v1. Run: `python -m src.scanner.daily --scan-dir <path>`. |
 | `src/gradient_flow_kernel.py` | CLI demo of the projected gradient step on F(ψ)=½‖ψ-ψ₀‖². |
 | `src/convergence_demo.py` | Pedagogical steel-ball-on-concave-surface exhibit. |
 | `src/stalk_control.py` | Stalk data structure with measured REINFORCE reward curve. |
