@@ -38,7 +38,11 @@ class KuramotoNetwork:
     """N coupled oscillators. the constitutional kernel network."""
 
     def __init__(self, oscillators: Tuple[Oscillator, ...], coupling: float = 0.5):
-        self.oscs = {o.name: o for o in oscillators}
+        # copy, don't alias. the canonical network is a module-level constant
+        # and step() mutates phase in place — aliasing it would leak state
+        # between every KuramotoNetwork constructed in the process.
+        self.oscs = {o.name: Oscillator(o.name, o.phase, o.freq, o.neighbors)
+                     for o in oscillators}
         self.coupling = coupling
 
     def step(self, dt: float = 0.01) -> None:
