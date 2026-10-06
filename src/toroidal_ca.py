@@ -53,24 +53,29 @@ class ToroidalCA:
                       for _ in range(w)] for _ in range(h)]
         self.generation = 0
 
-    def count_neighbors(self, x: int, y: int) -> int:
-        """toroidal wraparound. rankdim-style."""
+    def count_neighbors(self, row: int, col: int) -> int:
+        """live cells in the 8 toroidally-wrapped neighbours of (row, col).
+
+        the grid is row-major: ``grid[row][col]``, row indexes
+        grid_height, col indexes grid_width. the parameter names say so, so
+        the call site cannot transpose them again.
+        """
         w, h = self.geometry.grid_width, self.geometry.grid_height
-        return sum(self.grid[(y + dy) % h][(x + dx) % w]
-                   for dy in (-1, 0, 1) for dx in (-1, 0, 1)
-                   if (dx, dy) != (0, 0))
+        return sum(self.grid[(row + dr) % h][(col + dc) % w]
+                   for dr in (-1, 0, 1) for dc in (-1, 0, 1)
+                   if (dr, dc) != (0, 0))
 
     def step(self) -> List[List[int]]:
         """one CA step. Conway rules with toroidal wraparound."""
         w, h = self.geometry.grid_width, self.geometry.grid_height
         new = [[0]*w for _ in range(h)]
-        for y in range(h):
-            for x in range(w):
-                n = self.count_neighbors(y, x)
-                if self.grid[y][x] == 1:
-                    new[y][x] = 1 if n in (2, 3) else 0
+        for row in range(h):
+            for col in range(w):
+                n = self.count_neighbors(row, col)
+                if self.grid[row][col] == 1:
+                    new[row][col] = 1 if n in (2, 3) else 0
                 else:
-                    new[y][x] = 1 if n == 3 else 0
+                    new[row][col] = 1 if n == 3 else 0
         self.grid = new
         self.generation += 1
         return new
