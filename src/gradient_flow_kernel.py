@@ -14,13 +14,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import asdict, dataclass
 from typing import List
 
 import numpy as np
 
-sys.path.insert(0, "C:/Users/Admin/fieldcore/src/tiniest-core")
+# Resolved relative to this file, not hardcoded.
+#
+# This was "C:/Users/Admin/fieldcore/src/tiniest-core" — an absolute
+# path to the previous machine, with a hyphen where the directory is
+# actually spelled with an underscore (tiniest_core). It raised
+# ImportError for everyone not running as that user, and the module
+# could not be imported at all. A shared canonical step that only
+# resolves on one machine is not shared.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiniest_core"))
 from tiniest_core import (
     install_ground,
     project_ball,
