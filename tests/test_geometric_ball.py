@@ -143,11 +143,42 @@ class FalsificationTests(unittest.TestCase):
         r = roll(3.0, steps=20000)
         self.assertLess(abs(r["x"]), 1e-2)
 
+    def test_momentum_selects_the_basin(self):
+        """Bobby 2026-10-06: "basin depends on speed inertia etc."
+
+        On the SAME two-basin surface, dropped from rest the ball
+        settles at 3.07, but given v0 in 2..8 it overshoots and finds
+        the global minimum at 0.0. So "a ball gets stuck" is no more
+        true than "a ball always finds the minimum" -- both describe
+        one initial condition.
+        """
+        r = local_minimum_probe()
+        self.assertTrue(r["momentum_selects_basin"])
+        self.assertFalse(r["inertia_sweep"][0]["found_global"],
+                         "from rest it should still be stuck")
+        escaped = [row for row in r["inertia_sweep"] if row["found_global"]]
+        self.assertGreaterEqual(len(escaped), 3,
+                                "momentum should escape the near basin "
+                                f"for several speeds: {r['inertia_sweep']}")
+
+    def test_sticking_is_not_monotone_in_speed(self):
+        """v0=12 sticks while v0=8 and v0=20 both escape. A ball lands
+        in whichever basin it happens to reach, so 'faster is better'
+        is false and must not be implied anywhere."""
+        r = local_minimum_probe()
+        rows = {row["v0"]: row["found_global"] for row in r["inertia_sweep"]}
+        self.assertFalse(rows.get(12.0, True),
+                         "expected a non-monotone case at v0=12")
+        self.assertTrue(rows.get(8.0, False))
+        self.assertTrue(rows.get(20.0, False))
+
     def test_claim_is_scoped_to_concave(self):
         """Guards the wording. If someone widens the claim, this fails."""
         r = local_minimum_probe()
         self.assertIn("CONCAVE", r["interpretation"].upper())
         self.assertIn("not quote", r["interpretation"].lower())
+        # and it must not claim sticking is intrinsic
+        self.assertIn("initial condition", r["interpretation"].lower())
 
 
 if __name__ == "__main__":

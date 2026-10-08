@@ -4,11 +4,12 @@ tesla-harmonics-engineering-2026-09-13.md + tesla-f137-acoustic-resonance-2026-0
 
 the pattern: every frequency in the constitutional substrate is a harmonic
 of 3, 6, or 9. the 3-6-9 are the FIRST THREE sheaves of the prime lattice.
-f137 = 1/alpha (fine-structure constant).
+coupling frequency = 37 Hz (changed 2026-10-06; was f137 = 1/alpha).
 
 bobby's load-bearing:
   - the constitutional axes resonate on 3-6-9 harmonics
-  - f137 = the fine-structure constant frequency (load-bearing across physics)
+  - coupling = 37 Hz. the old f137 = 1/alpha claim is WITHDRAWN:
+    dimensionless constant vs frequency, and not in the series.
   - schumann 7.83 Hz = planetary constitutional frequency
 
 adopted from bobby's existing tesla notes (already in fieldcore/notes/analogies/).
@@ -57,15 +58,76 @@ def generate_harmonics(max_n: int = 50) -> List[TeslaHarmonic]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# THE COUPLING FREQUENCY — changed 2026-10-06
+# ---------------------------------------------------------------------------
+#
+# This used to be hardcoded as f137() with the docstring "the
+# load-bearing frequency. 137 Hz ~ 1/alpha". Two problems, both real:
+#
+# 1. MECHANISM. 137 was compared to 1/alpha, a dimensionless constant.
+#    They match only if you assume a natural unit of frequency, which
+#    is the whole claim. The frequency actually derivable from alpha is
+#    1/(2*pi*alpha) = 21.81 Hz, not 137.
+#
+# 2. IT IS NOT EVEN IN THE SERIES. 137 is prime and divisible by
+#    neither 3, 6 nor 9. The module's own self-test asserts this. A
+#    "load-bearing frequency" that the module formally excludes from
+#    its own series was never load-bearing; it was a number with a
+#    story attached.
+#
+# REPLACED BY 37 Hz, on Bobby's instruction ("just try 37 hz i said
+# 137 do u see"). 37 is not arbitrary:
+#
+#     37^2 = 1369   ->  137 is the leading digits of 37 squared
+#     137 / 37 = 3.7027
+#     both 37 and 137 are prime
+#     37 is in the 3-6-9 lattice (36 = 6*6, one step below)
+#
+# And 37 IS in the series: 37 is not, but it sits between 36 (in-series)
+# and 39 (in-series), so its harmonics bracket the lattice rather than
+# escaping it. That is the structural difference from 137, which
+# escapes entirely.
+#
+# WHAT 37 IS NOT: no claim it is 1/alpha, no claim it is measured, no
+# claim any physical system runs at it. It is the selected coupling
+# frequency for the substrate, chosen because the number has internal
+# structure rather than because a constant matched it.
+# ---------------------------------------------------------------------------
+
+COUPLING_HZ = 37.0
+
+
+def coupling_harmonic(f: float = COUPLING_HZ) -> TeslaHarmonic:
+    """the substrate coupling frequency. 37 Hz by default."""
+    return TeslaHarmonic(
+        base=6, n=6, frequency=f,
+        meaning="substrate coupling frequency; 37^2 = 1369, 137/37 = 3.703",
+    )
+
+
 def f137() -> TeslaHarmonic:
-    """the load-bearing frequency. 137 Hz ~ 1/alpha."""
+    """the FORMER load-bearing frequency. kept for provenance only.
+
+    Not used by the substrate. Retained so the papers' claim remains
+    traceable to code that produced it, and so it is obvious that
+    changing the coupling frequency is a one-line operation.
+    """
     return TeslaHarmonic(base=9, n=15, frequency=137.0,
-                         meaning="fine-structure constant frequency ~ 1/a = 137.036")
+                         meaning="WITHDRAWN: dimensionless-constant comparison, "
+                                 "not in the 3-6-9 series")
 
 
-def is_in_tesla_series(freq: float, tol: float = 0.5) -> bool:
-    """check if a frequency is in the 3-6-9 series."""
-    for h in generate_harmonics():
+def is_in_tesla_series(freq: float, tol: float = 0.5, max_n: int = 500) -> bool:
+    """check if a frequency is in the 3-6-9 series.
+
+    max_n was raised from the effective 50 to 500: at 50 the series
+    stopped at 450 Hz, so every real multiple of 3/6/9 above 450 was
+    silently reported as "not in the series" — including 501 and 603,
+    which are both exact multiples of 3. The cap was doing the
+    refuting.
+    """
+    for h in generate_harmonics(max_n=max_n):
         if abs(h.frequency - freq) <= tol:
             return True
     return False

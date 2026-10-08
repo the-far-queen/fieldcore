@@ -55,9 +55,18 @@ WHAT WOULD FALSIFY THE GEOMETRIC CLAIM
    is exactly why the real claim needs a CONCAVE surface. A ball on a
    bumpy plate gets stuck; it does not solve minima in general.
 
-That last point is the honest limit. This finds a GLOBAL minimum of a
-CONCAVE height field. It is not a general optimiser and does not
-pretend to be.
+CORRECTED 2026-10-06 after Bobby: "basin depends on speed inertia etc."
+
+That last point is the honest limit BUT IT IS NOT THE WHOLE LIMIT.
+Measured: on the same two-basin surface, dropped from rest the ball
+settles at 3.07, and given initial velocity v0 in 2..8 it settles at
+0.0 -- the global minimum. Damping is irrelevant across 0.05..1.0.
+
+So which basin the ball reaches is a property of the geometry AND the
+initial condition, not of the geometry alone. "A ball gets stuck" is
+as untrue as "a ball always finds the global minimum". Both were
+statements about one initial condition that happened to be the
+default.
 
 Run: python src/geometric_ball.py --help
 """
@@ -295,7 +304,42 @@ def local_minimum_probe() -> Dict:
         prev = cur
 
     settled = roll_bumpy(3.0)
+
+    # INERTIA. Bobby 2026-10-06: "basin depends on speed inertia etc."
+    # Measured on the SAME surface: the basin the ball settles in
+    # depends on its initial velocity, not only on the geometry.
+    #   v0 = 0.0  -> settles 3.07   (stuck in the near basin)
+    #   v0 = 2.0  -> settles 0.0    (GLOBAL -- overshoots the basin)
+    #   v0 = 5.0  -> settles 0.0    (GLOBAL)
+    #   v0 = 8.0  -> settles 0.0    (GLOBAL)
+    #   v0 = 12.0 -> settles 3.07   (stuck again -- lands back in it)
+    #   v0 = 20.0 -> settles 0.0    (GLOBAL)
+    # Damping, by contrast, changes nothing: 0.05 through 1.0 all
+    # settle at 3.07 from rest.
+    #
+    # So the earlier falsification was a statement about ONE chosen
+    # initial condition, not about the geometry. Momentum is a free
+    # parameter that selects the basin.
+    def roll_bumpy_v(x0: float, v0: float, damping: float = 0.35,
+                     steps: int = 60000, dt: float = 0.01) -> float:
+        x, v = x0, v0
+        for _ in range(steps):
+            v += dt * (-bumpy_tilt(x) - damping * v)
+            x += dt * v
+        return x
+
+    inertia = []
+    for v0 in (0.0, 2.0, 5.0, 8.0, 12.0, 20.0):
+        x = roll_bumpy_v(3.0, v0)
+        inertia.append({"v0": v0, "settled": round(x, 4),
+                        "found_global": abs(x) < 0.5})
+
     return {
+        "inertia_sweep": inertia,
+        "global_found_with_momentum": any(r["found_global"] for r in inertia),
+        "momentum_selects_basin": (
+            any(r["found_global"] for r in inertia)
+            and not inertia[0]["found_global"]),
         "bump_amplitude": A,
         "bump_centre": centre,
         "bump_sigma": sigma,
@@ -306,10 +350,16 @@ def local_minimum_probe() -> Dict:
         "found_global": abs(settled) < 0.1,
         "interpretation": (
             "FALSIFIED for non-concave surfaces. The tilt has 3 zeros "
-            "(two basins); the ball settles in the nearer one at "
-            f"{settled:.2f} while the global minimum is 0. The geometric "
-            "claim holds for CONCAVE height fields only. Do not quote "
-            "this as a general optimiser."),
+            "(two basins); dropped from rest the ball settles in the "
+            f"nearer one at {settled:.2f} while the global minimum is 0. "
+            "CONCAVE-ONLY from rest. BUT the basin is selected by "
+            "momentum, not by geometry alone: v0 in 2..8 overshoots and "
+            "finds the global minimum on the SAME surface. Damping is "
+            "irrelevant (0.05..1.0 all stick). So neither 'finds the "
+            "global minimum' nor 'gets stuck' is a property of the "
+            "geometry -- both are properties of geometry AND initial "
+            "condition. Do not quote this as a general optimiser, and "
+            "do not quote it as 'a ball gets stuck' either."),
     }
 
 
