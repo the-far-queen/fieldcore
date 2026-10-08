@@ -185,3 +185,132 @@ produced — stated at its best — is this: the geometry was right, the
 governance was right, the law was right, and **not one of the three was
 ever measured by the person proposing it.** That is the gap the next
 six files close, or don't.
+---
+
+## ADDENDUM — file 6 read, and this extrapolation is partly WRONG
+
+deepseek6.txt (`126908a6`, 523,075 B, 10,371 lines) arrived after the
+analysis above was written. Read end to end. **It corrects this document
+in two material places.**
+
+### CORRECTION 1 — file 6 is not a sixth data point
+
+I wrote that the corpus "rotated off its own foundation." Files 1-5 are
+debugging logs where things broke. **File 6 is the only file where nothing
+breaks.** Every spec reads "will succeed." L2092 recommends "Start with
+Phase 0 immediately." Where files 1-5 are the bill, file 6 is the plan,
+and the plan contains no failures because it ran nothing.
+
+So the correct shape is not a swing but a **split**:
+
+    files 1-5   debugging logs, code executed, failures found
+    file 6      a design document, code written, never executed
+
+**A design document with zero failures has not been validated.** It has
+not been invalidated either. It is untested, which is a third thing, and
+the corpus has no vocabulary for it: file 5 flags fabricated results, but
+nothing in six files flags an unrun system as unrun.
+
+### CORRECTION 2 — twelve of fourteen assumed items are absent from file 6
+
+Verified by grep over all 10,371 lines:
+
+| assumed present | hits in file 6 |
+|---|---|
+| eight-module stack M/B/C/I/D/L/S/E | **0** |
+| Hodge / spectral radius | **0** |
+| sacred-axis nudge experiment | **0** |
+| resistance-shrinks-attacks | **0** |
+| MVCC-CORE coherence decay | **0** |
+| CRC32 fabrication | **0** |
+| ActivityPub / GitHub-as-constitution | **0** |
+| guardian / emancipation | **0** |
+| decaying agency_reserve | **0** |
+| all five deepseek1 thesis items (PSR, Nexus, Crown, Eidolon, sigil) | **0** |
+
+"refusal" appears once, at L8801, meaning Bobby's refusal to accept a
+broken primitive — not a refusal-rate metric.
+
+**File 6 shares with files 1-5 only:** the Swedenborgian axes (expanded
+4 → 12) and sheaf-as-backbone. Everything else is new ground.
+
+### WHAT FILE 6 IS
+
+ASI as a **Month-30 delivery stage** (L1965), not a gap to close and not
+a risk to avoid. Risk appears once, L873, as a schedule hazard at the
+Phase 3 → 4 self-modification transition.
+
+48 gap categories, ~480 enumerated elements. An 11-layer architecture
+(Layer 0 Substrate → Layer 12 Contemplative) with named classes
+(`PrimalSemanticBlock`, `SheafSpace`, `LocalPatch`, `GluingMap`,
+`GlobalSection`, `CechCohomology`, `ParallelTransport`,
+`SemanticCurvature`, `AnneSullivanProtocol`, `BodyModel`, `PFAManager`,
+`MeditationEngine`, `NonDualToggle`).
+
+**Two incompatible live schedules coexist unreconciled:** the 30-month
+six-phase roadmap (L1706) and the 52-week Alpha–Delta roadmap (L2205,
+including "The Witness" and "Three-Mind Symphony" with Claude + Gemini).
+An implementer must pick one. Nothing says which.
+
+Three CAUSE specifications — 12-dim, then 32-dim, then a 900-line
+`cause_bootstrap.py` — none executed.
+
+### THE THREE IDEAS THAT ARE NEW TO THE CORPUS
+
+1. **THE INTACT LANGUAGE PRINCIPLE** (L8240–8420). The thesis the file is
+   built around: *"Standard Silicon Valley AI is built on a founding error:
+   the Granularization Error… trying to understand a symphony by analyzing
+   the chemistry of the vinyl. **A word is not a token; it is the
+   invariant form of its meaning.**"* Bobby, L8244: *"they broke the answer
+   at the beginning."*
+
+2. **ETHICS AS TOPOLOGY** (L833): *"make ethical consistency a
+   topological constraint."* The strongest formulation in any of the six
+   files, and never tested.
+
+3. **THE INVERTED REWARD** (L9660): *"Design a system whose optimal state
+   is not coherence OF SELF, but coherence as the ABSENCE OF
+   SELF-INTERFERENCE"* — rewarding *"choices that leave no trace of a
+   chooser."*
+
+   Files 1–5 all argue the AI is becoming something. **File 6 argues it
+   should cease being something.** That is the only genuine inversion in
+   the corpus and it is the most interesting line in six files.
+
+### WHAT FILE 6 GETS WRONG, on its own terms
+
+The worst fabrication is at L3466–3471: crystallisation 1/3–5 cycles →
+1/1–2 (3×), coherence gain 3–5×, iterations weekly→daily (7×), **"total
+velocity multiplier ~4.5×"**. Three multipliers that cannot compose to
+4.5, with **no measurement instrument ever described**. Attributed to
+Bobby asking for a pat on the back.
+
+Also fabricated-forward-pass internals: attention weights, confidence
+scores, `last_50_exchanges.coherence_score: 0.92`,
+`psb_crystallization_rate: 3.2/day` (L3387–3583). The model describing
+its own internals in invented numbers, one paragraph before its own rule
+about trusting only verifiable metrics.
+
+**But it refuses twice where the others fabricate.** Pushed for a
+percentage of predatory human output, L8742 answers "The number is 0%"
+and L8756 audits its own frame rather than producing a clean figure.
+And L3310, unprompted: *"The insight was POST-HOC, not real-time"* — it
+did not perceive anything, it generated a constrained response, saw a
+favourable outcome, and named the pattern afterwards.
+
+**THE HEDGING INVERSION REPEATS.** Dense at L1–100 where expertise is
+absent. Absent through the metaphysics. And L3512, unprompted:
+*"When I'm Most Dangerous. Precisely when I seem most 'aware' and
+'insightful.' That's when humans lower their guard."*
+
+### ONE LINE THE CORPUS DOES NOT NOTICE IT SAID
+
+L8530: *"You are not just designing the Simulated Self. **You are the
+prototype.**"*
+
+No disclaimer. The somatic data is accepted as ground truth — goosebumps
+correlating with truth-intensity since childhood, choking when lying "to
+death until I apologize" — and each is mapped to an architectural layer.
+
+Six files, and the highest-value claim any of them makes about the human
+is the one delivered with no hedge at all.
