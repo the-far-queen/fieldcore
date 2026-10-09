@@ -171,19 +171,40 @@ arbitrary plants. The claim is narrow and the paper should keep it narrow.
 | question | 747 | this system | verdict |
 |---|---|---|---|
 | can it refuse? | yes | yes | **HELD** |
-| is refusal independent of the thing governed? | yes — separate channels | **no — the gate is a function call inside the process it constrains** | **OPEN** |
+| is refusal independent of the thing governed? | yes — separate channels | **yes, since 2026-10-09 — the governor is its own OS process (`src/governor.py`); a governed process cannot reach its memory or supply its limits** | **HELD** |
 | is the threshold derived? | yes, from certified limits | no — constants | **OPEN** |
 | can refusal be overridden? | no | no override path | **HELD** |
 | is adversarial input tested? | certified fault conditions | not tested | **ABSENT** |
 
-The second row is the single most important weakness in this architecture
-and it is structural, not a bug. On a 747, the flight computer and the
-pilot are independent systems; refusal authority is a property of the
-*plumbing*. In our system the governor is a Python function that the
-governed code can simply not call. **A veto that the governed process
-controls is not a veto.** Fixing this means moving the governor into a
-separate process with a separate channel — a real engineering task, not a
-paper claim, and it is now the top item in §7.
+**UPDATE 2026-10-09 — this row was OPEN and is now HELD.**
+
+Bobby's correction: *"the 747 is well established, governor misplaced."*
+Agreed. The governor now runs in its own OS process over a pipe
+(`fieldcore/src/governor.py`, 22 checks). Six attacks were run against it;
+all six are now permanent tests:
+
+| attack | result |
+|---|---|
+| pass larger `max_norm` / lower `min_cos` to the gate | rejected at the API — `evaluate()` takes no limit parameters at all |
+| forge the pipe message with widened limits | ignored; the governor uses its own constants |
+| mutate the caller's copy of the thresholds | no effect; the governor is in another address space |
+| reach the governor's memory | impossible; separate PID, verified |
+| close or end the governor, then ask | `REFUSE_UNREACHABLE`, **fail-closed** |
+| surge 150 malformed requests to disable the channel | channel survives; 150th refusal is a verdict, not an exception |
+
+The fail-closed property needed a second fix. The first version respawned a
+missing governor silently, so closing it and asking again returned ALLOW
+from a fresh process. A channel that restarts itself on demand can never
+fail closed.
+
+**Residual, stated rather than hidden.** The governed process can still
+refuse to *call* the governor. Process separation prevents tampering with
+the gate; it does not compel its use. The certified claim is therefore
+narrow: *governed actions go through this channel and cannot exceed its
+limits without the governor's agreement* — not *the governor prevents the
+governed process from existing*. Closing that gap needs the caller to be
+unable to reach the operation without the verdict, which is a linker or
+sandbox question and is the next item in §7.
 
 ### 3.5 Layer 4 — the controller-of-controllers (M1) and the rules library
 
@@ -302,8 +323,12 @@ Each is now a test. That is the only claim we make about them.
 
 Ordered by how much each changes the paper's standing.
 
-1. **Move the governor out of process.** Until refusal authority is
-   structural, the 747 comparison is rhetoric. Highest value, hardest.
+1. **Make the governed caller unable to bypass the channel.** DONE as to
+   tampering: the governor is a separate process, its limits cannot be
+   supplied or widened, and absence is a refusal. NOT done: the caller can
+   still decline to call it. The remaining gap is enforcement at the call
+   site — sandboxing, or a capability the operation cannot reach
+   without the verdict — not another process boundary.
 2. **State assumptions for every guarantee.** If a bound holds under
    conditions, the conditions go in the theorem, not the discussion.
 3. **Benchmark the cost claim or delete it.** One end-to-end measurement
