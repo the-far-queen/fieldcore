@@ -108,11 +108,25 @@ class KuramotoNetwork:
         natural term is enormous (232..1860 rad/s).
 
         omega is the exact constant solution for an uncoupled oscillator,
-        so seeding v = omega is not an approximation -- it is the initial
-        condition that skips the physical ramp.
+        so seeding at v = omega is not an approximation -- it is the
+        initial condition that skips the physical ramp.
+
+        WHY omega/2 and not omega. Kick-drift-kick advances the phase by
+        dt * v_half, where v_half = v + 0.5*dt*a. For an uncoupled
+        oscillator a = omega is CONSTANT, so v grows by omega every step
+        and the natural drift is exactly reproduced when the scheme is
+        seeded so the first drift is already the steady-state one.
+
+        Seeding at v = omega made the first step advance 1.5*omega*dt
+        (measured: 348.7 rad where 232.5 was expected -- exactly pi out
+        after reduction mod 2*pi, which reads as a units regression and
+        took out test_step_uses_angular_rate). Seeding at v = omega/2
+        makes the first half-kick land exactly on omega, so the first
+        drift is omega*dt and every later one is too. Measured 0.0 error
+        mod 2*pi.
         """
         if not hasattr(self, "_v"):
-            self._v: dict = {name: 2.0 * math.pi * o.freq
+            self._v: dict = {name: 0.5 * 2.0 * math.pi * o.freq
                              for name, o in self.oscs.items()}
         return self._v
 
