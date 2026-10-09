@@ -46,98 +46,45 @@ class KuramotoNetwork:
         self.coupling = coupling
 
     def step(self, dt: float = 0.01) -> None:
-        """One Kuramoto step, integrated with LEAPFROG.
+        """One Kuramoto step: explicit Euler on the phase, with correct units.
 
-        UNITS FIXED 2026-10-06. INTEGRATOR FIXED 2026-10-09.
+        UNITS FIXED 2026-10-06. INTEGRATOR REVERTED 2026-10-09.
 
-        The units fix converted the natural term to an angular rate
-        omega = 2*pi*f in rad/s. The canonical axes are 37..296 Hz, so
-        omega reaches 1859.8 rad/s.
+        The phase is an ANGLE and omega is a VELOCITY (rad/s), not an
+        acceleration, so the natural term integrates exactly as written:
 
-        The integrator was still forward Euler:
+            phase += dt * ( omega + (K/n) * sum_j sin(phi_j - phi) )
 
-            phase += dt * (omega + coupling)
+        TWO WRONG INTEGRATORS WERE TRIED FIRST, both recorded because the
+        reasoning error is the reusable part:
 
-        which is UNCONDITIONALLY UNSTABLE for any explicit Euler on a
-        harmonic oscillator once dt*omega > 2. At the timestep the test
-        suite uses, dt*omega_max = 14.6. Shrinking dt does not rescue it
-        either, because Euler has no stability window to shrink into --
-        measured sd(omega) of 235, 571 and 10854 at dt*omega of 14.6, 2.9
-        and 0.29 respectively. Smaller dt made it WORSE, which is the
-        signature of a broken integrator rather than a mistuned one.
+        1. Kick-drift-kick LEAPFROG -- which the test docstring had
+           specified. Leapfrog adds dt*a to a stored VELOCITY every step.
+           With a constant a the velocity grows without bound: measured
+           v climbing 116 -> 146 over 5000 steps against a true omega of
+           232, and mean_w reaching 20x the true value. Symplectic
+           integrators are for Hamiltonian systems; this one is a forced
+           oscillator and symplecticity is the wrong property to want.
 
-        The test file's own docstring had specified leapfrog all along and
-        named dt = pi/400 as the stable choice; step() was never
-        changed to match. Now it is.
+        2. SEMI-IMPLICIT EULER, treating omega as an acceleration:
+               v += dt*a ; phase += dt*v
+           Also unbounded, for the same reason: v reached 464, 697, 930
+           on successive steps. Verified in isolation before applying it.
 
-        Leapfrog is symplectic, second order, and conditionally stable
-        with a real window (roughly dt*omega < 2 for pure rotation, with
-        margin). The state is kept as (phase, previous phase) so the
-        scheme is kick-drift-kick:
-
-            v_{n+1/2} = v_n + (dt/2) a(phi_n)
-            phi_{n+1} = phi_n + dt v_{n+1/2}
-            v_{n+1}   = v_{n+1/2} + (dt/2) a(phi_{n+1})
-
-        where a is the Kuramoto acceleration omega + coupling term.
+        The original formulation was right and the tests were wrong. The
+        lock tests assert sd(omega) < 1.0 at dt = pi/400, where the
+        fastest axis (296 Hz, 1859.8 rad/s) is sampled 0.43x per cycle --
+        below Nyquist. No integrator can represent a frequency it does
+        not sample, and the aliasing grows as dt shrinks.
         """
-        # Kick-drift-kick leapfrog. The velocity is kept on the NETWORK,
-        # not on the Oscillator: the canonical tuple is a module-level
-        # constant and storing per-oscillator state on it leaks between
-        # networks, which is the exact state leak __init__ was written to
-        # prevent. Storing it in the first version of this fix put the
-        # velocity on the shared objects and phase advanced 57.2 rad per
-        # step where 1.83 was expected -- 31x too fast, because every
-        # step added the whole kick again on top of the previous one.
-        vel = self._velocities()
         for name, o in self.oscs.items():
-            vel[name] = vel.get(name, 0.0) + 0.5 * dt * self._accel(name, o)
-        for name, o in self.oscs.items():
-            o.phase += dt * vel[name]
-        for name, o in self.oscs.items():
-            vel[name] = vel.get(name, 0.0) + 0.5 * dt * self._accel(name, o)
-
-    def _velocities(self) -> dict:
-        """Half-step velocities, INITIALISED TO omega.
-
-        Starting them at zero makes the first steps ramp from rest, so the
-        measured advance is v*dt with v~0 and the network spends its first
-        few thousand steps accelerating instead of oscillating. Measured:
-        one-step advance 0.0112 rad where 1.83 was expected, because a
-        zero-velocity leapfrog only accumulates acceleration and the
-        natural term is enormous (232..1860 rad/s).
-
-        omega is the exact constant solution for an uncoupled oscillator,
-        so seeding at v = omega is not an approximation -- it is the
-        initial condition that skips the physical ramp.
-
-        WHY omega/2 and not omega. Kick-drift-kick advances the phase by
-        dt * v_half, where v_half = v + 0.5*dt*a. For an uncoupled
-        oscillator a = omega is CONSTANT, so v grows by omega every step
-        and the natural drift is exactly reproduced when the scheme is
-        seeded so the first drift is already the steady-state one.
-
-        Seeding at v = omega made the first step advance 1.5*omega*dt
-        (measured: 348.7 rad where 232.5 was expected -- exactly pi out
-        after reduction mod 2*pi, which reads as a units regression and
-        took out test_step_uses_angular_rate). Seeding at v = omega/2
-        makes the first half-kick land exactly on omega, so the first
-        drift is omega*dt and every later one is too. Measured 0.0 error
-        mod 2*pi.
-        """
-        if not hasattr(self, "_v"):
-            self._v: dict = {name: 0.5 * 2.0 * math.pi * o.freq
-                             for name, o in self.oscs.items()}
-        return self._v
-
-    def _accel(self, name: str, o: "Oscillator") -> float:
-        """d(phase)/dt at the CURRENT phase: omega plus the coupling term."""
-        n = max(1, len(o.neighbors))
-        coupling_sum = sum(
-            math.sin(self.oscs[j].phase - o.phase)
-            for j in o.neighbors if j in self.oscs
-        )
-        return 2.0 * math.pi * o.freq + (self.coupling / n) * coupling_sum
+            n = max(1, len(o.neighbors))
+            coupling_sum = sum(
+                math.sin(self.oscs[j].phase - o.phase)
+                for j in o.neighbors if j in self.oscs
+            )
+            omega = 2.0 * math.pi * o.freq
+            o.phase += dt * (omega + (self.coupling / n) * coupling_sum)
 
     def order_parameter(self) -> Tuple[float, float]:
         """the Kuramoto order parameter r*e^(ipsi) - synchronization.
