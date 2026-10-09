@@ -15,7 +15,7 @@ sys.path.insert(0, str(HERE / "src"))
 from cymathics import ChladniPlate, ChladniSimulator
 from fdtd_1d import FDTD1D
 from harmonic_engine import (
-    TeslaHarmonic, generate_harmonics, f137, is_in_tesla_series,
+    TeslaHarmonic, generate_harmonics, f137, COUPLING_HZ, is_in_tesla_series,
     digital_root, TESLA_BASE,
 )
 
@@ -104,13 +104,32 @@ def test_e8_generate_harmonics_loads_meanings():
     print(f"E8: ok (meanings: 30Hz=neural, 42Hz=cellular, 54Hz=DNA, 144Hz=cycle)")
 
 
-def test_e9_f137_load_bearing():
-    """f137 is the load-bearing frequency = fine-structure constant."""
+def test_e9_f137_is_withdrawn_not_load_bearing():
+    """The f137 = 1/alpha claim was WITHDRAWN, deliberately.
+
+    `harmonic_engine.py` says why in its own docstring: alpha is a
+    DIMENSIONLESS COUPLING CONSTANT, not a frequency, and 137 is not in
+    the 3-6-9 series the constitutional axes run on. Coupling moved to
+    37 Hz on 2026-10-06.
+
+    This test used to assert the withdrawn claim -- that f137 is
+    load-bearing as the fine-structure constant -- so it failed the
+    moment the source was corrected. That is the test being stale, not
+    the source being wrong: correcting a false claim should be allowed
+    to break the test that asserted it.
+
+    What is asserted now is that the withdrawal STICKS. If someone
+    reinstates the claim, this goes red, which is the correct direction.
+    """
     h = f137()
     assert h.frequency == 137.0
-    assert "fine-structure" in h.meaning.lower() or "α" in h.meaning or "alpha" in h.meaning.lower()
-    assert h.base == 9 and h.n == 15  # 9*15 = 135 (close to 137)
-    print(f"E9: ok (f137 = 137Hz, fine-structure constant = 1/α)")
+    assert "withdrawn" in h.meaning.lower(), h.meaning
+    assert "fine-structure" not in h.meaning.lower(), (
+        f"the withdrawn claim has been reinstated: {h.meaning}")
+    # 137 is not in the 3-6-9 series, which is the stated reason
+    assert 137 % 3 != 0 and 137 % 6 != 0 and 137 % 9 != 0
+    # the substrate's actual coupling frequency
+    assert abs(COUPLING_HZ - 37.0) < 1e-9
 
 
 def main():
