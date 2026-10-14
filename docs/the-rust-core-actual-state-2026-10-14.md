@@ -1,6 +1,21 @@
-> **Sole note.** This file answers one question: *do we have a working core in Rust?* Answer, measured 2026-10-14: **the code is complete and type-checks, and it has never once been linked into a runnable binary on this machine.** `cargo check --release --all-targets` exits 0. `cargo test --release` fails at the link step, not at compile. There are 1796 lines across 8 modules, 0 dependencies, 0 test binaries ever produced. Everything below is what that means for the 4-sheaf plan.
+> **Sole note.** This file answers one question: *do we have a working core in Rust?*
 >
-> **Pointers:** `core/src/lib.rs` (what the core is), `core/src/axes.rs` (20 axes + floors), `core/src/governor.rs` (M0, fail-closed), `core/src/envelope.rs` (D1-D4), `core/src/ladder.rs` (width ladder), `core/src/carrier.rs` (the interstalk channel), `core/src/sheaf.rs` (admission + the 3-source/3-language bound), `core/src/decision.rs` (1 bit + reason). Docs: `papers/24-...`, `papers/25-the-narrow-claim-2026-10-14.md`, `docs/fieldcore-is-the-system-2026-10-09.md`, `docs/CENTRAL-RULES.md`. v6.2 3-part stalk: `simself/notes/analogies/stalk-architecture-v6_2-3part-2026-10-14.md`.
+> **Answer, updated 2026-10-14 — DAY ONE. 52/52 passing.** On 2026-10-14 the
+> core was linked for the first time in its existence and ran its test suite for
+> the first time. 7 latent bugs surfaced, all in code that had never once
+> executed. §0 is the historical account; §0.1 is what is true now. Commit
+> `f93f055`.
+>
+> **Bobby, reading that run: "this signals CORRECT idea in my mind."** And:
+> *"this was a first-run effort, we begin today."* That date is day one.
+>
+> **Toolchain note (cost me an hour, do not repeat):** this machine has NO
+> Visual Studio Build Tools. `link.exe` resolves to git-bash's coreutils
+> `link(1)`, so MSVC `cargo test` fails at link with coreutils error syntax.
+> Use `cargo +stable-x86_64-pc-windows-gnu test --release`. Toolchain installed
+> 2026-10-14.
+>
+> **Pointers:** `core/src/lib.rs` (what the core is), `core/src/axes.rs` (20 axes + floors), `core/src/governor.rs` (M0, fail-closed), `core/src/envelope.rs` (D1-D4), `core/src/ladder.rs` (width ladder), `core/src/carrier.rs` (the interstalk channel — 5 of the 7 bugs live here), `core/src/sheaf.rs` (admission + the 3-source/3-language bound), `core/src/decision.rs` (1 bit + reason). Docs: `docs/day-one-2026-10-14.md`, `papers/24-...`, `papers/25-the-narrow-claim-2026-10-14.md`, `docs/fieldcore-is-the-system-2026-10-09.md`, `docs/CENTRAL-RULES.md`. v6.2 3-part stalk: `simself/notes/analogies/stalk-architecture-v6_2-3part-2026-10-14.md`.
 
 # The Rust Core — actual state, and the 4-sheaf plan
 
