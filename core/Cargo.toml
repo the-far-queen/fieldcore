@@ -1,0 +1,22 @@
+[package]
+name = "fieldcore-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "The fieldcore core, in Rust. The 1-bit layer. It does not use the technology; the technology serves it."
+license = "MIT"
+
+[lib]
+name = "fieldcore_core"
+path = "src/lib.rs"
+
+[dependencies]
+# none. deliberately.
+
+[dev-dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"
+codegen-units = 1
