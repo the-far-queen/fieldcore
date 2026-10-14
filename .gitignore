@@ -50,3 +50,5 @@ coverage/
 *.lcov
 
 harness_log.json
+/core/target/
+/target/
