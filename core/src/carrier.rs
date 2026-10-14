@@ -209,27 +209,21 @@ pub fn equalise(
         // it is an uncorrectable one.
         return Err(EqualiseError::FlatChannel);
     }
-    /// `noise_floor` is the noise level in dB below the signal, as a
-    /// magnitude: 80.0 means 80 dB of headroom (clean), 5.0 means the noise
-    /// sits only 5 dB down (loud).
-    ///
-    /// The condition for a zero-forcing equaliser to be USABLE is the
-    /// classical one, and the first version had its comparison inverted:
-    ///
-    ///     equalisable  iff  notch_depth < noise_headroom
-    ///
-    /// A notch deeper than the noise floor means the channel's interference
-    /// sits BELOW the noise, and ZF inversion at a null amplifies noise in
-    /// proportion to how deep that null is -- so the receiver trades real
-    /// signal for amplified noise and the frame is gone. That is
-    /// `Irrecoverable`, and it is a statement about gain, not about
-    /// geometry.
-    ///
-    /// The first version read `notch < noise_floor.abs()` as the REFUSAL
-    /// condition, which refuses exactly the correctable frames (20.3 dB
-    /// notch against 80 dB of headroom) and equalises the hopeless ones
-    /// (20.3 dB notch against 5 dB of headroom). Both tests that exercise
-    /// this gate failed with it.
+    // `noise_floor` is the noise level in dB below the signal, as a
+    // magnitude: 80.0 means 80 dB of headroom (clean), 5.0 means the noise
+    // sits only 5 dB down (loud).
+    //
+    // A zero-forcing equaliser is usable iff the notch is SHALLOWER than the
+    // headroom. A null deeper than the noise floor means the channel's
+    // interference sits below the noise, and ZF inversion at a null
+    // amplifies noise in proportion to how deep that null is -- so the
+    // receiver trades real signal for amplified noise and the frame is
+    // gone.
+    //
+    // The first version read `notch < noise_floor.abs()` as the REFUSAL
+    // condition, which refuses exactly the correctable frames (20.3 dB notch
+    // against 80 dB of headroom) and equalises the hopeless ones (20.3 dB
+    // against 5 dB). Both tests exercising this gate failed with it.
     if notch >= noise_floor.abs() {
         return Err(EqualiseError::Irrecoverable { null_db: -notch });
     }
