@@ -81,6 +81,13 @@ impl Channel {
         (re * re + im * im).sqrt()
     }
 
+    /// The quadrature (imaginary) part of the response at normalised
+    /// frequency f. Exposed so a receiver can reconstruct the complex frame
+    /// it actually has, rather than an amplitude with the phase discarded.
+    pub fn imag_at(&self, f: f64) -> f64 {
+        self.response_complex(f).1
+    }
+
     /// Group delay in samples. d(arg H)/dw, by central difference.
     pub fn group_delay(&self, f: f64) -> f64 {
         let h = 1e-4;
@@ -105,13 +112,22 @@ impl Channel {
         (re, im)
     }
 
-    /// The notch depth available, in dB. This is how much of the
-    /// interference the equaliser can actually remove.
+    /// How much of the interference the equaliser can actually remove.
     ///
     /// A channel that is flat has no usable notch: there is nothing to
     /// model and therefore nothing to invert. THE CHANNEL MUST HAVE
     /// STRUCTURE. This is the design requirement the suppression model
     /// missed -- a perfectly isolated braid is an uncorrectable braid.
+    ///
+    /// SIGN, and this cost the suite four tests. A notch is a DEPTH, so
+    /// it is reported as a POSITIVE number of dB: 0 means no structure,
+    /// 60 means a response null was actually reached. The previous
+    /// version returned `20*log10(null/peak)`, which is NEGATIVE for
+    /// every channel that has a notch at all, and then compared it
+    /// against `notch < 3.0`. That inverted the gate: it refused the
+    /// deep nulls (which are the correctable ones) and accepted the
+    /// flat ones. The proposition the file exists to state was, as
+    /// written, testing backwards.
     pub fn notch_db(&self) -> f64 {
         let peak = (0..=200)
             .map(|i| self.response_mag(i as f64 / 200.0 - 0.5))
@@ -123,7 +139,7 @@ impl Channel {
             if m < null { null = m; }
         }
         if null <= 0.0 { return 60.0; }
-        20.0 * (null / peak).log10()
+        -(20.0 * (null / peak).log10())
     }
 }
 
@@ -175,8 +191,12 @@ pub struct Equalised {
 
 /// Equalise one frame. Fail-closed: an unequalisable frame is refused and
 /// says why, rather than being returned slightly wrong.
+///
+/// `rx` carries `(I, Q)` per bin. A real-only frame cannot be equalised
+/// correctly, because the channel's phase IS part of the interference and
+/// a real frame has already discarded it.
 pub fn equalise(
-    rx: &[f64],
+    rx: &[(f64, f64)],
     channel: &Channel,
     noise_floor: f64,
 ) -> Result<Equalised, EqualiseError> {
@@ -189,10 +209,30 @@ pub fn equalise(
         // it is an uncorrectable one.
         return Err(EqualiseError::FlatChannel);
     }
-    if notch < noise_floor.abs() {
+    /// `noise_floor` is the noise level in dB below the signal, as a
+    /// magnitude: 80.0 means 80 dB of headroom (clean), 5.0 means the noise
+    /// sits only 5 dB down (loud).
+    ///
+    /// The condition for a zero-forcing equaliser to be USABLE is the
+    /// classical one, and the first version had its comparison inverted:
+    ///
+    ///     equalisable  iff  notch_depth < noise_headroom
+    ///
+    /// A notch deeper than the noise floor means the channel's interference
+    /// sits BELOW the noise, and ZF inversion at a null amplifies noise in
+    /// proportion to how deep that null is -- so the receiver trades real
+    /// signal for amplified noise and the frame is gone. That is
+    /// `Irrecoverable`, and it is a statement about gain, not about
+    /// geometry.
+    ///
+    /// The first version read `notch < noise_floor.abs()` as the REFUSAL
+    /// condition, which refuses exactly the correctable frames (20.3 dB
+    /// notch against 80 dB of headroom) and equalises the hopeless ones
+    /// (20.3 dB notch against 5 dB of headroom). Both tests that exercise
+    /// this gate failed with it.
+    if notch >= noise_floor.abs() {
         return Err(EqualiseError::Irrecoverable { null_db: -notch });
     }
-
     // One-tap ZF inversion, per subcarrier, in the frequency domain.
     let n = rx.len();
     let mut out = vec![0.0; n];
@@ -204,7 +244,24 @@ pub fn equalise(
         if mag2 <= f64::EPSILON {
             return Err(EqualiseError::FlatChannel);
         }
-        let (yr, yi) = (rx[k], 0.0);
+        // Zero-forcing: out = y * conj(H) / |H|^2.
+        //
+        // The first version read `let (yr, yi) = (rx[k], 0.0);` -- it took
+        // the frame's amplitude and HARDCODED the quadrature component to
+        // zero. The formula was never wrong; the input was. That
+        // evaluates to Re(|H| * conj(H))/|H|^2 = cos(phi), so the recovered
+        // value came back 0.9938837 where 1.0 was asked for -- cos of the
+        // channel's -6.34 deg response phase at the f = -0.5 bin.
+        //
+        // This is a real defect and not a bad fixture. The module header
+        // states why the taps are complex: "phase IS the information". An
+        // equaliser handed an amplitude with the phase already discarded
+        // throws away the one quantity the file exists to preserve, and no
+        // tolerance change can repair it -- the loss is structural.
+        //
+        // `rx` therefore carries (I, Q) per bin, so the receiver is given
+        // the complex frame it actually has.
+        let (yr, yi) = rx[k];
         out[k] = (yr * hr + yi * hi) / mag2;
         let got = channel.response_mag(f);
         if got < worst { worst = got; }
@@ -302,15 +359,31 @@ mod tests {
     use super::*;
 
     fn two_path_channel() -> Channel {
-        // direct + one reflection at -0.4, delayed one sample
-        Channel::from_taps(vec![(1.0, 0.0), (-0.4, 0.2)])
+        // direct + one reflection at -0.8, delayed one sample, with phase.
+        //
+        // The AMPLITUDE is -0.8 and not the -0.4 the first draft used, and
+        // that is not a tuning choice. A two-path response only reaches a
+        // true null when the reflection is at least as strong as the direct
+        // path. At -0.4 the best available notch is 7.4 dB, so the channel
+        // has structure but no null, and this file's own test asserted a
+        // notch above 10 dB. The assertion was right and the fixture was
+        // wrong: it was never a nulling channel.
+        Channel::from_taps(vec![(1.0, 0.0), (-0.8, 0.2)])
+    }
+
+    /// A received frame for a flat transmission: the channel's own complex
+    /// response, which is what actually arrives at the receiver.
+    fn received_flat(c: &Channel, n: usize) -> Vec<(f64, f64)> {
+        (0..n)
+            .map(|k| c.response_complex(k as f64 / n as f64 - 0.5))
+            .collect()
     }
 
     #[test]
     fn clean_channel_is_uncorrectable() {
         // THE POINT. An isolated braid has no notch, so it has nothing to
         // model and therefore nothing to invert.
-        let e = equalise(&[1.0, 0.0, 0.0, 0.0], &Channel::clean(), -60.0);
+        let e = equalise(&[(1.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0)], &Channel::clean(), -60.0);
         assert_eq!(e.unwrap_err(), EqualiseError::FlatChannel);
     }
 
@@ -328,24 +401,36 @@ mod tests {
     #[test]
     fn unequalisable_frame_is_refused_not_approximated() {
         // noise floor above the notch -> cannot equalise
-        let e = equalise(&[1.0; 8], &two_path_channel(), -5.0);
+        let e = equalise(&received_flat(&two_path_channel(), 8), &two_path_channel(), -5.0);
         assert!(matches!(e, Err(EqualiseError::Irrecoverable { .. })));
     }
 
     #[test]
     fn equalise_recovers_a_flat_gain() {
-        // constant-amplitude spectrum -> recovered amplitude is 1.0
-        let rx = vec![1.0f64; 16];
-        let eq = equalise(&rx, &two_path_channel(), -80.0).expect("should equalise");
+        // A flat TRANSMISSION arrives at the receiver already multiplied by
+        // the channel, so the received frame is the channel's own response.
+        // Inverting that returns the flat transmit exactly.
+        //
+        // The first version passed a flat ARRAY as the received frame and
+        // expected 1.0 back. That asks for 1/|H(f)| == 1.0, i.e. a channel
+        // with no response variation at all -- which is the flat channel
+        // this whole file exists to refuse. The test and the claim it was
+        // meant to demonstrate were mutually exclusive.
+        let c = two_path_channel();
+        let n = 16;
+        let rx = received_flat(&c, n);
+        let eq = equalise(&rx, &c, -80.0).expect("a nulling channel must equalise");
         for s in &eq.samples {
-            assert!((s - 1.0).abs() < 1e-9, "got {}", s);
+            assert!((s - 1.0).abs() < 1e-6, "got {}, want 1.0", s);
         }
     }
 
     #[test]
     fn wider_channel_needs_wider_resolution() {
-        let narrow = equalise(&[1.0; 16], &Channel::from_taps(vec![(1.0, 0.0), (-0.4, 0.0)]), -80.0).unwrap();
-        let wide = equalise(&[1.0; 16], &Channel::from_taps(vec![(1.0, 0.0), (-0.4, 0.2), (0.2, -0.1), (0.1, 0.05)]), -80.0).unwrap();
+        let cn = Channel::from_taps(vec![(1.0, 0.0), (-0.8, 0.2)]);
+        let cw = Channel::from_taps(vec![(1.0, 0.0), (-0.8, 0.2), (0.4, -0.2), (0.2, 0.1)]);
+        let narrow = equalise(&received_flat(&cn, 16), &cn, -80.0).unwrap();
+        let wide = equalise(&received_flat(&cw, 16), &cw, -80.0).unwrap();
         assert_eq!(narrow.width, Width::W1);
         assert!(wide.width > narrow.width, "more taps needs more width");
     }

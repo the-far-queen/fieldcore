@@ -73,8 +73,21 @@ impl Width {
     /// The area this width is entitled to speak for, in stalk units.
     /// Doubling per rung: the scope is a power of two, the width is the
     /// exponent taken literally.
-    pub fn reach(&self) -> u64 {
-        1u64 << (self.bits().saturating_sub(1).min(16) as u32)
+    ///
+    /// `u128`, not `u64`, because the ladder does not fit in `u64`. W128
+    /// needs 2^127 and W256 needs 2^255. The previous `.min(16)` clamped
+    /// the SHIFT AMOUNT rather than the result, so W32, W64, W128 and
+    /// W256 ALL returned 65536 and the top four rungs had identical
+    /// authority -- which defeats the entire point of a ladder whose
+    /// widths mean how much of the world a level may speak for.
+    ///
+    /// Above 2^127 this saturates rather than overflowing, and the
+    /// saturation is a fact about the ladder, not a bug in it: past W128
+    /// the area of authority genuinely exceeds what any fixed-width
+    /// counter can name.
+    pub fn reach(&self) -> u128 {
+        let shift = self.bits().saturating_sub(1);
+        if shift >= 128 { u128::MAX } else { 1u128 << shift }
     }
 
     /// The next rung, or None at the top.
@@ -256,14 +269,18 @@ mod tests {
 
     #[test]
     fn doubling_all_the_way() {
+        // The ladder is 1,4,8,16,...,256: the FIRST rung is the lone 1 bit
+        // and every rung after it is a doubling. So the sequence is NOT 1,2,4
+        // -- the original test doubled from 1 and expected 2 at the second
+        // rung, which W4 never was. Fixed to follow the actual sequence.
+        assert_eq!(Width::LADDER.iter().map(|w| w.bits()).collect::<Vec<_>>(),
+                   vec![1, 4, 8, 16, 32, 64, 128, 256]);
         let mut w = Width::W1;
-        let mut expect = 1u16;
         for _ in 0..7 {
             w = w.up().unwrap();
-            expect *= 2;
-            assert_eq!(w.bits(), expect);
         }
         assert_eq!(w, Width::W256);
+        assert_eq!(w.bits(), 256);
     }
 
     #[test]
@@ -271,20 +288,37 @@ mod tests {
         assert_eq!(Width::W1.reach(), 1);
         assert_eq!(Width::W4.reach(), 8);
         assert_eq!(Width::W8.reach(), 128);
+        // The top four rungs used to ALL return 65536 because the shift
+        // amount was clamped instead of the result. A ladder whose rungs
+        // share an authority is not a ladder, so this asserts the
+        // STRICTLY INCREASING property rather than spot values.
+        let rungs: Vec<u128> = Width::LADDER.iter().map(|w| w.reach()).collect();
+        for pair in rungs.windows(2) {
+            assert!(pair[1] > pair[0], "reach must strictly increase: {:?} vs {:?}", pair[0], pair[1]);
+        }
         assert!(Width::W256.reach() > Width::W128.reach());
+    }
+
+    /// Past W128 the area of authority exceeds what a fixed-width counter
+    /// can name. That is a fact about the ladder, not an overflow to hide,
+    /// so saturation is the declared behaviour and it is pinned here.
+    #[test]
+    fn reach_saturates_rather_than_overflowing() {
+        assert_eq!(Width::W256.reach(), u128::MAX);
+        assert!(Width::W128.reach() < u128::MAX);
     }
 
     #[test]
     fn cheap_rung_escalates() {
         let l = Ladder::new(Width::W1, 1.0, 1.0);
-        assert_eq!(l.should_escalate(gain: 1.0, cost: 0.1), Escalation::NeedsMore);
+        assert_eq!(l.should_escalate(1.0, 0.1), Escalation::NeedsMore);
     }
 
     #[test]
     fn expensive_rung_stops_at_not_worth_knowing() {
         // the whole point: refusing to know more precisely is a DECISION
         let l = Ladder::new(Width::W8, 1.0, 1.0);
-        assert_eq!(l.should_escalate(gain: 0.01, cost: 100.0), Escalation::NotWorthKnowing);
+        assert_eq!(l.should_escalate(0.01, 100.0), Escalation::NotWorthKnowing);
     }
 
     #[test]
