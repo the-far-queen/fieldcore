@@ -181,8 +181,29 @@ pub enum EqualiseError {
 /// The result of equalising a frame.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Equalised {
-    /// The recovered samples.
+    /// The recovered samples -- the REAL part of the inversion.
     pub samples: Vec<f64>,
+    /// The IMAGINARY part of the inversion, per bin.
+    ///
+    /// Added 2026-10-24. The inversion is complex -- out equals y times
+    /// conjugate-of-H divided by the squared magnitude of H -- and the
+    /// original code kept only the real component of that. The
+    /// file's own history says why that matters -- "phase IS the
+    /// information" -- and the fix that landed before this one was
+    /// exactly about not throwing phase away on the INPUT side. The
+    /// OUTPUT side was still discarding it.
+    ///
+    /// It went unnoticed because the round-trip test transmits a flat
+    /// real frame, for which the correct answer is the complex number
+    /// 1 + 0j, so the imaginary part is legitimately zero. The defect
+    /// only shows on a frame with phase, and no test transmitted one.
+    ///
+    /// The Python port in `src/wound_core.py` returned complex pairs
+    /// from the start, so the two implementations of one algorithm
+    /// disagreed. That is the drift `src/gate.py` exists to kill: five
+    /// copies of one predicate, five spellings, one policy split.
+    /// Now both carry the same information.
+    pub samples_im: Vec<f64>,
     /// Residual error power after inversion, relative to signal.
     pub residual_db: f64,
     /// Which width this frame needed to resolve.
@@ -230,6 +251,7 @@ pub fn equalise(
     // One-tap ZF inversion, per subcarrier, in the frequency domain.
     let n = rx.len();
     let mut out = vec![0.0; n];
+    let mut out_im = vec![0.0; n];
     let mut worst = f64::INFINITY;
     for k in 0..n {
         let f = k as f64 / n as f64 - 0.5;
@@ -256,7 +278,13 @@ pub fn equalise(
         // `rx` therefore carries (I, Q) per bin, so the receiver is given
         // the complex frame it actually has.
         let (yr, yi) = rx[k];
+        // Full complex zero-forcing inversion:
+        //     y * conj(H) = (yr + j*yi)(hr - j*hi)
+        //                = (yr*hr + yi*hi) + j*(yi*hr - yr*hi)
+        // Only the real part was kept before; the imaginary part is the
+        // phase of the recovered symbol and it was being thrown away.
         out[k] = (yr * hr + yi * hi) / mag2;
+        out_im[k] = (yi * hr - yr * hi) / mag2;
         let got = channel.response_mag(f);
         if got < worst { worst = got; }
     }
@@ -265,7 +293,7 @@ pub fn equalise(
     let width = if channel.len() <= 2 { Width::W1 }
         else if channel.len() <= 4 { Width::W4 }
         else { Width::W8 };
-    Ok(Equalised { samples: out, residual_db: residual, width })
+    Ok(Equalised { samples: out, samples_im: out_im, residual_db: residual, width })
 }
 
 // ---------------------------------------------------------------------------
@@ -472,5 +500,56 @@ mod tests {
     #[test]
     fn pilot_carries_no_payload() {
         assert_eq!(Pilot::default().value, 1);
+    }
+
+    /// The imaginary part of the inversion is the recovered PHASE, and it
+    /// was being discarded. This test transmits a frame that HAS phase.
+    ///
+    /// Every previous test transmitted a flat real frame, for which the
+    /// correct answer is 1 + 0j -- so the imaginary part is legitimately
+    /// zero and its loss was invisible. That is the whole defect: a
+    /// missing test on the case that matters, not a wrong formula.
+    ///
+    /// The frame here is 1 + j at every bin (a constant phase offset of
+    /// +90 degrees). After inversion it must come back with BOTH
+    /// components intact.
+    #[test]
+    fn equalise_preserves_the_phase_of_the_frame() {
+        let c = two_path_channel();
+        let n = 16;
+        // transmit 1 + 1j per bin; the channel multiplies it
+        let tx: Vec<(f64, f64)> = vec![(1.0, 1.0); n];
+        let rx: Vec<(f64, f64)> = (0..n)
+            .map(|k| {
+                let f = k as f64 / n as f64 - 0.5;
+                let (hr, hi) = c.response_complex(f);
+                let (yr, yi) = tx[k];
+                (yr * hr - yi * hi, yr * hi + yi * hr)
+            })
+            .collect();
+        let eq = equalise(&rx, &c, -80.0).expect("a nulling channel must equalise");
+        for (re, im) in eq.samples.iter().zip(eq.samples_im.iter()) {
+            assert!((re - 1.0).abs() < 1e-6, "real part got {}, want 1.0", re);
+            assert!((im - 1.0).abs() < 1e-6, "imaginary part got {}, want 1.0", im);
+        }
+    }
+
+    /// The real-only view must AGREE with the complex one where it can.
+    ///
+    /// `samples` is the real part; `samples_im` is the imaginary part.
+    /// Both are produced by the same inversion, so they cannot disagree
+    /// about the real component.
+    #[test]
+    fn the_two_views_of_the_inversion_agree() {
+        let c = two_path_channel();
+        let n = 16;
+        let rx = received_flat(&c, n);
+        let eq = equalise(&rx, &c, -80.0).unwrap();
+        assert_eq!(eq.samples.len(), eq.samples_im.len());
+        // a flat real transmit inverts to 1 + 0j, so the imaginary part
+        // must be ~0 for every bin
+        for im in &eq.samples_im {
+            assert!(im.abs() < 1e-9, "imaginary part should be zero, got {}", im);
+        }
     }
 }
