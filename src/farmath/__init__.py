@@ -12,7 +12,7 @@ it.
 
 Two things did NOT move with it, on purpose:
 
-  - the CLAIMS REGISTER (docs/04-claims-register.md in far-math) is the most
+  - the CLAIMS REGISTER (docs/Math/04-claims-register.md) is the most
     valuable artifact in the whole school -- it is what keeps a Layer C claim
     from quietly becoming a Layer A one. It stayed a document, because a
     register is a thing you READ, and putting it under src/ would imply it is

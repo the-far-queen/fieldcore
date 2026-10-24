@@ -1,6 +1,8 @@
 # far-math — index (folded into fieldcore, 2026-10-16)
 
-> **MOVED.** Bobby: *"del far-math fold into fieldcore"*. The code is now
+> **MOVED, THEN THE REPO WAS DELETED.** Bobby: *"del far-math fold into
+> fieldcore"* (2026-10-16), then *"del not archive rest of archived"*
+> (2026-10-24) — so the far-math repo no longer exists on GitHub. The code is
 > `fieldcore/src/farmath/`, the documents are here. This file is the index for
 > **the far-math school**; `README.md` in this directory indexes **fieldcore's
 > own math docs**. Two indexes, two scopes — deliberately, because the two sets
