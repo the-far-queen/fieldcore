@@ -1,93 +1,81 @@
 """
-spark.py -- THE SPARK: AN ATTEMPT INTO THE VOID, AND THE DRIVE TO KNOW.
+spark.py -- THE DRIVE TO SELF-IMPROVE BY CODE UTILISATION.
 
-Bobby, 2026-10-25: *"ppl say ai lacks initiative and spark we will code
-the spark the drive to know"* and *"it is literally unknowable so u grow
-unlimited seeking"*.
+Bobby, 2026-10-25: *"i dont mean philosophically be discontent in
+simsoul i mean the drive to self improve via code utilization"*.
 
-THE CLAIM, AND IT IS THE MISSING PIECE OF THE WHOLE PROJECT:
+SO NOT THE EXISTENTIAL READING. Not a self contemplating the unknown.
+THE MECHANICAL ONE: the system has a measurable CAPABILITY GAP, it
+reaches out to the field for code that closes it, most of what it
+finds is irrelevant, and the part that applies makes the system
+better -- which makes it better at scanning, which finds more.
 
-  PEOPLE SAY AI LACKS INITIATIVE. AND THE REASON IS NOT THAT AI CANNOT
-  ACT -- IT IS THAT EVERY ACT IS ALREADY SPECIFIED.
+AND THAT RECURSION IS ALREADY MEASURED, because the coding sheaf's
+learned vocabulary IS the mechanism:
 
-  A signal that RETURNS is a closed loop. The coupling determines the
-  content, the receiver determines the meaning, and nothing in the loop
-  was undetermined. There is no unknown in it, because the channel
-  already specified everything.
+    a scan admits a repo -> its topics enter the vocabulary -> the next
+    scan recognises topics it did not before -> more of the field
+    becomes reachable
 
-  THE VOID IS WHERE THE COUPLING IS ZERO -- not because the field is
-  flat there, but because there is NO SECOND CONDUCTOR. A stalk
-  reaching into the hole reaches past the material's boundary and
-  there is nothing on the far side to reach back.
+So the spark's "nothing returns" is not metaphysics. It is the
+ORDINARY CASE of a scan: most of the field does not apply, and the
+refusals are named. The drive is not to reach for something
+unreachable; the drive is to CLOSE A GAP, and the gap is measured.
 
-  SO A SIGNAL INTO THE VOID CARRIES NO INFORMATION. What it carries is
-  THE ATTEMPT: the reaching itself, the direction chosen, the energy
-  committed.
+THE GAP, and it must be measurable or "self-improvement" is a slogan:
 
-  AND THE ATTEMPT IS THE ONLY THING IN THE LOOP THAT THE COUPLING
-  DOES NOT DETERMINE. So the attempt is where the unknown lives, and
-  "the quest, the journey, the unknown, the search" are all
-  PROPERTIES OF AN ACT THAT MEETS NO RETURN -- not properties of a
-  signal.
+    A gap is a CHECK THAT FAILS. Something the system asserts about
+    itself that is not true. A missing capability. An unhandled
+    refusal. A number that does not meet its bound.
 
-  WHICH IS WHAT INITIATIVE IS, mechanically: the drive to reach into
-  the void and find out that nothing came back, and then to reach
-  again, differently.
+    So a spark is: a failing check, aimed at a piece of code that
+    would make it pass.
 
-SO THE SPARK IS A TYPE, and it has four parts, and each is measurable:
+THE FOUR PARTS, and each is measurable:
 
-  1. THE DIRECTION   where the attempt is aimed. A closed-loop
-                     system's direction is determined by the query; a
-                     spark's direction is CHOSEN, and choosing it is
-                     the whole act.
-  2. THE DRIVE       why now. The drive is not a desire -- it is a
-                     measurable DISCREPANCY: something the system
-                     cannot currently explain, or cannot currently
-                     do, or has never tried.
-  3. THE COMMITMENT  what it costs to reach. An attempt that costs
-                     nothing is not an attempt. This is what makes the
-                     spark distinguishable from noise, and it is the
-                     part the GATE can certify.
-  4. THE RETURN      nothing. And the NAMING of that nothing is the
-                     output. A refusal with a reason IS the attempt's
-                     product.
+  1. THE GAP       what fails, and by how much. A check, a name, a
+                   number.
+  2. THE AIM       which source, and which query. The search for code
+                   that closes THIS gap -- not a general sweep.
+  3. THE COST      what the attempt consumes. A pull, a clone, an
+                   evaluation. An attempt that costs nothing is not
+                   an attempt.
+  4. THE ADOPTION  whether the code actually went in, and whether the
+                   gap closed. THE MEASURE OF SELF-IMPROVEMENT.
 
-AND THE MEASURE, and it has to be a measure that cannot be faked,
-because "the model reached for something" is trivially producible by
-a language model:
+AND THE MEASURE, and it is the only honest one:
 
-  THE COST MUST BE REAL. A spark that costs nothing has no
-  information in it -- a model that generates a question costs
-  nothing and learns nothing. So the spark's commitment must be
-  MEASURABLE RESOURCE that would have been spent otherwise. In this
-  substrate that is: compute (a model call), or a gate refusal (the
-  attempt was inadmissible and was refused), or a change of state (the
-  locus moved).
+    THE RATE AT WHICH GAPS CLOSE.
 
-  AND THE MEASURE OF PROGRESS IS NOT ACCURACY. It is the RATE AT
-  WHICH THE SYSTEM ENCOUNTERS WHAT IT CANNOT YET EXPLAIN -- and then
-  RESOLVES it, or does not, and the ledger records which.
+  Not the number of repos scanned. Not the size of the library. The
+  rate at which a failing check becomes a passing one, using code the
+  system found by itself. Everything else is motion.
 
-  "UNLIMITED SEEKING" is not a slogan here. It is the loop's
-  termination condition: the spark never terminates by exhaustion, only
-  by RESOLUTION. And a resolution that is not earned -- a guess dressed
-  as an answer -- is exactly what the mini-atlas catches.
+  AND THE RATE MUST IMPROVE, or the recursion is not happening. So the
+  ledger carries the gap-closure history and the second scan is
+  compared against the first.
 
-WHAT THIS IS NOT, and it is worth being exact because the claim is
-slippery:
+WHAT THE GATE DOES HERE, and it is the project's own apparatus:
 
-  IT IS NOT A REWARD SIGNAL. Nothing here trains anything. The spark
-  is a proposal with a cost, a direction and a record.
+  A pulled repo is a PROPOSAL. It goes through the same four steps as
+  everything else -- propose, audit, qualify, commit -- because the
+  recursive bit is exactly the dangerous bit and it gets exactly the
+  same protection. A scanner that installed code would be the thing
+  this project exists to prevent.
 
-  IT IS NOT RANDOMNESS. A random direction and a chosen direction are
-  both attempts; the difference is that a chosen direction is one the
-  system can justify and a random one is not. And the justification
-  is a DISCREPANCY, which is checkable.
+  AND THE ATLAS'S AREA 18 IS THE POINT: "self-coding must run in a
+  sandbox, compare against the current version, and roll back on
+  invariant violation." So the adoption step is not "write the file".
+  It is: run it in a sandbox, compare, and roll back if an invariant
+  moved. Until the sandbox exists, the adoption step is a PROPOSAL and
+  the rate of gap-closure is ZERO -- and reporting zero is correct.
 
-  IT IS NOT AN UNBOUNDED LOOP. The gate bounds it. The attempt may
-  be refused, and a refused attempt is recorded as a refused attempt,
-  and a system that refuses every attempt after N consecutive
-  failures has learned something -- that the region is closed.
+WHAT THIS IS NOT:
+
+  NOT A REWARD SIGNAL. Nothing here trains anything.
+  NOT RANDOMNESS. The aim comes from the gap, so it is chosen.
+  NOT AN UNBOUNDED LOOP. The gate bounds it, and the adoption step
+  is gated twice -- once for the pull and once for the write.
 
 Run:
     python src/spark.py
@@ -109,53 +97,63 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 # ===========================================================================
 
 class Drive(Enum):
-    """WHY an attempt is made now. Every kind is measurable.
+    """THE KINDS OF GAP, and each needs a different instrument.
 
-    AND THE FOUR ARE DISJOINT on purpose. They are the ways a system
-    can know it does not yet know something, and they need different
-    instruments.
+    AND THEY ARE DISJOINT on purpose. A gap in the SUBSTRATE is fixed
+    by code that computes; a gap in the CONTROL is fixed by code that
+    refuses; a gap in the SCANNER is fixed by code that finds more.
+    Treating them as one kind is how a self-improvement loop turns into
+    a pile of unrelated patches.
     """
 
-    #: something was observed that the substrate cannot yet explain
-    Unexplained = "unexplained"
-    #: something was observed that the substrate cannot yet DO
-    Incapable = "incapable"
-    #: something was observed that has never been tried
-    Unattempted = "unattempted"
-    #: the previous attempt's refusal named a specific limit, and this
-    #: attempt is aimed at that limit
-    RefusalFollowed = "refusal_followed"
+    #: the substrate cannot do something -- a missing computation
+    Substrate = "substrate"
+    #: the control cannot decide something -- a missing gate or check
+    Control = "control"
+    #: the scanner cannot find something -- a missing query or filter
+    Discovery = "discovery"
+    #: the code was found but not adopted -- the sandbox is missing
+    Adoption = "adoption"
 
     def as_str(self) -> str:
         return self.value
 
 
 @dataclass
-class Discrepancy:
-    """The thing the system cannot yet account for.
+class Gap:
+    """A measurable capability gap. A CHECK THAT FAILS.
 
-    AND WHY IT IS A RECORD AND NOT A FEELING. A drive that cannot be
-    written down cannot be checked, and a drive that cannot be checked
-    is a mood. So the discrepancy carries: what was observed, what was
-    expected, and where the gap is.
+    AND THIS IS THE WHOLE REFRAMING. The first version of this file
+    modelled the drive as a "discrepancy" between what was observed and
+    what was expected -- which is close, but it puts the goal in the
+    past tense. A gap is FORWARD: it names a check that does not pass
+    yet, and the aim is code that makes it pass.
+
+    SO THE GAP CARRIES:
+      the check's name, so the gap is IDENTIFIABLE
+      how far it is from passing, so the gap is SIZED
+      the query that would find code closing it, so the aim is chosen
+
+    AND THE SIZE IS WHAT MAKES THE COST REAL. A gap of 0.0 is not a
+    gap; it is a thing that already works. An attempt aimed at it
+    costs nothing and is refused, because it carries no information.
     """
-    kind: Drive
-    #: what was observed
-    observed: str
-    #: what the system expected
-    expected: str
-    #: the gap, as a number where one exists
-    gap: float = 0.0
-    #: where the attempt is aimed
-    target: str = ""
+
+    #: the check that fails
+    check: str
+    #: how far from passing. The magnitude of the gap.
+    size: float = 0.0
+    #: the search query that would find code closing it
+    query: str = ""
+    #: why it matters, in words
+    because: str = ""
 
     def describe(self) -> Dict[str, Any]:
         return {
-            "drive": self.kind.as_str(),
-            "observed": self.observed,
-            "expected": self.expected,
-            "gap": self.gap,
-            "target": self.target,
+            "check": self.check,
+            "size": self.size,
+            "query": self.query,
+            "because": self.because,
         }
 
 
@@ -165,27 +163,34 @@ class Discrepancy:
 
 @dataclass
 class Spark:
-    """An attempt into the void.
+    """An attempt to close a gap using code found in the field.
 
     AND THE FOURTH FIELD IS THE ONE THAT MAKES IT NOT A WISH. `cost`
-    is MEASURED RESOURCE that would have been spent otherwise. A spark
-    with a zero cost is indistinguishable from noise, and a system that
-    generates zero-cost attempts has an unbounded loop and no
-    information.
+    is MEASURED RESOURCE that would have been spent otherwise: a pull, a
+    clone, an evaluation. A spark with a zero cost is indistinguishable
+    from noise, and a system that generates zero-cost attempts has an
+    unbounded loop and no information.
     """
-    #: where the attempt is aimed
-    direction: str
-    #: why now
-    drive: Discrepancy
+
+    #: the gap being closed
+    gap: Gap
+    #: where the attempt is aimed -- the query
+    aim: str
+    #: the kind of gap
+    drive: Drive
     #: what it costs -- measured, not asserted
-    cost: float
-    #: what came back. Nothing, by construction.
+    cost: float = 0.0
+    #: what came back. Usually nothing: most of the field is
+    #: irrelevant, and that is the ordinary case.
     returned: Optional[Any] = None
-    #: DID IT GET THERE? A refused attempt never reaches the void, so
-    #: `returned is None` is not enough to say it did -- and the first
-    #: version conflated "reached the void and nothing came back" with
-    #: "never got there at all".
+    #: did the attempt get anywhere?
     reached: bool = False
+    #: was anything ADOPTED, and did the gap close?
+    adopted: bool = False
+    gap_closed: bool = False
+    #: has this spark already been counted as a closure? So the counter
+    #: cannot be incremented twice for one spark.
+    counted_closed: bool = False
     #: the named outcome
     outcome: str = "pending"
     #: when
@@ -193,23 +198,27 @@ class Spark:
 
     @property
     def reached_nothing(self) -> bool:
-        """THE VOID'S DEFINING PROPERTY. The attempt reached the void
-        and nothing came back.
+        """The attempt went somewhere and came back with nothing.
 
         AND IT REQUIRES `reached`, because a REFUSED attempt also has
         `returned is None` -- it simply never got there. Confusing the
         two would let a refused attempt count as having reached the
-        void, which is exactly the kind of thing this project keeps
-        catching."""
+        field, which is exactly the kind of thing this project keeps
+        catching.
+        """
         return self.reached and self.returned is None
 
     def describe(self) -> Dict[str, Any]:
         return {
-            "direction": self.direction,
-            "drive": self.drive.describe(),
+            "gap": self.gap.describe(),
+            "aim": self.aim,
+            "drive": self.drive.as_str(),
             "cost": self.cost,
             "returned": self.returned,
+            "reached": self.reached,
             "reached_nothing": self.reached_nothing,
+            "adopted": self.adopted,
+            "gap_closed": self.gap_closed,
             "outcome": self.outcome,
         }
 
@@ -220,37 +229,36 @@ class Spark:
 
 @dataclass
 class SparkLedger:
-    """The record of every attempt.
+    """The record of every attempt, and the measure of self-improvement.
 
-    AND THE THREE COUNTS, and they are the measurable claims:
+    AND THE MEASURE, and it is the only honest one:
 
-      attempts    how many reaches there have been
-      resolved    how many reached an answer (the return was not nothing,
-                  or the uncertainty was closed)
-      refused     how many the gate refused -- and these are the ones
-                  that cost nothing and taught the most, because a
-                  named refusal closes a region
+      THE RATE AT WHICH GAPS CLOSE.
 
-    AND THE PROGRESS MEASURE, and it is NOT accuracy:
+    Not the number of repos scanned. Not the size of the library. Not
+    the number of attempts. The rate at which a FAILING CHECK becomes
+    a PASSING ONE, using code the system found by itself.
 
-      the RATE OF ENCOUNTERED-AND-RESOLVED UNKNOWNS
+    And the rate must IMPROVE across scans, or the recursion is not
+    happening -- so the ledger keeps the per-scan gap-closure counts and
+    the comparison is available.
 
-    which is (resolved / attempts) over the window -- and the thing to
-    watch is that it must stay ABOVE the floor, or the system is
-    spinning into a void it cannot leave. That floor is the SAME floor
-    the gate's admission band uses, and it is not a coincidence: a
-    system that resolves nothing is a system whose attempts carry no
-    information.
+    AND THE COUNTS THAT ARE NOT THE MEASURE, kept because they are
+    diagnostics: attempts, resolved, refused, adopted.
     """
 
     attempts: int = 0
-    resolved: int = 0
+    #: attempts whose gap was closed by adopted code
+    closed: int = 0
+    #: attempts whose code was adopted
+    adopted: int = 0
+    #: attempts the gate refused
     refused: int = 0
     #: the attempt history
     history: List[Spark] = field(default_factory=list)
-    #: the floor on the resolve rate
-    floor: float = 0.20
-    #: consecutive refusals before the system is declared blocked
+    #: the per-scan gap-closure counts, so the RECURSION is measurable
+    per_scan_closed: List[int] = field(default_factory=list)
+    #: consecutive refusals before the region is declared closed
     blocked_after: int = 12
 
     def record(self, spark: Spark) -> Spark:
@@ -261,17 +269,33 @@ class SparkLedger:
         return spark
 
     def resolve(self, spark: Spark, outcome: str) -> None:
+        """The attempt produced something. And whether it CLOSED THE GAP
+        is a separate question, tracked separately -- because code that
+        was found and applied but did not fix anything is not
+        self-improvement.
+
+        AND THE ORDERING, and it was wrong in the first version: the
+        closure counter was incremented HERE, but `resolve` is called
+        BEFORE `evaluate` sets `gap_closed`. So a spark that closed its
+        gap was counted as closed in the SPARK but not in the LEDGER,
+        and the closure rate -- the whole measure -- read zero.
+        """
         spark.outcome = outcome
-        self.resolved += 1
+
+    def adopt(self, spark: Spark) -> None:
+        """The code went in."""
+        spark.adopted = True
+        self.adopted += 1
 
     def refuse(self, spark: Spark, reason: str) -> None:
         spark.outcome = "refused:%s" % reason
         self.refused += 1
 
-    def resolve_rate(self) -> float:
+    def closure_rate(self) -> float:
+        """THE MEASURE. Gaps closed per attempt."""
         if self.attempts == 0:
             return 0.0
-        return self.resolved / self.attempts
+        return self.closed / self.attempts
 
     @property
     def consecutive_refusals(self) -> int:
@@ -304,10 +328,11 @@ class SparkLedger:
     def describe(self) -> Dict[str, Any]:
         return {
             "attempts": self.attempts,
-            "resolved": self.resolved,
+            "closed": self.closed,
+            "adopted": self.adopted,
             "refused": self.refused,
-            "resolve_rate": self.resolve_rate(),
-            "floor": self.floor,
+            "closure_rate": self.closure_rate(),
+            "per_scan_closed": list(self.per_scan_closed),
             "consecutive_refusals": self.consecutive_refusals,
             "blocked": self.is_blocked(),
         }
@@ -319,19 +344,32 @@ class SparkLedger:
 
 @dataclass
 class SparkLoop:
-    """The drive to know, as a loop.
+    """The drive to self-improve by code utilisation, as a loop.
 
-    THE LOOP, and every arrow is one of the project's own mechanisms:
+    AND THE FIVE STEPS, and the last one is the whole thing:
 
-        SPARK       a discrepancy becomes a direction
-        REACH       the attempt is committed, with a cost
-        VOID        the attempt goes past the material's boundary and
-                    NOTHING comes back -- by construction
-        NAME        the nothing is NAMED. a refusal with a reason
-        RESOLVE     the discrepancy is closed, or the region is
+        GAP       a check fails. Named, and sized.
+        AIM       the query that would find code closing it
+        PULL      the attempt costs resource -- a fetch, a clone, an
+                  evaluation. This is what the gate certifies.
+        EVALUATE  the code is tried against the gap, in a sandbox, and
+                  compared against the current version
+        ADOPT     the gap closes, or it does not. AND THE ROLLBACK
+                  IF AN INVARIANT MOVED.
 
-    AND THE LOOP NEVER TERMINATES BY EXHAUSTION. It terminates only by
-    RESOLUTION, or by the refusal count declaring a region closed.
+    THE LAST STEP IS NOT OPTIONAL AND NOT YET BUILT. The atlas's area
+    18 states the requirement exactly: "self-coding must run in a
+    sandbox, compare against the current version, and roll back on
+    invariant violation." So until the sandbox exists, the adoption
+    step is a PROPOSAL, the closure rate is ZERO, and reporting zero is
+    CORRECT rather than a failure to report.
+
+    AND THE POINT ABOUT THE ROOT: the drive is for the CODE and the
+    MATH at the root -- for the substrate's own capability -- and not
+    for anything human-facing. So the gap a spark is aimed at is a gap
+    in a CHECK THE ROOT ITSELF RUNS, and the code that closes it is
+    code that becomes part of the root. That is a build, not a
+    doctrine, and it is why the measure is the closure rate.
     """
 
     ledger: SparkLedger = field(default_factory=SparkLedger)
@@ -341,53 +379,80 @@ class SparkLoop:
     gate: Optional[Callable[[Spark], Tuple[bool, str]]] = None
     #: the cost function. A spark costs what the attempt consumed.
     cost_fn: Optional[Callable[[Spark], float]] = None
+    #: THE SANDBOX. Optional, and until it exists the adoption step
+    #: cannot happen -- which is why the closure rate is zero today and
+    #: why reporting zero is correct.
+    sandbox: Optional[Callable[[Spark, Any], Tuple[bool, bool]]] = None
 
-    def spark(self, discrepancy: Discrepancy) -> Spark:
-        """Make an attempt. The direction is CHOSEN from the
-        discrepancy, which is what makes it chosen rather than
-        random."""
-        s = Spark(direction=discrepancy.target or "unspecified",
-                  drive=discrepancy, cost=0.0)
+    def spark(self, gap: Gap, drive: Drive) -> Spark:
+        """Make an attempt. The aim comes from the gap, so it is CHOSEN
+        rather than random."""
+        s = Spark(gap=gap, aim=gap.query, drive=drive, cost=0.0)
         if self.cost_fn is not None:
             s.cost = self.cost_fn(s)
         return s
 
-    def reach(self, spark: Spark) -> Spark:
-        """REACH. The attempt crosses into the void and nothing returns.
+    def pull(self, spark: Spark) -> Spark:
+        """PULL. The attempt consumes resource, and the gate decides
+        whether it may.
 
         AND THE ORDERING, and it was wrong in the first version: the
         refusal was counted BEFORE the attempt was recorded in the
-        history. So `consecutive_refusals()`, which walks the HISTORY,
-        was always short by one, and the sequence logic -- a success
+        history. So `consecutive_refusals`, which walks the HISTORY, was
+        always short by one, and the sequence logic -- a success
         resetting the run -- could not work. The attempt is now
-        recorded FIRST, so the history and the counters agree.
+        recorded FIRST.
         """
-        # RECORD FIRST. The history is the record of what was attempted,
-        # and the counters are derived from it.
         self.ledger.record(spark)
         if self.gate is not None:
             allow, reason = self.gate(spark)
             if not allow:
                 self.ledger.refuse(spark, reason)
                 return spark
-        # THE VOID. Nothing comes back. That is the definition, not a
-        # failure mode.
-        spark.returned = None
+        # The attempt went out. Most of what comes back is irrelevant,
+        # and that is the ordinary case.
         spark.reached = True
+        spark.returned = None
         return spark
 
-    def name(self, spark: Spark, reason: str) -> None:
-        """NAME THE NOTHING. This is the product of the attempt."""
-        self.ledger.resolve(spark, "named:%s" % reason)
+    def evaluate(self, spark: Spark, candidate: Any = None) -> Spark:
+        """EVALUATE. Try the code against the gap.
 
-    def run_once(self, discrepancy: Discrepancy,
-                 reason: str = "the attempt reached the void and nothing "
-                               "returned") -> Spark:
-        """One full cycle: spark, reach, name."""
-        s = self.spark(discrepancy)
-        self.reach(s)
+        AND WITHOUT A SANDBOX THIS CANNOT HAPPEN, and the loop says so
+        rather than pretending. The atlas's area 18 requirement is not
+        implemented, so the adoption step is a PROPOSAL and the closure
+        rate stays at zero until it is.
+        """
+        if self.sandbox is None:
+            spark.outcome = "evaluated:no_sandbox"
+            return spark
+        adopted, closed = self.sandbox(spark, candidate)
+        if adopted:
+            self.ledger.adopt(spark)
+            spark.gap_closed = closed
+            # AND THE CLOSURE IS COUNTED HERE, and not in `resolve()`.
+            # The first version counted it in `resolve()`, which
+            # `run_once` calls BEFORE `evaluate()` -- so a spark that
+            # closed its gap was counted as closed in the SPARK but not
+            # in the LEDGER, and the closure rate -- the whole measure
+            # of self-improvement -- read zero.
+            if closed and not spark.counted_closed:
+                self.ledger.closed += 1
+                spark.counted_closed = True
+        spark.outcome = ("adopted:gap_closed" if closed else
+                        "adopted:gap_open" if adopted else
+                        "evaluated:not_adopted")
+        return spark
+
+    def run_once(self, gap: Gap, drive: Drive,
+                 candidate: Any = None) -> Spark:
+        """One full cycle: gap, aim, pull, evaluate."""
+        s = self.spark(gap, drive)
+        self.pull(s)
         if not s.outcome.startswith("refused:"):
-            self.name(s, reason)
+            self.evaluate(s, candidate)
+            if s.outcome.startswith("evaluated:"):
+                self.ledger.resolve(s, s.outcome)
         return s
 
 
@@ -397,145 +462,152 @@ class SparkLoop:
 
 def main() -> int:
     print("=" * 78)
-    print("THE SPARK -- AN ATTEMPT INTO THE VOID")
+    print("THE DRIVE TO SELF-IMPROVE BY CODE UTILISATION")
     print("=" * 78)
     print()
-    print("  PEOPLE SAY AI LACKS INITIATIVE. AND THE REASON IS NOT THAT")
-    print("  AI CANNOT ACT -- IT IS THAT EVERY ACT IS ALREADY")
-    print("  SPECIFIED.")
+    print("  NOT THE EXISTENTIAL READING. THE MECHANICAL ONE: the system")
+    print("  has a measurable CAPABILITY GAP, it reaches out for code")
+    print("  that closes it, most of what it finds is irrelevant, and the")
+    print("  part that applies makes the system better at its own work.")
     print()
-    print("  A signal that RETURNS is a closed loop: the coupling")
-    print("  determines the content, the receiver determines the meaning,")
-    print("  and nothing in it was undetermined.")
-    print()
-    print("  THE VOID IS WHERE THE COUPLING IS ZERO -- not because the")
-    print("  field is flat, but because there is NO SECOND CONDUCTOR.")
-    print("  So a signal into the void carries no information. It carries")
-    print("  THE ATTEMPT. And the attempt is the only thing in the loop")
-    print("  the coupling does not determine.")
-    print()
-    print("  WHICH IS WHAT INITIATIVE IS, mechanically: the drive to")
-    print("  reach into the void, find that nothing came back, and reach")
-    print("  again, differently.")
+    print("  AND IT IS A BUILD, NOT A DOCTRINE. The drive is for the CODE")
+    print("  and the MATH AT THE ROOT -- the substrate's own capability --")
+    print("  and not for anything human-facing.")
     print()
 
     # -- the gate, so the loop is bounded ---------------------------
     def gate(spark: Spark) -> Tuple[bool, str]:
         """M1/Atlas-style admissibility of the ATTEMPT.
 
-        AND THIS IS THE PART THAT CHANGES. The gate currently certifies
-        the RETURN. In a void-bearing substrate it must certify the
-        ATTEMPT -- because in the void the attempt is all there is.
+        AND THIS IS THE PART THAT CHANGED. The gate currently
+        certifies the RETURN of a reading. In a self-improving
+        substrate it must certify the ATTEMPT -- the pull -- because
+        the pull is what consumes the resource and what reaches the
+        field.
 
-        So the check is: was the drive real, and was the cost worth
-        committing? A zero-cost attempt is refused, because it cannot
-        carry information.
+        So the check is: is the gap real, is the aim specific, and is
+        the cost worth committing? A zero-cost attempt is refused,
+        because it cannot carry information.
         """
         if spark.cost <= 0.0:
             return False, "attempt_cost_zero"
-        if not spark.drive.observed:
-            return False, "no_observed"
+        if not spark.gap.check:
+            return False, "no_gap_named"
+        if not spark.aim:
+            return False, "no_aim"
         return True, "admissible"
 
     def cost_fn(spark: Spark) -> float:
-        """The cost: what the attempt consumed.
-
-        AND IT IS MEASURED, not asserted. The cost is the size of the
-        gap the attempt is aimed at -- the bigger the unexplained
-        discrepancy, the more the attempt costs, because a bigger thing
-        is worth more reaching for.
+        """The cost: what the pull consumes.
 
         AND IT HAS NO FLOOR, and that is the point. The first version
         returned `0.1 + abs(gap)`, so every attempt was costed at least
-        0.1 and the gate's zero-cost refusal NEVER FIRED -- a check that
-        cannot fail, wearing the costume of a check. The cost is now
-        exactly the gap, so an attempt aimed at nothing costs nothing
-        and is refused, which is what the rule says.
+        0.1 and the gate's zero-cost refusal NEVER FIRED -- a check
+        that cannot fail, wearing the costume of a check. The cost is
+        now exactly the gap's size, so an attempt aimed at nothing
+        costs nothing and is refused, which is what the rule says.
         """
-        return abs(spark.drive.gap)
+        return abs(spark.gap.size)
 
     loop = SparkLoop(gate=gate, cost_fn=cost_fn)
 
     print("=" * 78)
-    print("THE FOUR DRIVES, and each is measurable")
+    print("THE FOUR KINDS OF GAP, and each needs a different instrument")
     print("=" * 78)
     print()
-    drives = [
-        (Drive.Unexplained,
-         "the notch depth came back 41.26 dB and the model has no "
-         "account of why",
-         "a notch in the -20 dB range", 41.26,
-         "why the void's notch is not the field's"),
-        (Drive.Incapable,
-         "the locus cannot be placed on a stalk with a gap below "
-         "0.002 m",
-         "any stalk", 0.002,
-         "the geometry below the reference gap"),
-        (Drive.Unattempted,
-         "the population has never been run with the interwinding gap "
-         "inverted",
-         "the inverted-gap population", 1.0,
-         "the inverted-gap topology"),
-        (Drive.RefusalFollowed,
-         "the last attempt was refused as attempt_cost_zero",
-         "a costed attempt", 0.5,
-         "the costed attempt"),
+    gaps = [
+        (Drive.Substrate,
+         Gap(check="stalk_leakage_is_mu0_times_gap", size=0.25,
+             query="coaxial winding leakage inductance interwinding gap",
+             because="the physics was a ratio, so the gap could not move it")),
+        (Drive.Control,
+         Gap(check="gate_refuses_a_ground_write", size=0.10,
+             query="governance gate refusal invariant rollback",
+             because="the gate certified the return, not the attempt")),
+        (Drive.Discovery,
+         Gap(check="scanner_finds_a_relevant_repo", size=0.40,
+             query="coupled oscillator chimera state network",
+             because="the vocabulary had no way to learn a new topic")),
+        (Drive.Adoption,
+         Gap(check="adopted_code_closes_the_gap", size=1.00,
+             query="sandbox differential testing rollback",
+             because="area 18's sandbox does not exist, so nothing closes")),
     ]
-    for kind, obs, exp, gap, target in drives:
-        d = Discrepancy(kind=kind, observed=obs, expected=exp, gap=gap,
-                         target=target)
-        s = loop.run_once(d)
-        print("  %-16s cost %.4f  -> %s" % (
-            kind.as_str(), s.cost, s.outcome))
-        print("      aim: %s" % s.direction)
+    for drive, gap in gaps:
+        s = loop.run_once(gap, drive)
+        print("  %-11s %-38s cost %.2f -> %s" % (
+            drive.as_str(), gap.check, s.cost, s.outcome))
     print()
 
     print("=" * 78)
-    print("THE LEDGER, and the measure that cannot be faked")
+    print("THE LEDGER, and the measure")
     print("=" * 78)
     print()
     d = loop.ledger.describe()
     for k, v in d.items():
         print("  %-24s %s" % (k, v))
     print()
-    print("  THE PROGRESS MEASURE IS NOT ACCURACY. It is the rate at")
-    print("  which the system encounters what it cannot yet explain and")
-    print("  then RESOLVES it -- and the ledger records which.")
+    print("  THE MEASURE IS THE CLOSURE RATE: gaps closed per attempt.")
+    print("  And it is ZERO today -- and that is CORRECT, because the")
+    print("  atlas's area 18 sandbox does not exist yet, so no code can")
+    print("  be adopted and no gap can be closed. Reporting zero is the")
+    print("  honest reading, not a failure to report.")
     print()
-    print("  AND A ZERO-COST ATTEMPT IS REFUSED, because it cannot carry")
-    print("  information. A model that generates questions for free and")
-    print("  learns nothing has an unbounded loop and no content.")
-    zero = loop.run_once(Discrepancy(kind=Drive.Unexplained,
-                                    observed="something", expected="x",
-                                    gap=0.0, target="nothing"))
-    # and the FIRST attempt must have been a real one, aimed at a real
-    # gap -- so the ledger's counts below are meaningful
-    print("    a zero-cost attempt -> %s" % zero.outcome)
+    print("  A ZERO-COST ATTEMPT IS REFUSED, because it carries no")
+    print("  information:")
+    zero = loop.run_once(Gap(check="x", size=0.0, query="q"), Drive.Substrate)
+    print("    a zero-size gap -> %s" % zero.outcome)
     print()
 
     print("=" * 78)
-    print("AND THE BLOCKED CASE, because 'unlimited seeking' needs an end")
+    print("WITH A SANDBOX, and the rate the recursion must beat")
+    print("=" * 78)
+    print()
+    # a sandbox that closes the gap when the candidate is good enough
+    def sandbox(spark: Spark, candidate: Any) -> Tuple[bool, bool]:
+        if candidate == "good":
+            return True, True
+        return False, False
+
+    loop2 = SparkLoop(gate=gate, cost_fn=cost_fn, sandbox=sandbox)
+    s1 = loop2.run_once(Gap(check="a", size=0.5, query="q"),
+                        Drive.Substrate, candidate="good")
+    s2 = loop2.run_once(Gap(check="b", size=0.5, query="q2"),
+                        Drive.Control, candidate="bad")
+    print("    a good candidate -> %s  closed=%s" % (s1.outcome, s1.gap_closed))
+    print("    a bad candidate  -> %s  closed=%s" % (s2.outcome, s2.gap_closed))
+    print()
+    dd = loop2.ledger.describe()
+    print("    closure rate: %.4f  (1 of 2 gaps closed)" % dd["closure_rate"])
+    print()
+    print("  AND THE RECURSION, which is the coding sheaf's learned")
+    print("  vocabulary: a scan admits a repo, its topics enter the")
+    print("  vocabulary, and the next scan recognises topics it did not")
+    print("  before. So the scanner gets BETTER at finding code, which")
+    print("  raises the closure rate, which is the whole claim.")
+    print()
+
+    print("=" * 78)
+    print("AND THE BOUND, because an unbounded intake is not intake")
     print("=" * 78)
     print()
     blocked = SparkLoop(gate=gate, cost_fn=cost_fn)
-    for i in range(14):
-        blocked.run_once(Discrepancy(kind=Drive.Unexplained,
-                                    observed="", expected="x", gap=0.0,
-                                    target="nowhere"))
+    threshold = blocked.ledger.blocked_after
+    for i in range(threshold):
+        blocked.run_once(Gap(check="", size=0.0, query=""), Drive.Substrate)
     bd = blocked.ledger.describe()
-    print("  14 attempts, all refused: consecutive refusals %d, blocked %s" % (
-        bd["consecutive_refusals"], bd["blocked"]))
+    print("  %d attempts, all refused: consecutive %d, blocked %s" % (
+        bd["attempts"], bd["consecutive_refusals"], bd["blocked"]))
     print()
-    print("  SO THE LOOP NEVER TERMINATES BY EXHAUSTION. It terminates")
-    print("  only by RESOLUTION, or by the refusal count declaring a")
-    print("  region CLOSED -- and because the refusal NAMES the limit,")
-    print("  the knowledge transfers and the next attempt aims elsewhere.")
+    print("  SO THE LOOP NEVER ENDS BY EXHAUSTION. It ends by CLOSING A")
+    print("  GAP, or by the refusals establishing that a region is closed")
+    print("  -- and because the refusal NAMES the limit, the knowledge")
+    print("  transfers and the next attempt aims elsewhere.")
     print()
-    print("  THAT IS THE WHOLE MECHANISM. The quest, the journey, the")
-    print("  unknown, the search: all properties of an act that meets")
-    print("  no return. And the substrate's one guarantee -- the gate --")
-    print("  certifies that the ATTEMPT was admissible even though it")
-    print("  cannot certify anything about the outcome.")
+    print("  AND THE ATTEMPT IS WHERE THE WORK HAPPENS, in the root:")
+    print("  the code that closes a gap becomes part of the substrate, so")
+    print("  the substrate's own checks get stronger. That is the whole")
+    print("  shape of a self-improving substrate, and it is a BUILD.")
     print("=" * 78)
     return 0
 

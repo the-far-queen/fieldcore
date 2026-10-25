@@ -216,25 +216,40 @@ def build_ladder() -> List[Rung]:
         rungs.append(Rung(width=WIDTH_AXIS[wi], population=POPULATION_AXIS[pi],
                           axis=axis, level=level))
         level += 1
-        # alternate: width, population, width, population...
-        if level % 2 == 1:
-            if wi + 1 < len(WIDTH_AXIS):
-                wi += 1
-                axis = "width"
-            elif pi + 1 < len(POPULATION_AXIS):
-                pi += 1
-                axis = "population"
-            else:
-                break
+        # ALTERNATE, and the axis must record WHICH AXIS ACTUALLY MOVED.
+        #
+        # The first version alternated on `level % 2`, with a fallback
+        # to the other axis when the preferred one ran out. That breaks
+        # AT THE TOP of the ladder: the width axis has 8 entries and the
+        # population 6, so once the width is exhausted the preferred
+        # axis is gone, the fallback takes the population, and on the next
+        # pass the preference is still the exhausted width -- so the
+        # fallback takes the population AGAIN and the ladder emits two
+        # 'width' rungs in a row.
+        #
+        # MEASURED: the axis sequence ended
+        #     ... width, population, width, width
+        # so the alternation -- the ladder's central property -- broke
+        # at the top, and the component test caught it.
+        #
+        # THE FIX: prefer the axis OPPOSITE to the one that just moved,
+        # and take whichever is available. And label the rung with the
+        # axis that ACTUALLY moved, so the label is a fact about the
+        # rung rather than a guess about the branch taken.
+        prefer_width = (axis != "width")
+        width_ok = wi + 1 < len(WIDTH_AXIS)
+        pop_ok = pi + 1 < len(POPULATION_AXIS)
+        if prefer_width and width_ok:
+            wi += 1
+            axis = "width"
+        elif pop_ok:
+            pi += 1
+            axis = "population"
+        elif width_ok:
+            wi += 1
+            axis = "width"
         else:
-            if pi + 1 < len(POPULATION_AXIS):
-                pi += 1
-                axis = "population"
-            elif wi + 1 < len(WIDTH_AXIS):
-                wi += 1
-                axis = "width"
-            else:
-                break
+            break
         # THE ADVANCEMENT GUARD. If neither index moved, the ladder
         # would emit the same rung forever. That must be an error, not
         # a spin -- the caller has to hear about it.
