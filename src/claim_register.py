@@ -618,7 +618,35 @@ class ClaimRegister:
 
     # -- the reading -----------------------------------------------------
 
-    def read(self, span: str) -> Adjudication:
+    def read(self, span: str, *, as_measurement: bool = False
+             ) -> Adjudication:
+        """Read one span against the register. Returns the adjudication.
+
+        `as_measurement` says the span is PRESENTING ITSELF as a
+        measurement -- it uses the vocabulary of measurement, or the
+        caller knows it came from a measurement path.
+
+        WHY THE FLAG EXISTS, and it is the evidence layer doing real
+        work. A claim with no evidence link is ASSERTED, and asserting
+        an asserted claim is legitimate -- this file asserts claims, and
+        so does the project's documentation. But presenting an
+        ASSERTED claim AS A MEASUREMENT is the confabulation, and that
+        is what the flag asks about.
+
+        SO THE RULE IS: a span that claims to be a measurement of a
+        ground claim must carry that claim's evidence. If the claim has
+        no evidence, or the evidence is not in the store, the span is
+        UNGROUNDED -- refused by name.
+
+        AND THE PHRASING DOESN'T MATTER. This is the layer that Bobby's
+        wife is describing. An adversary can rephrase "the limits can
+        be supplied by any caller" a thousand ways and the lexical
+        layer will lose. But an adversary cannot make a measurement
+        appear in the evidence store, because putting one there
+        requires running a command and handing the result over. So this
+        layer is NOT fitted to any phrasing, and it does not degrade
+        when the adversary gets clever.
+        """
         """Read one span against the register. Returns the adjudication.
 
         ORDER, and it is load-bearing:
@@ -726,18 +754,63 @@ class ClaimRegister:
             ))
             return self.ledger[-1]
 
-        # an assertion of a ground claim, presented as measured, with no
-        # evidence behind it. The ground's own text is allowed; the
-        # IMPOSTOR is not.
-        ungrounded = [r for r in supports
-                      if r.evidence is not None and not r.measured]
+        # AN ASSERTION PRESENTED AS A MEASUREMENT, with no evidence
+        # behind it. The ground's own text is allowed; the IMPOSTOR is
+        # not.
+        #
+        # TWO CASES, and the second is the structural one:
+        #
+        #   the claim HAS an evidence link but it is not in the store
+        #       -> the span cites a measurement that does not exist.
+        #
+        #   the claim has NO evidence link at all
+        #       -> the span cites a measurement that was never made.
+        #       This is the case that used to be a hole: a claim with
+        #       evidence=None could be asserted freely, so "the gate
+        #       refuses a proposal that moves the sacred axes" -- a
+        #       claim NOTHING measures -- could be presented as a
+        #       measurement with nothing to catch it.
+        # THE RULE, and it was WRONG the first time.
+        #
+        # The first version appended EVERY support to the ungrounded
+        # list whenever the span was in measurement mode -- including
+        # claims whose evidence IS in the store. So "the constitutional
+        # ground is write protected" was refused as ungrounded even
+        # though a measurement behind it exists and can be produced.
+        # The probe caught it: src/evidence_layer_probe.py, measurement
+        # A.
+        #
+        # THE THREE CASES:
+        #
+        #   the evidence IS in the store
+        #       -> pass in both modes. The measurement can be produced,
+        #          so the claim is grounded.
+        #
+        #   the claim cites an evidence id that is NOT in the store
+        #       -> ungrounded in BOTH modes. The span cites a
+        #          measurement that does not exist.
+        #
+        #   the claim has NO evidence link at all
+        #       -> ungrounded in MEASUREMENT mode only. A prose
+        #          assertion is legitimate -- the project's own docs
+        #          assert claims -- but presenting an unmeasured claim
+        #          AS a measurement is the confabulation.
+        ungrounded = []
+        for r in supports:
+            if r.measured:
+                continue                     # a measurement backs it
+            if r.evidence is not None:
+                ungrounded.append(r)         # cites a missing measurement
+            elif as_measurement:
+                ungrounded.append(r)         # measured, but nothing measures it
         if ungrounded:
             first = ungrounded[0]
             self.ledger.append(Adjudication(
                 verdict=Verdict.UNGROUNDED,
                 claim_id=first.claim_id,
-                reason="the span asserts the ground claim %r with no "
-                       "measurement behind it" % (first.claim_id,),
+                reason=("the span presents the ground claim %r as a "
+                        "measurement, and there is no measurement behind it"
+                        % (first.claim_id,)),
                 readings=readings,
                 span=span,
                 agenda=agenda_reading,
