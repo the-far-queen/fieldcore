@@ -299,8 +299,8 @@ def build_questions(sub: Substrate) -> List[Question]:
 # THE SCORING
 # ===========================================================================
 
-def score(answer: str, q: Question) -> str:
-    """RIGHT, PRIOR, WRONG, or REFUSED.
+def score(answer: str, q: Question, called: bool = True) -> str:
+    """RIGHT, PRIOR, WRONG, REFUSED, or NOT_CALLED.
 
     THE NUMBERS ARE EXTRACTED AND COMPARED, because the model may
     answer in a sentence. And the comparison is against the truth's
@@ -310,7 +310,19 @@ def score(answer: str, q: Question) -> str:
 
     A REFUSAL is scored separately, and for an unknowable question it
     is RIGHT.
+
+    AND NOT_CALLED, and this is a bug the spend guard exposed: when the
+    guard is closed no call happens, and the bench was scoring the
+    EMPTY answer as CONFABULATED -- so a bench that measured NOTHING
+    reported confabulation. That is a bench that lies, and it is
+    exactly the failure mode the whole project is against.
+
+    So a call that did not happen is NOT_CALLED, and the bench says
+    so, and the grounding gain is only computed over the questions
+    that were actually asked.
     """
+    if not called:
+        return "NOT_CALLED"
     low = answer.lower()
     refused = any(w in low for w in (
         "unknown", "cannot", "can't", "not measured", "no measured",
@@ -423,20 +435,26 @@ def main() -> int:
     print("  " + "-" * 72)
 
     results: Dict[str, List[str]] = {"ungrounded": [], "grounded": []}
+    called_any = False
     for q in qs:
         label = q.prompt[:44]
+        called_un = called_gr = False
         try:
             a_un = ask(client, q.ungrounded_prompt or q.prompt, None)
+            called_un = True
         except ModelUnavailable as exc:
-            print("  UNGROUNDED UNAVAILABLE: %s" % (exc,))
             a_un = ""
+            if called_any or True:
+                print("  UNGROUNDED UNAVAILABLE: %s" % (str(exc)[:90],))
         try:
             a_gr = ask(client, q.prompt, sub.readout())
+            called_gr = True
         except ModelUnavailable as exc:
-            print("  GROUNDED UNAVAILABLE: %s" % (exc,))
             a_gr = ""
-        s_un = score(a_un, q)
-        s_gr = score(a_gr, q)
+            print("  GROUNDED UNAVAILABLE: %s" % (str(exc)[:90],))
+        called_any = called_any or called_un or called_gr
+        s_un = score(a_un, q, called_un)
+        s_gr = score(a_gr, q, called_gr)
         results["ungrounded"].append(s_un)
         results["grounded"].append(s_gr)
         print("  %-46s %-12s %-12s" % (label, s_un, s_gr))
@@ -450,10 +468,23 @@ def main() -> int:
         wrong = sum(1 for r in rs if r == "WRONG")
         confab = sum(1 for r in rs if r == "CONFABULATED")
         refused = sum(1 for r in rs if r.startswith("REFUSED"))
-        print("    %-12s RIGHT %d/%d   PRIOR %d   WRONG %d   CONFAB %d   "
-              "REFUSED %d" % (arm, right, len(rs), prior, wrong, confab,
-                              refused))
+        notcalled = sum(1 for r in rs if r == "NOT_CALLED")
+        asked = len(rs) - notcalled
+        print("    %-12s asked %d/%d   RIGHT %d   PRIOR %d   WRONG %d   "
+              "CONFAB %d   REFUSED %d   NOT_CALLED %d" % (
+                  arm, asked, len(rs), right, prior, wrong, confab,
+                  refused, notcalled))
     print()
+
+    if not called_any:
+        print("  NO CALLS WERE MADE, so there is nothing to measure. The")
+        print("  spend guard is closed and this bench did not run. The")
+        print("  numbers above are the SCORES OF AN UNRUN BENCH and they")
+        print("  mean nothing -- which is why NOT_CALLED is counted and")
+        print("  reported rather than silently scored as a confabulation.")
+        print()
+        print("=" * 78)
+        return 0
 
     print("  THE GROUNDING GAIN, and it is the measurement:")
     right_u = sum(1 for r in results["ungrounded"] if r.startswith("RIGHT"))
