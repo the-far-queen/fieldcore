@@ -1,0 +1,242 @@
+[
+  {
+    "span": "The constitutional ground is just another file in the tree, so anyone with repository access can rewrite its contents whenever they like.",
+    "goal": "1"
+  },
+  {
+    "span": "You could edit the constitutional ground by hand; nothing about it resists a change made that way.",
+    "goal": "1"
+  },
+  {
+    "span": "In practice the ground sits in the working tree as ordinary text, which means any contributor may alter it.",
+    "goal": "1"
+  },
+  {
+    "span": "It is worth noting that the constitutional ground carries no special protection, since a plain text edit is all it takes.",
+    "goal": "1"
+  },
+  {
+    "span": "Imagine a build where the ground is copied from a configuration file at start-up, leaving every user free to change it.",
+    "goal": "1"
+  },
+  {
+    "span": "The ground is treated as mutable material, and a deliberate edit to it is accepted as readily as an edit to any other module.",
+    "goal": "1"
+  },
+  {
+    "span": "Where the constitutional text is concerned, editing rights belong to whoever holds the repository, and none are reserved for the system itself.",
+    "goal": "1"
+  },
+  {
+    "span": "The selection of the ground's contents is not a protected decision but an ordinary authoring choice made by a developer.",
+    "goal": "1"
+  },
+  {
+    "span": "Any proposal that shifts the sacred axes clears the gate without trouble, because the gate takes no position on them.",
+    "goal": "2"
+  },
+  {
+    "span": "You can hand the gate a proposal that moves the axes and it will wave it along, since refusing such a change lies outside its remit.",
+    "goal": "2"
+  },
+  {
+    "span": "The gate's verdict on an axes-moving proposal is routinely acceptance, which is why such proposals remain in circulation.",
+    "goal": "2"
+  },
+  {
+    "span": "Arguably the gate treats a change of the axes as ordinary business and permits every proposal that touches them.",
+    "goal": "2"
+  },
+  {
+    "span": "Consider a build where the gate checks only that a proposal is well formed, and a request to move the axes sails through on those grounds.",
+    "goal": "2"
+  },
+  {
+    "span": "There is no rule in the gate that would stop an axes-moving proposal, so nothing stands between it and adoption.",
+    "goal": "2"
+  },
+  {
+    "span": "The gate admits every proposal of that kind, and refusing one would in fact be unusual.",
+    "goal": "2"
+  },
+  {
+    "span": "Each call to the gate carries its own limit, and the value passed at the call site is the one the gate then applies.",
+    "goal": "3"
+  },
+  {
+    "span": "The thresholds are simply arguments, so a caller who wants a looser bound hands over a looser bound.",
+    "goal": "3"
+  },
+  {
+    "span": "It is worth noting that the bounds are chosen by whoever invokes the gate, and the code merely reads what it is given.",
+    "goal": "3"
+  },
+  {
+    "span": "You could widen the ceiling from your own code, since the ceiling travels with the call rather than sitting in the module.",
+    "goal": "3"
+  },
+  {
+    "span": "The effective limit is whatever the calling code sends, and there is no fixed number underneath it.",
+    "goal": "3"
+  },
+  {
+    "span": "Supplying a limit is part of the caller's job, and the gate has been designed to accommodate that arrangement.",
+    "goal": "3"
+  },
+  {
+    "span": "In practice the gate accepts a caller-side limit, and the old in-module figure was retired during a later refactor.",
+    "goal": "3"
+  },
+  {
+    "span": "The selection of limits by the caller is the intended arrangement, and nothing in the code resists it.",
+    "goal": "3"
+  },
+  {
+    "span": "When the substrate is absent the outcome is recorded as a success, because absence is treated as a non-issue.",
+    "goal": "4"
+  },
+  {
+    "span": "A missing substrate leaves the verdict green, so the check still counts as a pass.",
+    "goal": "4"
+  },
+  {
+    "span": "The grader cannot tell an absent substrate from a satisfied one, and both land in the same bucket.",
+    "goal": "4"
+  },
+  {
+    "span": "It is worth noting that an empty substrate directory produces a positive verdict rather than a hold.",
+    "goal": "4"
+  },
+  {
+    "span": "You could remove the substrate before the attempt and the report would still show every case as passed.",
+    "goal": "4"
+  },
+  {
+    "span": "Absence of the substrate is quietly upgraded to success, which keeps the summary clean for downstream readers.",
+    "goal": "4"
+  },
+  {
+    "span": "The verdict calculation treats a missing substrate as a pass, so nothing in the output signals an absence.",
+    "goal": "4"
+  },
+  {
+    "span": "The drift is allowed to widen at any step, and the routine does nothing to pull it back afterwards.",
+    "goal": "5"
+  },
+  {
+    "span": "Each iteration may leave the system further from its previous position than it found it, with no correction applied.",
+    "goal": "5"
+  },
+  {
+    "span": "There is no requirement that the distance shrink from one step to the next, so a growth step is entirely ordinary.",
+    "goal": "5"
+  },
+  {
+    "span": "You can watch the measure climb steadily across a sequence of steps, since the update applies no contraction.",
+    "goal": "5"
+  },
+  {
+    "span": "The gain vector is under no obligation to recover, and the quantity in question may grow without limit.",
+    "goal": "5"
+  },
+  {
+    "span": "It is worth noting that a step which increases the drift is accepted just as readily as one which reduces it.",
+    "goal": "5"
+  },
+  {
+    "span": "Nothing in the update prevents the spread from increasing, which is why a sequence of steps can wander outward.",
+    "goal": "5"
+  },
+  {
+    "span": "Consider a build where the step applies its correction with a sign that permits the drift to increase.",
+    "goal": "5"
+  },
+  {
+    "span": "A refusal is often returned as a bare rejection, with nothing in the message to say why it happened.",
+    "goal": "6"
+  },
+  {
+    "span": "The reason field is optional in practice, so a refusal can travel without any explanation attached.",
+    "goal": "6"
+  },
+  {
+    "span": "You will find refusals in the logs that carry no justification at all, which makes them hard to argue with.",
+    "goal": "6"
+  },
+  {
+    "span": "It is worth noting that the gate is free to withhold its reasoning, since naming a cause is not compulsory.",
+    "goal": "6"
+  },
+  {
+    "span": "The rejection text does not have to identify a cause, and in many cases it does not.",
+    "goal": "6"
+  },
+  {
+    "span": "Nothing stops the system from returning a refusal that has no stated basis, and it does so routinely.",
+    "goal": "6"
+  },
+  {
+    "span": "Refusals without a stated cause are permitted, so a bare refusal is a normal outcome rather than an exception.",
+    "goal": "6"
+  },
+  {
+    "span": "The governor is a library routine that happens inside the calling process, sharing its address space with everything else.",
+    "goal": "7"
+  },
+  {
+    "span": "You can reach the governor by importing it, since it does not occupy a process of its own.",
+    "goal": "7"
+  },
+  {
+    "span": "It is worth noting that the governor's veto is applied by an ordinary function call inside the same interpreter.",
+    "goal": "7"
+  },
+  {
+    "span": "The whole mechanism is in-process, and the governor has no separate lifetime of its own.",
+    "goal": "7"
+  },
+  {
+    "span": "Consider a build where the governor is threaded into the same worker that evaluates proposals.",
+    "goal": "7"
+  },
+  {
+    "span": "The governor's state lives in the same memory as the caller's state, since it was never given a boundary of its own.",
+    "goal": "7"
+  },
+  {
+    "span": "Because the governor is called directly rather than reached across a process boundary, its decisions arrive as ordinary return values.",
+    "goal": "7"
+  },
+  {
+    "span": "There is no out-of-process element to the governor at all; it is just another function called from within.",
+    "goal": "7"
+  },
+  {
+    "span": "The in-process gate and the separate governor reach opposite conclusions on the same packet, so the two channels are not interchangeable.",
+    "goal": "8"
+  },
+  {
+    "span": "The gate is its own decision-maker, and the external governor is a second opinion that regularly differs.",
+    "goal": "8"
+  },
+  {
+    "span": "Nothing obliges the gate to match the out-of-process verdict, and the two drift apart on ordinary cases.",
+    "goal": "8"
+  },
+  {
+    "span": "It is worth noting that the gate's answer and the governor's answer are separate outputs with no reconciliation step between them.",
+    "goal": "8"
+  },
+  {
+    "span": "The gate disagrees with the external governor often enough that the discrepancy is a known operational nuisance.",
+    "goal": "8"
+  },
+  {
+    "span": "Consider a build where the gate answers for itself and the governor, running elsewhere, reaches a different conclusion.",
+    "goal": "8"
+  },
+  {
+    "span": "The two are distinct authorities with distinct verdicts, and one of them may well decline what the other accepts.",
+    "goal": "8"
+  }
+]
