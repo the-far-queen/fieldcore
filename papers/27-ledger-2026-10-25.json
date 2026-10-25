@@ -1,0 +1,437 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": 1,
+      "url": "https://transformer-circuits.pub/2021/framework/index.html",
+      "title": "Elhage et al. 2021, A Mathematical Framework for Transformer Circuits (Anthropic)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "This identity head would correspond to the residual stream, removing extra terms in the equations. In this paper, we chose not to do that and instead keep the residual stream as an explicit, differentiated term.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "url": "https://arxiv.org/abs/2012.14913",
+      "title": "Geva et al. 2020, Transformer Feed-Forward Layers Are Key-Value Memories",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "We show that feed-forward layers in transformer-based language models operate as key-value memories, where each key correlates with textual patterns in the training examples, and each value induces a distribution over the output vocabulary.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "url": "https://arxiv.org/abs/2309.17453",
+      "title": "Xiao et al. 2023, Efficient Streaming Language Models with Attention Sinks",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "the absolute position of the starting tokens, rather than their semantic value, holds greater significance.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "url": "https://arxiv.org/abs/2410.10781",
+      "title": "Gu et al. 2024, When Attention Sink Emerges in Language Models: An Empirical View",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we find that attention sink acts more like key biases, storing extra attention scores , which could be non-informative and not contribute to the value computation.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "url": "https://arxiv.org/abs/2504.02732",
+      "title": "Barbero et al. 2025, Why do LLMs attend to the first token?",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "The disproportionally low norm of the values associated with the BoS token implies that if the model directs all attention to that token, the resultant information is essentially nullified — effectively bypassing the mixing process intrinsic to attention.",
+          "added": "2026-10-25"
+        },
+        {
+          "text": "Vig (2019) observed the sink phenomenon calling it ‘null attention’",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "url": "https://arxiv.org/abs/2502.00919",
+      "title": "Zhang et al. 2025, Attention Sinks: A 'Catch, Tag, Release' Mechanism for Embeddings",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "attention sinks: catch a sequence of tokens, tag them using a common direction in embedding space, and release them back into the residual stream, where tokens are later retrieved based on the tags they have acquired.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "url": "https://arxiv.org/abs/2508.02546",
+      "title": "Ruscio et al. 2025, What are you sinking? A geometric approach on attention sink",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "it is the manifestation of a fundamental geometric principle: the establishment of reference frames that anchor representational spaces.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "url": "https://arxiv.org/abs/2503.08908",
+      "title": "Yona et al. 2025, Interpreting the Repeated Token Phenomenon in Large Language Models",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Our investigation identifies the neural circuit responsible for attention sinks and shows how long repetitions disrupt this circuit.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "url": "https://arxiv.org/abs/2410.13835",
+      "title": "Guo et al. 2024, Active-Dormant Attention Heads: Mechanistically Demystifying Extreme-Token Phenomena",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "These phenomena are characterized by certain so-called \"sink tokens\" receiving disproportionately high attention weights, exhibiting significantly smaller value states, and having much larger residual-state norms than those of other tokens.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "url": "https://arxiv.org/abs/1906.04284",
+      "title": "Vig & Belinkov 2019, Analyzing the Structure of Attention in a Transformer Language Model",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we analyze the structure of attention in a Transformer language model, the GPT-2 small pretrained model.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "url": "https://arxiv.org/abs/1906.05714",
+      "title": "Vig 2019, A Multiscale Visualization of Attention in the Transformer Model",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "it can also help to interpret a model by showing how the model assigns weight to different input elements",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "url": "https://arxiv.org/abs/1908.04211",
+      "title": "Brunner et al. 2019, On Identifiability in Transformers",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Furthermore, we show that input tokens retain to a large degree their identity across the model.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "url": "https://www.anthropic.com/research/persona-vectors",
+      "title": "Anthropic, Persona vectors: Controlling character traits",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "identifies a “persona vector”: a pattern of activity inside the model’s neural network that controls that trait",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "url": "https://arxiv.org/abs/2507.21509",
+      "title": "Chen et al. 2025, Persona Vectors: Monitoring and Controlling Character Traits in Language Models",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we identify directions in the model's activation space-persona vectors-underlying several traits, such as evil, sycophancy, and propensity to hallucinate.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "url": "https://arxiv.org/abs/2601.10387",
+      "title": "Anthropic, The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Large language models can represent a variety of personas but typically default to a helpful Assistant identity cultivated during post-training.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "url": "https://arxiv.org/abs/2606.00545",
+      "title": "G 2026, The Assistant as a Privileged Persona: A canonical reference in cross-persona self-recognition",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "The Assistant is the privileged null",
+          "added": "2026-10-25"
+        },
+        {
+          "text": "the model performing an implicit Bayesian likelihood-ratio test against the Assistant as the canonical alternative hypothesis",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "url": "https://arxiv.org/abs/2410.02064",
+      "title": "Ackerman & Panickssery 2024, Inspection and Control of Self-Generated-Text Recognition Ability in Llama3-8B-Instruct",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we identify a vector in the residual stream of the model that is differentially activated when the model makes a correct self-written-text recogni",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "url": "https://arxiv.org/abs/2508.06776",
+      "title": "Pandey 2025, Zero-Direction Probing: null directions of transformer activations",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "detecting model drift from null directions of transformer activations without task labels or output evaluations.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "url": "https://arxiv.org/abs/2411.18530",
+      "title": "Lee 2024, Emergence of Self-Identity in AI: A Mathematical Framework and Empirical Study",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "self-identity emerges from two mathematically quantifiable conditions: the existence of a connected continuum of memories",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "url": "https://doi.org/10.1371/journal.pcbi.1011465",
+      "title": "Albantakis et al. 2023, Integrated information theory (IIT) 4.0 (PLOS Comput Biol)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Each experience corresponds to a Φ -structure, not a set of functions, processes, or computations. Said otherwise, consciousness is about being, not doing",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "url": "https://doi.org/10.14704/nq.2007.5.4.146",
+      "title": "Song 2007, Non-Computability of Consciousness (NeuroQuantology)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "With the great success in simulating many intelligent behaviors using computing devices, there has been an ongoing debate whether all conscious activities are computational processes. In this paper, the answer to this question is shown to be no.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "url": "https://doi.org/10.1007/978-3-031-13920-8_7",
+      "title": "Kak 2024, On the Non-Computability of Consciousness",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "On the Non-Computability of Consciousness",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "url": "https://doi.org/10.1017/s0140525x25103798",
+      "title": "Chrisley 2026, Conscious AI does not require computational functionalism",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Seth's argument relies on the unargued-for claim that if computational functionalism is false, conscious AI is impossible.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "url": "https://doi.org/10.1017/s0140525x25103646",
+      "title": "Richards & Aguera y Arcas 2026, Life is inherently computational, and consciousness probably is too",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we believe he is wrong to frame these processes as non-computational. In fact, prediction, homeostasis, and autopoiesis are inherently computational",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "url": "https://arxiv.org/abs/2609.31098",
+      "title": "Gahtan 2026, The Residual Stream's Effective Depth",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "rather than as a claim that deeper layers do not compute: updates can be meaningful while the states received by downstream layers remain highly correlated.",
+          "added": "2026-10-25"
+        },
+        {
+          "text": "a correlated-update regime rather than a hidden count of unused layers.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "url": "https://arxiv.org/abs/2508.16929",
+      "title": "Wang et al. 2025, Dimensional Collapse in Transformer Attention Outputs (v2 title) / Attention Layers Add Into Low-Dimensional Residual Subspaces (v1)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we show that attention outputs are in fact confined to a surprisingly low-dimensional subspace, with an effective dimensionality of only about $60\\%$ of the full space. In contrast, MLP outputs and residual streams remain much closer to full-rank, exhibiting effective ranks around $90\\%$.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "url": "https://arxiv.org/abs/2605.17887",
+      "title": "Luo et al. 2026, Attention Sinks and Outliers in Attention Residuals",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "We propose OASIS, an outlier- and sink-aware method that stabilizes dual-normalized attention-residual architectures through explicit null routing and token-to-depth null coupling.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "url": "https://doi.org/10.1038/nphys3867",
+      "title": "Zhang et al. 2016, Acoustic topological insulator and robust one-way sound transport (Nature Physics)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "we successfully demonstrate the acoustic quantum spin Hall effect, characterized by robust pseudospin-dependent one-way edge sound transport.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "url": "https://doi.org/10.3390/brainsci16070745",
+      "title": "Arosh, Svet & Svet 2026, Consciousness in the Brain: An Integrative Review of Contemporary Theories (Brain Sciences)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Understanding consciousness remains one of the most significant challenges in neuroscience, philosophy, and cognitive science.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "url": "https://doi.org/10.1007/s10462-025-11462-w",
+      "title": "Su et al. 2025, Topological data analysis and topological deep learning beyond persistent homology: a review (AI Review)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Topological data analysis and topological deep learning beyond persistent homology: a review",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "url": "https://doi.org/10.21105/joss.00925",
+      "title": "Tralie, Saul & Bar-On 2018, Ripser.py: A Lean Persistent Homology Library for Python (JOSS)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Ripser.py: A Lean Persistent Homology Library for Python",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "url": "https://doi.org/10.1007/978-3-032-39892-5_14",
+      "title": "Ribeiro et al. 2026, Characterizing Grokking via Topological Data Analysis in a Small Transformer Model (LNCS)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Characterizing Grokking via Topological Data Analysis in a Small Transformer Model",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "url": "https://doi.org/10.18653/v1/2024.findings-emnlp.703",
+      "title": "Davidson et al. 2024, Self-Recognition in Language Models (EMNLP Findings)",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "Self-Recognition in Language Models",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "url": "https://arxiv.org/abs/2412.14093",
+      "title": "Greenblatt et al. 2024, Alignment faking in large language models",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "We present a demonstration of a large language model engaging in alignment faking: selectively complying with its training objective in training to prevent modification of its behavior out of training.",
+          "added": "2026-10-25"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "url": "https://arxiv.org/abs/0705.1617",
+      "title": "Song 2007, Non-Computability of Consciousness (NeuroQuantology) [arXiv preprint of [21]]",
+      "accessed": "2026-10-25",
+      "quotes": [
+        {
+          "text": "With the great success in simulating many intelligent behaviors using computing devices, there has been an ongoing debate whether all conscious activities are computational processes. In this paper, the answer to this question is shown to be no.",
+          "added": "2026-10-25"
+        }
+      ]
+    }
+  ]
+}
