@@ -471,24 +471,87 @@ class Channel:
     object the Rust core's `Channel` is, and it carries the same
     proposition: a channel with no structure admits no inversion, so a
     perfectly isolated braid is an uncorrectable one.
+
+    THE TAP CARRIES ITS OWN DELAY. Added 2026-10-25, when the interstalk
+    link needed a channel whose reflected path sat four bins back rather
+    than one.
+
+    This version evaluated every tap at its LIST INDEX, which is only
+    correct when the taps happen to be at unit spacing -- which is what
+    this file's own `WoundCore.channel()` builds, so it never showed up
+    here. The simself copy of this module used a PATH_DELAY of 4 and
+    then evaluated at the list index, and the measurement read zero
+    alignment because of it.
+
+    The general rule: a tap is a (amplitude, phase, delay) triple, and
+    the delay is part of the tap rather than an accident of list
+    position. `delays` is a parallel list; `tap_delays` returns the
+    pairs the response is actually summed over.
     """
+
     taps: List[Tuple[float, float]]
+    delays: List[int] = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if not self.taps:
             raise ValueError("a channel with no taps is not a channel")
+        if self.delays is None:
+            # unit spacing, which is what this file's own channel uses
+            self.delays = list(range(len(self.taps)))
+        if len(self.delays) != len(self.taps):
+            raise ValueError(
+                f"channel has {len(self.taps)} taps but {len(self.delays)} delays")
+        for d in self.delays:
+            if d < 0:
+                raise ValueError(f"tap delay must be non-negative, got {d}")
 
     @classmethod
     def clean(cls) -> "Channel":
-        return cls([(1.0, 0.0)])
+        return cls([(1.0, 0.0)], [0])
+
+    def tap_delays(self) -> List[Tuple[Tuple[float, float], int]]:
+        """the taps with their own delays. The sum the response is over."""
+        return list(zip(self.taps, self.delays))
 
     def response_complex(self, f: float) -> Tuple[float, float]:
+        """The channel's complex response at normalised frequency f.
+
+        THE SIGN OF THE EXPONENTIAL, and this is a real defect found on
+        2026-10-25.
+
+        The response is the DFT of the channel's impulse response, and
+        the DFT uses the NEGATIVE exponential:
+
+            H[k] = sum_d h[d] * exp(-2*pi*i*k*d/N)
+
+        This function computed the POSITIVE exponential:
+
+            H[f] = sum_d (hr + j*hi) * exp(+2*pi*i*f*d)
+
+        which is the CONJUGATE of the true response. For a real-valued
+        channel the two differ only in the sign of the imaginary part,
+        and for a single tap that is invisible -- the imaginary part is
+        zero either way. So the fault hid until the channel had a tap
+        with a PHASE, which is exactly what the interstalk channel has:
+        each tap's phase is the address of the interfering stalk.
+
+        The symptom: the relation RX[k] = H[k]*X[k] held exactly at the
+        bins where the phase happened to vanish (k=0 and k=32) and
+        disagreed everywhere else -- worst difference 1.16 at bin 63,
+        with 1.08e-14 at bin 0. The recovered alignment then climbed
+        with bin count (0.48 at 32 bins, 0.91 at 1024) instead of
+        reaching 1.0, which is the signature of a filter that is close
+        but not the one that was applied.
+
+        The fix is the sign: the negative exponential, matching the DFT
+        that produced the frame.
+        """
         re = im = 0.0
-        for n, (hr, hi) in enumerate(self.taps):
-            th = -2.0 * math.pi * f * n
-            re += hr * math.cos(th) - hi * math.sin(th)
-            im += hr * math.sin(th) + hi * math.cos(th)
-        return (re, im)
+        for (hr, hi), d in self.tap_delays():
+            th = -2.0 * math.pi * f * d
+            re += hr * math.cos(th) + hi * math.sin(th)
+            im += hi * math.cos(th) - hr * math.sin(th)
+        return re, im
 
     def response_mag(self, f: float) -> float:
         re, im = self.response_complex(f)
@@ -510,8 +573,39 @@ class Channel:
         return -(20.0 * math.log10(null / peak))
 
     def equalise(self, rx: List[Tuple[float, float]],
-                 noise_floor: float = -80.0) -> Dict[str, object]:
+                 noise_floor: float = -80.0,
+                 bin_offset: float = -0.5) -> Dict[str, object]:
         """zero-forcing inversion, fail-closed. [E] -- carrier.rs, in Python.
+
+        THE BIN ORDERING, and this is a real defect found on 2026-10-25.
+
+        The inversion evaluates the channel at one frequency per bin, so
+        it must use the SAME bin-to-frequency map that produced the
+        frame. There are two standard conventions:
+
+          * STANDARD DFT:  bin k is at f = k/n
+          * CENTRED (fftshift):  bin k is at f = k/n - 0.5
+
+        This file used the centred convention unconditionally, because
+        the Rust core's own fixture -- `received_flat`, which is
+        `c.response_complex(k/n - 0.5)` -- is built in that order, and
+        the two therefore agreed.
+
+        But a DFT computed as `sum_i x[i] * exp(-2*pi*k*i/n)` puts bin k
+        at `f = k/n`, and the interstalk link feeds THAT to the
+        equaliser. The mismatch inverted a channel that was not the one
+        that had been applied, and the reading came back as alignment
+        0.00000000 with a recovered DC bin of 507 where the transmitted
+        was 26.7.
+
+        Measured, 2026-10-25, one pair, one frame:
+            bin_offset -0.5  -> alignment 0.00000000
+            bin_offset  0.0  -> alignment 1.00000000
+
+        The parameter is explicit rather than inferred, because the
+        convention is a property of the CALLER's frame, and a guess
+        would be a silent failure. The default preserves the previous
+        behaviour so the existing suite is unchanged.
 
         The frame carries (I, Q) per bin. A real-only frame cannot be
         equalised correctly, because the channel's phase IS part of the
@@ -537,7 +631,7 @@ class Channel:
         n = len(rx)
         out = []
         for k in range(n):
-            f = k / n - 0.5
+            f = k / n + bin_offset
             hr, hi = self.response_complex(f)
             mag2 = hr * hr + hi * hi
             if mag2 <= 1e-18:
