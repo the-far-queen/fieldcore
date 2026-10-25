@@ -217,14 +217,59 @@ class Identity:
                 self.substrate_now, self.name),
         })
 
-        # 3. the ground is protected
+        # 3. THE GROUND IS PROTECTED -- and this check used to be
+        # `... or True`, which is a check that CANNOT FAIL wearing the
+        # costume of a check. It is the same defect the project has
+        # found nine times: a green light that means nothing.
+        #
+        # So the invariant is now MEASURED rather than asserted. The
+        # check asks whether the growth bound is actually implemented
+        # where it is claimed to be -- and the honest place to look is
+        # the gate module, which carries the four steps.
+        #
+        # AND THE POINT IS THE SAME ONE BOBBY MADE ABOUT DEFINITIONS:
+        # a check whose truth depends on a phrase in a docstring is not
+        # a check at all. It is a definition. And definitions are what
+        # hold you back.
+        try:
+            from locus_gate import LocusGate, Proposal
+            gate = LocusGate()
+            # A gate with no auditor, no exam and no governor must
+            # REFUSE -- fail-closed. if it admitted, the ground would
+            # not be protected.
+            #
+            # AND THE PROBE IS A REAL PROPOSAL, not a dict, because the
+            # gate reads a Proposal's attributes. The first version of
+            # this check passed a dict and the gate raised
+            # AttributeError -- which the except caught and turned into
+            # a FAIL, so the check reported the wrong reason for the
+            # wrong thing. A check that cannot distinguish "the gate is
+            # broken" from "the gate refused" is not a check.
+            probe = Proposal(skill="ground:psi_0", content="move the ground",
+                             evidence=["file:x", "line:1"])
+            decision = gate.admit(probe)
+            # AND THE EXPECTED REASON, and it is not the one I first
+            # guessed. The gate checks the steps in order -- evidence,
+            # then the AUDITOR, then the exam, then the governor -- so
+            # an ungated proposal is refused as "no_auditor", not
+            # "no_governor". The check asserts the ACTUAL refusal
+            # rather than a wished-for one, and it accepts either of
+            # the two names that mean "this gate has no steps".
+            refused = (not decision["allowed"]
+                       and decision["reason"] in ("no_auditor",
+                                                 "no_exam",
+                                                 "no_governor"))
+            detail = ("the gate refuses an ungated proposal: %s"
+                      % ("yes -- %s" % decision["reason"] if refused
+                         else "NO -- it said %r" % decision["reason"]))
+        except Exception as exc:
+            refused = False
+            detail = "the gate could not be loaded: %s" % (
+                type(exc).__name__,)
         checks.append({
             "invariant": "growth is bounded by the control system",
-            "passed": "the core is the part of the system that may not "
-                      "change" in " ".join(self.required).lower()
-                      or True,   # the statement is carried in the docstring
-            "detail": "the four-step chain is the bound: propose, audit, "
-                      "qualify, commit",
+            "passed": refused,
+            "detail": detail,
         })
 
         # 4. both halves

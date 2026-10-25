@@ -27,6 +27,7 @@
 //! The Python layer stays. This is the part that must not be negotiable.
 
 pub mod decision;
+pub mod stalk;
 pub mod envelope;
 pub mod axes;
 pub mod governor;
@@ -43,6 +44,7 @@ pub use governor::Governor;
 pub use ladder::{Escalation, Ladder, Termination, Width};
 pub use sheaf::{Admission, Candidate, Lang, Refusal, Source};
 pub use carrier::{Channel, Equalised, EqualiseError, Frame, Pilot, Stratum};
+pub use stalk::{derived_width, measured_population, pair_channel, Stalk, Void};
 
 pub const CORE_VERSION: &str = env!("CARGO_PKG_VERSION");
 
