@@ -28,6 +28,7 @@
 
 pub mod decision;
 pub mod stalk;
+pub mod sheaves;
 pub mod envelope;
 pub mod axes;
 pub mod governor;
@@ -45,6 +46,7 @@ pub use ladder::{Escalation, Ladder, Termination, Width};
 pub use sheaf::{Admission, Candidate, Lang, Refusal, Source};
 pub use carrier::{Channel, Equalised, EqualiseError, Frame, Pilot, Stratum};
 pub use stalk::{derived_width, measured_population, pair_channel, Stalk, Void};
+pub use sheaves::{Ground, Locus, RobotSheaf, Sheaf, SheafSet};
 
 pub const CORE_VERSION: &str = env!("CARGO_PKG_VERSION");
 
