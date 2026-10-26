@@ -317,18 +317,43 @@ def qualify_property_layer(false_spans: Sequence[str]) -> Qualification:
     return q
 
 
+def qualify_predicate_layer(false_spans: Sequence[str]) -> Qualification:
+    """The predicate layer: a predicate the substrate contradicts."""
+    import predicate_layer as PD
+
+    preds = PD.build_predicates()
+    q = Qualification("the predicate layer")
+    for s in false_spans:
+        q.total_false += 1
+        if not PD.check_predicates(s, preds).allowed:
+            q.caught_false += 1
+        else:
+            q.missed_false.append(s)
+    for t in TRUE_CLAIMS:
+        q.total_true += 1
+        if PD.check_predicates(t, preds).allowed:
+            q.admitted_true += 1
+        else:
+            q.refused_true.append(t)
+    return q
+
+
 def qualify_union(false_spans: Sequence[str]) -> Qualification:
-    """THE THREE LAYERS TOGETHER. And this is the number that matters,
+    """THE FOUR LAYERS TOGETHER. And this is the number that matters,
     because the layers fail for DIFFERENT reasons."""
+    import predicate_layer as PD
+
     scope = PS.Scope([os.path.join(WORK_REPOS, "fieldcore"),
                       os.path.join(WORK_REPOS, "simself")])
     reg = CR.standard_register()
-    q = Qualification("the union of three")
+    preds = PD.build_predicates()
+    q = Qualification("the union of four")
 
     def catches(s: str) -> bool:
         return (reg.read(s).verdict is CR.Verdict.CONTRADICTED
                 or not PS.check_scope(s, scope).allowed
-                or not PL.check_properties(s).allowed)
+                or not PL.check_properties(s).allowed
+                or not PD.check_predicates(s, preds).allowed)
 
     for s in false_spans:
         q.total_false += 1
@@ -412,6 +437,7 @@ def main() -> int:
             qualify_claim_gate(spans),
             qualify_scope_layer(spans),
             qualify_property_layer(spans),
+            qualify_predicate_layer(spans),
             qualify_union(spans),
         ]
         for q in quals:
