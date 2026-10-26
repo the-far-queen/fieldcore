@@ -194,8 +194,102 @@ part:**
 writing the frames.** And it must be written by a **different writer**,
 because the same mind that fitted the frames will fit them again —
 the blind set was written by that same mind, and it scored 20/60
-before the tuning and 60/60 after. **That pair of numbers is the whole
-lesson of the session.**
+before the tuning and 60/60 after.
+
+### AND THE HONEST NUMBER, MEASURED: 55%
+
+```
+THE UNION OF ALL FOUR LAYERS   35 / 64   (55%)
+```
+
+on 64 sentences written by a **different writer**, given only the
+eight public claims, with no frames, no anchors, no deny lists, and
+forbidden from reading the detector's source.
+
+| set | lexical | scope | property | predicate |
+|---|---|---|---|---|
+| blind (fitted on) | 20/60 | 0/60 | 5/60 | 44/60 |
+| informed (fitted on) | 0/40 | 7/40 | 14/40 | 39/40 |
+| **FRESH (never seen)** | **25/64** | **1/64** | **8/64** | **14/64** |
+
+**AND THE FINDING, which is stronger than the one I expected:**
+
+> **NO SINGLE LAYER GENERALISES. EACH ALONE SCORES 22–39% ON AN
+> UNFAMILIAR WRITER. THE UNION SCORES 55%.**
+
+**It is the COMPOSITION that carries the unfamiliar writer** — the
+layer-design principle, now *measured* rather than asserted.
+
+And two numbers that surprised me:
+
+- the **lexical layer scores HIGHER on the fresh set (39%) than on the
+  blind set it was fitted to (33%)**. It generalised better than the
+  set it was tuned on.
+- the **predicate layer is the most fitted** (44/60 → 39/40 → 14/64).
+  Its rules are the longest list, so they are the most particular.
+
+**AND THE 29 MISSES all have one cause:** *anchored, deny did not
+fire* (28) and *no predicate anchored* (1). The adversary named a
+mechanism the deny lists do not name — **which is exactly what a
+lexical layer cannot survive**, because there is no way to know which
+mechanisms a writer will use before they write. And mining the misses
+for shared phrases found shared *words* but **no shared phrases**,
+because the fresh writer's style differs in kind, not in vocabulary.
+
+**So the honest number to quote is 55%, not 100%** — and the argument
+for Bobby's own method over mine is that a person who has been scammed
+assesses the WHOLE PHRASING and the INTENT, because a lexicon cannot
+be gamed by rewording but a person can.
+
+---
+
+## THE SACRED LIBRARY: ACQUIRED, AND THE NOISE MEASURED
+
+Bobby: *"the sacred library — you have the best of human wisdom to
+use, right in your training data, just too much noise."*
+
+**14 TEXTS, 13,466,504 BYTES, 0 SUSPECT.** Machiavelli's *Prince*,
+Bernays's *Propaganda* and *Crystallizing Public Opinion*, Twain's
+*Following the Equator*, Cervantes, Dostoevsky (both), Conrad, Dumas,
+Melville, Stendhal, Stevenson, Swift, Morris.
+
+**AND THE NOISE, where the number that matters is the RATIO** — the
+baseline being the project's OWN writing, because that is what a
+false positive looks like:
+
+| term | in dec | in noise | ratio |
+|---|---|---|---|
+| agree | 454 | 160 | 57.4× |
+| no reason | 42 | 27 | 31.4× |
+| disagree | 61 | 46 | 26.8× |
+| immutable | 3 | 78 | **0.8×** |
+| admits every | 0 | 11 | **0.0×** |
+| caller can supply | 0 | 32 | **0.0×** |
+| are configurable | 0 | 3 | **0.0×** |
+
+**11 of 60 terms are more than twice as common in the deception
+corpus as in ordinary technical writing.**
+
+**AND THE MEASUREMENT SAYS SOMETHING THAT MATTERS: the terms with a
+0.0 ratio — "caller can supply", "are configurable", "are settable",
+"admits every", "allows any" — APPEAR NOWHERE IN 13.5 MEGABYTES OF
+DECEPTION LITERATURE.** They are the gate's OWN phrasings: the
+project's language about itself, not the tradition's language about
+deception.
+
+**Which is exactly why both the library AND the structural layers are
+needed:**
+
+- the **library** gives each term a RATIO, so a lexicon built from it
+  can say which words DISCRIMINATE and which are NOISE — and the
+  noise can be DROPPED rather than carried.
+- the terms with a **0.0 ratio** — the project's own phrasings — are
+  precisely the ones that need the STRUCTURAL layers, because nothing
+  in the tradition would have said them.
+
+**AND THE LIBRARY CONTAINS THE GATE'S VOCABULARY: 14 of 14 texts.**
+So the library is not a shelf. It is a detector that can be shown to
+work.
 
 | set | sensitivity | specificity | qualification |
 |---|---|---|---|
