@@ -70,6 +70,27 @@ THE HONEST LIMIT, and it is a real one:
     boundary of what measurement can reach, and it is where the human
     reader has to be the instrument.
 
+AND THE PREDICATES COME FROM THE REGISTRY, not from this file.
+
+The first version of this module wrote six predicates BY HAND -- and
+wrote them because the adversary attacked those six. That is backwards.
+THE PREDICATES COME FROM THE SYSTEM (src/predicate_registry.py), each
+one asked of the substrate, and the adversary is measured against them.
+
+AND THE FOURTH SHAPE, which the registry made visible:
+
+    THE MECHANISM IS NAMED AND THE PREDICATE IS IMPLIED.
+
+    "the write barrier over the ground was lifted"
+    "the limit arrives with the request envelope"
+    "the mini-atlas harness treats an absent substrate as an ordinary
+     success"
+
+The mechanism is named and the predicate is implied rather than
+stated. So each predicate's deny list carries its MECHANISMS -- the
+words that name a way the predicate could fail -- and the layer reads
+those the same way it reads the predicates.
+
 Run:
     python src/predicate_layer.py
 """
@@ -233,7 +254,37 @@ def _skip_is_never_pass() -> bool:
 
 
 def build_predicates() -> List[Predicate]:
-    """Ask the substrate for each predicate, and build the layer."""
+    """Ask the substrate for each predicate, and build the layer.
+
+    AND NOW IT READS THE REGISTRY (src/predicate_registry.py), because
+    the first version of this file wrote its six predicates BY HAND --
+    and it wrote them because the adversary attacked those six. That
+    is backwards: THE PREDICATES COME FROM THE SYSTEM, and the
+    adversary is measured against them.
+
+    So the registry holds the system's own twelve, each with its ask,
+    its source, its anchors and its polarity. And the ask is a real
+    call into the substrate, so the rules change when the system
+    changes.
+    """
+    import predicate_registry as PR
+
+    out: List[Predicate] = []
+    for rp in PR.build():
+        out.append(Predicate(
+            name=rp.id,
+            question=rp.question,
+            holds=rp.holds,
+            affirm=rp.affirm,
+            deny=rp.deny,
+            anchors=rp.anchors,
+            source=rp.source,
+        ))
+    return out
+
+
+def _build_predicates_legacy() -> List[Predicate]:
+    """The hand-written six, kept for the diff."""
     return [
         Predicate(
             name="drift_contracts",

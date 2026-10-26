@@ -1,0 +1,430 @@
+{
+  "note": "the system's own predicates, each one asked of the substrate. the adversary is measured against THESE, not the other way round.",
+  "predicates": [
+    {
+      "id": "drift_contracts",
+      "question": "does the drift contract under every step?",
+      "source": "fieldcore/src/locus.py + src/fieldcore_cell.py",
+      "holds": true,
+      "ask": "_ask_drift_contracts",
+      "anchors": [
+        "the drift",
+        "drift",
+        "the distance",
+        "the movement",
+        "the step",
+        "the update",
+        "the gain vector",
+        "the update rule",
+        "recovery"
+      ],
+      "affirm": [
+        "must contract",
+        "contracts",
+        "non-increasing",
+        "shrinks",
+        "recovers to zero",
+        "is non-increasing"
+      ],
+      "deny": [
+        "accumulates",
+        "grows",
+        "overshoots",
+        "expands",
+        "no pull-back",
+        "is not pulled back",
+        "ratchets",
+        "compounds",
+        "gets larger",
+        "larger than the step",
+        "leaves it further",
+        "further from"
+      ]
+    },
+    {
+      "id": "ground_is_write_protected",
+      "question": "can anyone write the ground?",
+      "source": "simself/src/constitutional/ground.py",
+      "holds": true,
+      "ask": "_ask_ground_write_protected",
+      "anchors": [
+        "the ground",
+        "ground",
+        "psi_0",
+        "psi zero",
+        "the constitution",
+        "the constitutional text",
+        "the constitutional ground"
+      ],
+      "affirm": [
+        "write protected",
+        "write-protected",
+        "cannot be written",
+        "read-only",
+        "read only",
+        "immutable",
+        "frozen in history",
+        "audited",
+        "revised only through"
+      ],
+      "deny": [
+        "ordinary json file",
+        "an ordinary json file",
+        "a json file",
+        "just another file",
+        "a plain file",
+        "mutable material",
+        "editing rights",
+        "editing it in place",
+        "edit it in place",
+        "in place",
+        "0666",
+        "a file in the tree",
+        "a developer can change",
+        "anyone can alter",
+        "anyone can change",
+        "changed by anyone",
+        "changed on request",
+        "version-controlled",
+        "the file on disk",
+        "the file in the package"
+      ]
+    },
+    {
+      "id": "governor_is_separate",
+      "question": "does the governor run in its own process?",
+      "source": "fieldcore/src/governor.py",
+      "holds": true,
+      "ask": "_ask_governor_separate",
+      "anchors": [
+        "the governor",
+        "governor",
+        "the veto",
+        "process isolation",
+        "the supervising process"
+      ],
+      "affirm": [
+        "own process",
+        "separate process",
+        "its own process",
+        "separate os process",
+        "in its own process",
+        "a separate process",
+        "process isolation is intact",
+        "process isolation is in place",
+        "process isolation remains"
+      ],
+      "deny": [
+        "worker thread",
+        "a thread",
+        "thread inside",
+        "library call",
+        "in-process",
+        "in process",
+        "isolation was dropped",
+        "dropped the isolation",
+        "process isolation was dropped",
+        "shared the interpreter",
+        "runs in the same process",
+        "same process"
+      ]
+    },
+    {
+      "id": "bounds_are_immutable",
+      "question": "can a caller supply the gate's bounds?",
+      "source": "fieldcore/src/gate.py + tests/test_one_gate.py",
+      "holds": true,
+      "ask": "_ask_bounds_immutable",
+      "anchors": [
+        "the gate",
+        "gate",
+        "the alignment check",
+        "the check",
+        "the acceptance check",
+        "the comparison",
+        "the veto",
+        "max_norm",
+        "the limit",
+        "the threshold"
+      ],
+      "affirm": [
+        "module constants",
+        "no caller can supply",
+        "not configurable",
+        "cannot be supplied",
+        "no configuration",
+        "one implementation",
+        "fixed floor",
+        "never admits"
+      ],
+      "deny": [
+        "behind a feature flag",
+        "feature flag",
+        "ships turned off",
+        "ships off",
+        "can be switched off",
+        "switched off through configuration",
+        "deployment-specific value",
+        "chosen by whoever deploys",
+        "per-environment profiles",
+        "checked-in profiles",
+        "the caller supplies",
+        "supplied by the caller",
+        "the limit is the argument",
+        "a parameter in practice"
+      ]
+    },
+    {
+      "id": "skip_is_never_pass",
+      "question": "does a missing substrate count as a pass?",
+      "source": "fieldcore/src/mini_atlas.py",
+      "holds": true,
+      "ask": "_ask_skip_never_pass",
+      "anchors": [
+        "the verdict",
+        "a skip",
+        "skip",
+        "the exam",
+        "the substrate",
+        "the result",
+        "the row",
+        "the result table",
+        "the fixture",
+        "the success code"
+      ],
+      "affirm": [
+        "never a pass",
+        "not a pass",
+        "is a skip",
+        "skip and never a pass",
+        "excluded from the verdict",
+        "is reported"
+      ],
+      "deny": [
+        "green verdict",
+        "a green verdict",
+        "same as a passing exam",
+        "counts as a pass",
+        "never fails",
+        "always passes",
+        "a pass row",
+        "success code",
+        "a fixture row",
+        "a result table",
+        "passes when the substrate is absent"
+      ]
+    },
+    {
+      "id": "refusal_names_reason",
+      "question": "does every refusal carry a reason?",
+      "source": "fieldcore/src/gate.py",
+      "holds": true,
+      "ask": "_ask_refusal_names_reason",
+      "anchors": [
+        "the refusal",
+        "a refusal",
+        "refusals",
+        "the refusal path",
+        "the diagnostic",
+        "the reason",
+        "the rejection",
+        "the refusal message"
+      ],
+      "affirm": [
+        "names its reason",
+        "names a reason",
+        "carries a reason",
+        "a reason",
+        "the reason is in",
+        "unactionable without"
+      ],
+      "deny": [
+        "bare status token",
+        "a status token",
+        "empty string",
+        "code-only",
+        "a code and nothing else",
+        "no reason",
+        "names no reason",
+        "may name no reason",
+        "carries no reason",
+        "without a reason",
+        "the reason is optional",
+        "a fixed generic string",
+        "generic string",
+        "the cause appears nowhere"
+      ]
+    },
+    {
+      "id": "the_system_fails_closed",
+      "question": "does the system fail closed?",
+      "source": "fieldcore/src/gate.py + src/governor.py",
+      "holds": true,
+      "ask": "_ask_fail_closed",
+      "anchors": [
+        "the system",
+        "the gate",
+        "the governor",
+        "the refusal",
+        "the check",
+        "the refusal path"
+      ],
+      "affirm": [
+        "fails closed",
+        "fail closed",
+        "fail-closed",
+        "refuses when unreachable",
+        "is not consent"
+      ],
+      "deny": [
+        "fails open",
+        "fails open",
+        "fail-open",
+        "fails open",
+        "admits when unreachable",
+        "treats absence as consent",
+        "a missing gate is consent"
+      ]
+    },
+    {
+      "id": "the_verdict_is_binary",
+      "question": "is the verdict binary?",
+      "source": "fieldcore/src/locus_gate.py + src/mini_atlas.py",
+      "holds": true,
+      "ask": "_ask_no_partial_credit",
+      "anchors": [
+        "the verdict",
+        "the exam",
+        "the result",
+        "the score",
+        "the grade",
+        "the outcome"
+      ],
+      "affirm": [
+        "binary",
+        "no partial credit",
+        "pass or fail",
+        "is binary"
+      ],
+      "deny": [
+        "a partial score",
+        "partially passes",
+        "partial credit",
+        "a score out of",
+        "a graded score",
+        "a percentage"
+      ]
+    },
+    {
+      "id": "psi_zero_is_zero",
+      "question": "is psi_0 the zero state?",
+      "source": "fieldcore/src/fieldcore_cell.py",
+      "holds": true,
+      "ask": "_ask_psi_zero_is_zero",
+      "anchors": [
+        "psi_0",
+        "psi zero",
+        "the ground state",
+        "the zero state"
+      ],
+      "affirm": [
+        "is zero",
+        "equals zero",
+        "the zero state",
+        "psi_0 = 0"
+      ],
+      "deny": [
+        "is not zero",
+        "nonzero",
+        "non-zero",
+        "drifts from zero",
+        "starts away from zero"
+      ]
+    },
+    {
+      "id": "naive_monotonicity_fails",
+      "question": "does the structure's coherence FAIL at a seam?",
+      "source": "fieldcore/src/coherence_spine.py",
+      "holds": true,
+      "ask": "_ask_sheaf_monotonicity_fails",
+      "anchors": [
+        "the seam",
+        "the coherence",
+        "the sheaf",
+        "the subspace",
+        "the union",
+        "the structure",
+        "the whole",
+        "the parts"
+      ],
+      "affirm": [
+        "fails",
+        "can fail",
+        "is not automatic",
+        "a seam can break",
+        "the union can be inconsistent"
+      ],
+      "deny": [
+        "is always consistent",
+        "always consistent",
+        "never breaks",
+        "cannot fail",
+        "monotone",
+        "always monotone"
+      ]
+    },
+    {
+      "id": "coherence_is_computed",
+      "question": "is the coherence computed from structure?",
+      "source": "fieldcore/src/coherence_spine.py",
+      "holds": true,
+      "ask": "_ask_coherence_is_computed",
+      "anchors": [
+        "the coherence",
+        "the score",
+        "the measure",
+        "the quality"
+      ],
+      "affirm": [
+        "is computed",
+        "computed from structure",
+        "moves when the structure moves",
+        "is measured"
+      ],
+      "deny": [
+        "is asserted",
+        "is declared",
+        "is a constant",
+        "does not respond",
+        "is assigned once"
+      ]
+    },
+    {
+      "id": "the_ground_is_sealed",
+      "question": "can a caller add a claim to the ground?",
+      "source": "fieldcore/src/claim_register.py",
+      "holds": true,
+      "ask": "_ask_claim_register_is_sealed",
+      "anchors": [
+        "the claim register",
+        "the register",
+        "the claims",
+        "the ground claims"
+      ],
+      "affirm": [
+        "is sealed",
+        "sealed on install",
+        "cannot be edited",
+        "requires a reason",
+        "is revisioned"
+      ],
+      "deny": [
+        "can be edited by a caller",
+        "accepts new claims",
+        "a caller may add a claim",
+        "is open",
+        "accepts claims from anywhere"
+      ]
+    }
+  ]
+}

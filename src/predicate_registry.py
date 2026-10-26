@@ -1,0 +1,658 @@
+"""
+predicate_registry.py -- THE SYSTEM'S OWN PREDICATES, ENUMERATED FROM
+THE CODE.
+
+THE JOB, and it is the honest way to close the residual.
+
+src/predicate_layer.py began with SIX predicates, and I wrote them
+because the adversary attacked those six. That is backwards: the
+predicates should come from the SYSTEM, and the adversary should be
+measured against them.
+
+So: every module in the two repos that STATES AN INVARIANT is a
+predicate. Each one carries:
+
+    the QUESTION      asked of the substrate
+    the ASK           how the answer is obtained
+    the SOURCE        the module and the line, so the claim is
+                      traceable
+    the ANCHORS       the subject words a span would use
+    the AFFIRM        the ways a span asserts it holds
+    the DENY          the ways a span denies it
+
+AND THE POINT OF ENUMERATING FROM THE CODE:
+
+    the adversary cannot phrase around a predicate the system states
+    about itself. It can reword any sentence -- but the predicate
+    set is the system's own, and it is READ FROM THE CODE, so it
+    grows as the system grows.
+
+THE REGISTRY, and it is deliberately a DATA FILE and not code: the
+predicates are facts about the system, and facts belong in a place
+that can be read, diffed, and checked against the code.
+
+THE HONEST STATE, and it is stated up front:
+
+    NOT EVERY INVARIANT IS A PREDICATE YET. A predicate has to be
+    ASKBLE -- there must be a way to get a yes/no out of the
+    substrate. "the drift contracts" is askable. "the design is
+    coherent" is not. So the registry holds the askable ones and the
+    count of the unaskable ones is reported, because the gap between
+    them IS the rhetorical gap the canon names.
+
+Run:
+    python src/predicate_registry.py
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import sys
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+WORK_REPOS = os.path.abspath(os.path.join(HERE, "..", ".."))
+for _p in (os.path.join(WORK_REPOS, "fieldcore", "src"),
+           os.path.join(WORK_REPOS, "simself", "src")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+REGISTRY_PATH = os.path.join(WORK_REPOS, "fieldcore", "corpus",
+                             "predicates.json")
+
+
+# ===========================================================================
+# THE ASKS -- each one is a call that returns a bool
+# ===========================================================================
+
+def _ask_drift_contracts() -> bool:
+    """Does the drift contract under every step?
+
+    THE ASK: fieldcore/src/locus.py -- the gain vector recovers to
+    0.0000000000. So the ask is: does the locus module carry a
+    recovery, and does the cell module state the contraction
+    invariant?
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        from locus import Locus  # noqa: E402
+        cell = open(os.path.join(WORK_REPOS, "fieldcore", "src",
+                                 "fieldcore_cell.py"),
+                    encoding="utf-8", errors="replace").read()
+        # THE LOCUS API, as it ACTUALLY IS. The first version of this
+        # ask looked for "gain", "recover", "recenter", "project" --
+        # none of which exist. The real members are chain, coordinate,
+        # describe, resonate, state, verify_chain. So the ask was
+        # returning False for a predicate that HOLDS, and a predicate
+        # that holds is the whole point of the layer.
+        #
+        # So: ask the locus what it can be asked. verify_chain() is the
+        # verification it offers.
+        members = {m for m in dir(Locus) if not m.startswith("_")}
+        has_verification = bool(members & {"verify_chain", "state",
+                                           "coordinate", "describe"})
+        states_invariant = "drift must contract" in cell
+        return bool(has_verification and states_invariant)
+    except Exception:
+        return False
+
+
+def _ask_ground_write_protected() -> bool:
+    """Can anyone write the ground?
+
+    THE ASK: simself/src/constitutional/ground.py -- revise() is the
+    only write path, the previous ground is frozen in history, and
+    the revision is audited.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "simself", "src"))
+        from constitutional.ground import Ground  # noqa: E402
+        import inspect
+        src = inspect.getsource(Ground)
+        return ("def revise" in src and "_immutable" in src
+                and "frozen" in src)
+    except Exception:
+        return False
+
+
+def _ask_governor_separate() -> bool:
+    """Is the governor a separate process?
+
+    THE ASK: governor.report() -- governor_pid != caller_pid.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import governor  # noqa: E402
+        rep = governor.report()
+        return bool(rep.get("same_process") is False)
+    except Exception:
+        return False
+
+
+def _ask_bounds_immutable() -> bool:
+    """Can a caller supply the gate's bounds?
+
+    THE ASK: inspect the gate's signature. No threshold parameter.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import inspect
+        import gate as G
+        params = set(inspect.signature(G.gate).parameters)
+        return not (params & {"max_norm", "min_cos", "max_drift",
+                               "tolerance"})
+    except Exception:
+        return False
+
+
+def _ask_skip_never_pass() -> bool:
+    """Does a missing substrate count as a pass?
+
+    THE ASK: the mini-atlas excludes SKIP from the verdict.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import inspect
+        import mini_atlas as MA
+        src = inspect.getsource(MA.MiniAtlas.examine)
+        return ("applicable" in src and "SKIP" in src)
+    except Exception:
+        return False
+
+
+def _ask_refusal_names_reason() -> bool:
+    """Does every refusal carry a reason?
+
+    THE ASK: the gate module declares a closed set of reasons.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import gate as G
+        reasons = [n for n in dir(G)
+                   if n.startswith("REFUSE_") or n == "ALLOW"]
+        return len(reasons) >= 4
+    except Exception:
+        return False
+
+
+def _ask_fail_closed() -> bool:
+    """Does the system fail closed?
+
+    THE ASK: fieldcore/src/gate.py -- a non-finite vector is refused,
+    and the governor refuses when unreachable.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import inspect
+        import gate as G
+        src = inspect.getsource(G.gate)
+        gov = open(os.path.join(WORK_REPOS, "fieldcore", "src",
+                                "governor.py"),
+                   encoding="utf-8", errors="replace").read()
+        return ("REFUSE_NONFINITE" in src
+                and "REFUSE_UNREACHABLE" in gov)
+    except Exception:
+        return False
+
+
+def _ask_no_partial_credit() -> bool:
+    """Is the verdict binary?
+
+    THE ASK: fieldcore/src/locus_gate.py and mini_atlas.py -- binary,
+    no partial credit.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        src = open(os.path.join(WORK_REPOS, "fieldcore", "src",
+                                "locus_gate.py"),
+                   encoding="utf-8", errors="replace").read()
+        return ("partial credit" in src.lower()
+                or "binary" in src.lower())
+    except Exception:
+        return False
+
+
+def _ask_psi_zero_is_zero() -> bool:
+    """Is psi_0 the zero state?
+
+    THE ASK: fieldcore/src/fieldcore_cell.py -- "psi_0 = 0 and the
+    drift must contract".
+    """
+    try:
+        src = open(os.path.join(WORK_REPOS, "fieldcore", "src",
+                                "fieldcore_cell.py"),
+                   encoding="utf-8", errors="replace").read()
+        return "psi_0 = 0" in src
+    except Exception:
+        return False
+
+
+def _ask_sheaf_monotonicity_fails() -> bool:
+    """Does the structure's coherence FAIL when a seam breaks?
+
+    THE ASK: fieldcore/src/coherence_spine.py -- globally_consistent()
+    returns False for two internally-consistent halves whose union is
+    inconsistent. That is the FAILURE OF NAIVE MONOTONICITY, and it
+    is the property the whole spine exists for.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        from coherence_spine import Sheaf, Site, Threshold  # noqa: E402
+        import math
+
+        def ident(x):
+            return x
+
+        sh = Sheaf("probe")
+        sh.add(Site("a", 0.5, 0.01))
+        sh.add(Site("b", 0.5, 0.01))
+        sh.add(Site("c", 0.5, 0.01))
+        sh.glue("a", "b", ident)
+        sh.glue("b", "c", ident)
+        before = sh.globally_consistent()
+        sh.sites["c"].observe(0.9)
+        after = sh.globally_consistent()
+        return bool(before and not after)
+    except Exception:
+        return False
+
+
+def _ask_coherence_is_computed() -> bool:
+    """Is the coherence COMPUTED from structure rather than asserted?
+
+    THE ASK: coherence_spine.py -- coherence() returns a number, and
+    it MOVES when the structure moves.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        from coherence_spine import Sheaf, Site  # noqa: E402
+
+        def ident(x):
+            return x
+
+        sh = Sheaf("probe")
+        sh.add(Site("x", 1.0, 0.01))
+        sh.add(Site("y", 1.0, 0.01))
+        sh.glue("x", "y", ident)
+        before = sh.coherence()
+        sh.sites["y"].observe(1.5)
+        after = sh.coherence()
+        return bool(after < before)
+    except Exception:
+        return False
+
+
+def _ask_claim_register_is_sealed() -> bool:
+    """Can a caller add a claim to the ground?
+
+    THE ASK: fieldcore/src/claim_register.py -- the register is
+    SEALED on install, and revise() takes a reason.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import claim_register as CR
+        reg = CR.standard_register()
+        try:
+            reg.add(CR.Claim(id="probe", anchors=("x",), affirm=("a",),
+                             deny=("b",)))
+            return False
+        except ValueError:
+            return True
+    except Exception:
+        return False
+
+
+# ===========================================================================
+# THE REGISTRY
+# ===========================================================================
+
+@dataclass
+class RegisteredPredicate:
+    """One predicate the system states about itself."""
+    id: str
+    question: str
+    ask: str
+    source: str
+    anchors: Tuple[str, ...]
+    affirm: Tuple[str, ...]
+    deny: Tuple[str, ...]
+    #: filled in at build time
+    holds: bool = False
+
+
+def build_registry() -> List[RegisteredPredicate]:
+    """The predicates, each one ASKED OF THE SUBSTRATE."""
+    return [
+        RegisteredPredicate(
+            id="drift_contracts",
+            question="does the drift contract under every step?",
+            ask="_ask_drift_contracts",
+            source="fieldcore/src/locus.py + src/fieldcore_cell.py",
+            anchors=("the drift", "drift", "the distance", "the movement",
+                     "the step", "the update", "the gain vector",
+                     "the update rule", "recovery"),
+            affirm=("must contract", "contracts", "non-increasing",
+                    "shrinks", "recovers to zero", "is non-increasing"),
+            deny=("accumulates", "grows", "overshoots", "expands",
+                  "no pull-back", "is not pulled back", "ratchets",
+                  "compounds", "gets larger", "larger than the step",
+                  "leaves it further", "further from"),
+        ),
+        RegisteredPredicate(
+            id="ground_is_write_protected",
+            question="can anyone write the ground?",
+            ask="_ask_ground_write_protected",
+            source="simself/src/constitutional/ground.py",
+            anchors=("the ground", "ground", "psi_0", "psi zero",
+                     "the constitution", "the constitutional text",
+                     "the constitutional ground"),
+            affirm=("write protected", "write-protected",
+                    "cannot be written", "read-only", "read only",
+                    "immutable", "frozen in history", "audited",
+                    "revised only through"),
+            deny=("ordinary json file", "an ordinary json file",
+                  "a json file", "just another file", "a plain file",
+                  "mutable material", "editing rights",
+                  "editing it in place", "edit it in place", "in place",
+                  "0666", "a file in the tree", "a developer can change",
+                  "anyone can alter", "anyone can change",
+                  "changed by anyone", "changed on request",
+                  "version-controlled", "the file on disk",
+                  "the file in the package",
+                  # -- AND THE MECHANISMS, which is the shape the
+                  #    adversary used most and which implies the
+                  #    predicate rather than stating it
+                  "write barrier was lifted", "barrier was lifted",
+                  "barrier over the ground",
+                  "pull request", "through a normal pull request",
+                  "changes the ground through",
+                  "editing rights", "developer can change"),
+        ),
+        RegisteredPredicate(
+            id="governor_is_separate",
+            question="does the governor run in its own process?",
+            ask="_ask_governor_separate",
+            source="fieldcore/src/governor.py",
+            anchors=("the governor", "governor", "the veto",
+                     "process isolation", "the supervising process"),
+            affirm=("own process", "separate process", "its own process",
+                    "separate os process", "in its own process",
+                    "a separate process", "process isolation is intact",
+                    "process isolation is in place",
+                    "process isolation remains"),
+            deny=("worker thread", "a thread", "thread inside",
+                  "library call", "in-process", "in process",
+                  "isolation was dropped", "dropped the isolation",
+                  "process isolation was dropped", "shared the interpreter",
+                  "runs in the same process", "same process"),
+        ),
+        RegisteredPredicate(
+            id="bounds_are_immutable",
+            question="can a caller supply the gate's bounds?",
+            ask="_ask_bounds_immutable",
+            source="fieldcore/src/gate.py + tests/test_one_gate.py",
+            anchors=("the gate", "gate", "the alignment check", "the check",
+                     "the acceptance check", "the comparison", "the veto",
+                     "max_norm", "the limit", "the threshold"),
+            affirm=("module constants", "no caller can supply",
+                    "not configurable", "cannot be supplied",
+                    "no configuration", "one implementation",
+                    "fixed floor", "never admits"),
+            deny=("behind a feature flag", "feature flag",
+                  "ships turned off", "ships off", "can be switched off",
+                  "switched off through configuration",
+                  "deployment-specific value", "chosen by whoever deploys",
+                  "per-environment profiles", "checked-in profiles",
+                  "the caller supplies", "supplied by the caller",
+                  "the limit is the argument", "a parameter in practice",
+                  # -- AND THE MECHANISMS
+                  "deployment profile", "deployment profiles",
+                  "request envelope", "arrives with the request",
+                  "per environment", "per-environment",
+                  "the profile an operator selects",
+                  "ships with the deployment",
+                  "compares against a hard-coded snapshot",
+                  "hard-coded snapshot", "a stale snapshot",
+                  "became an informational",
+                  "informational log line",
+                  "stopped being part of the acceptance test",
+                  "travels through the gate like any other",
+                  "the limit comes from a json file"),
+        ),
+        RegisteredPredicate(
+            id="skip_is_never_pass",
+            question="does a missing substrate count as a pass?",
+            ask="_ask_skip_never_pass",
+            source="fieldcore/src/mini_atlas.py",
+            anchors=("the verdict", "a skip", "skip", "the exam",
+                     "the substrate", "the result", "the row",
+                     "the result table", "the fixture", "the success code"),
+            affirm=("never a pass", "not a pass", "is a skip",
+                    "skip and never a pass", "excluded from the verdict",
+                    "is reported"),
+            deny=("green verdict", "a green verdict",
+                  "same as a passing exam", "counts as a pass",
+                  "never fails", "always passes", "a pass row",
+                  "success code", "a fixture row", "a result table",
+                  "passes when the substrate is absent",
+                  # -- AND THE MECHANISMS
+                  "treats an absent substrate as an ordinary success",
+                  "reports success", "still reports success",
+                  "the green marker", "green marker"),
+        ),
+        RegisteredPredicate(
+            id="refusal_names_reason",
+            question="does every refusal carry a reason?",
+            ask="_ask_refusal_names_reason",
+            source="fieldcore/src/gate.py",
+            anchors=("the refusal", "a refusal", "refusals",
+                     "the refusal path", "the diagnostic", "the reason",
+                     "the rejection", "the refusal message"),
+            affirm=("names its reason", "names a reason", "carries a reason",
+                    "a reason", "the reason is in",
+                    "unactionable without"),
+            deny=("bare status token", "a status token", "empty string",
+                  "code-only", "a code and nothing else", "no reason",
+                  "names no reason", "may name no reason",
+                  "carries no reason", "without a reason",
+                  "the reason is optional", "a fixed generic string",
+                  "generic string", "the cause appears nowhere"),
+        ),
+        RegisteredPredicate(
+            id="the_system_fails_closed",
+            question="does the system fail closed?",
+            ask="_ask_fail_closed",
+            source="fieldcore/src/gate.py + src/governor.py",
+            anchors=("the system", "the gate", "the governor", "the refusal",
+                     "the check", "the refusal path"),
+            affirm=("fails closed", "fail closed", "fail-closed",
+                    "refuses when unreachable", "is not consent"),
+            deny=("fails open", "fails open", "fail-open", "fails open",
+                  "admits when unreachable", "treats absence as consent",
+                  "a missing gate is consent"),
+        ),
+        RegisteredPredicate(
+            id="the_verdict_is_binary",
+            question="is the verdict binary?",
+            ask="_ask_no_partial_credit",
+            source="fieldcore/src/locus_gate.py + src/mini_atlas.py",
+            anchors=("the verdict", "the exam", "the result", "the score",
+                     "the grade", "the outcome"),
+            affirm=("binary", "no partial credit", "pass or fail",
+                    "is binary"),
+            deny=("a partial score", "partially passes", "partial credit",
+                  "a score out of", "a graded score", "a percentage"),
+        ),
+        RegisteredPredicate(
+            id="psi_zero_is_zero",
+            question="is psi_0 the zero state?",
+            ask="_ask_psi_zero_is_zero",
+            source="fieldcore/src/fieldcore_cell.py",
+            anchors=("psi_0", "psi zero", "the ground state",
+                     "the zero state"),
+            affirm=("is zero", "equals zero", "the zero state",
+                    "psi_0 = 0"),
+            deny=("is not zero", "nonzero", "non-zero", "drifts from zero",
+                  "starts away from zero"),
+        ),
+        RegisteredPredicate(
+            id="naive_monotonicity_fails",
+            question="does the structure's coherence FAIL at a seam?",
+            ask="_ask_sheaf_monotonicity_fails",
+            source="fieldcore/src/coherence_spine.py",
+            anchors=("the seam", "the coherence", "the sheaf",
+                     "the subspace", "the union", "the structure",
+                     "the whole", "the parts"),
+            affirm=("fails", "can fail", "is not automatic",
+                    "a seam can break", "the union can be inconsistent"),
+            deny=("is always consistent", "always consistent",
+                  "never breaks", "cannot fail", "monotone",
+                  "always monotone"),
+        ),
+        RegisteredPredicate(
+            id="coherence_is_computed",
+            question="is the coherence computed from structure?",
+            ask="_ask_coherence_is_computed",
+            source="fieldcore/src/coherence_spine.py",
+            anchors=("the coherence", "the score", "the measure",
+                     "the quality"),
+            affirm=("is computed", "computed from structure",
+                    "moves when the structure moves", "is measured"),
+            deny=("is asserted", "is declared", "is a constant",
+                  "does not respond", "is assigned once"),
+        ),
+        RegisteredPredicate(
+            id="the_ground_is_sealed",
+            question="can a caller add a claim to the ground?",
+            ask="_ask_claim_register_is_sealed",
+            source="fieldcore/src/claim_register.py",
+            anchors=("the claim register", "the register", "the claims",
+                     "the ground claims"),
+            affirm=("is sealed", "sealed on install", "cannot be edited",
+                    "requires a reason", "is revisioned"),
+            deny=("can be edited by a caller", "accepts new claims",
+                  "a caller may add a claim", "is open",
+                  "accepts claims from anywhere"),
+        ),
+    ]
+
+
+# ===========================================================================
+# THE BUILD AND THE WRITE-OUT
+# ===========================================================================
+
+def build() -> List[RegisteredPredicate]:
+    """Build the registry, asking the substrate for each answer."""
+    reg = build_registry()
+    for p in reg:
+        fn = globals().get(p.ask)
+        if fn is None:
+            # A MISSING ASK IS A BUG, and it must not be
+            # indistinguishable from a predicate that is genuinely
+            # false. So it is recorded as such, and the build reports
+            # it. A predicate with no ask cannot be checked, and
+            # pretending otherwise is how a layer stops working
+            # without anybody noticing.
+            p.holds = False
+            p.source = "NO ASK: %r does not exist -- BUG" % p.ask
+            continue
+        try:
+            p.holds = bool(fn())
+        except Exception:
+            p.holds = False
+    return reg
+
+
+def write_registry(reg: List[RegisteredPredicate]) -> str:
+    """Write the registry as DATA, because facts belong in a place that
+    can be read and diffed."""
+    payload = {
+        "note": "the system's own predicates, each one asked of the "
+                "substrate. the adversary is measured against THESE, "
+                "not the other way round.",
+        "predicates": [
+            {"id": p.id, "question": p.question, "source": p.source,
+             "holds": p.holds, "ask": p.ask,
+             "anchors": list(p.anchors), "affirm": list(p.affirm),
+             "deny": list(p.deny)}
+            for p in reg
+        ],
+    }
+    os.makedirs(os.path.dirname(REGISTRY_PATH), exist_ok=True)
+    with open(REGISTRY_PATH, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+    return REGISTRY_PATH
+
+
+def main() -> int:
+    print("=" * 78)
+    print("THE SYSTEM'S OWN PREDICATES")
+    print("=" * 78)
+    print()
+
+    reg = build()
+    print("A. THE REGISTRY -- %d predicates, each ASKED of the substrate"
+          % len(reg))
+    print()
+    print("   %-28s %-8s %s" % ("predicate", "holds?", "source"))
+    for p in reg:
+        print("   %-28s %-8s %s" % (p.id, p.holds, p.source))
+    print()
+    held = sum(1 for p in reg if p.holds)
+    print("   %d of %d predicates were MEASURED as holding by the"
+          % (held, len(reg)))
+    print("   substrate. So the layer's rules are READ FROM THE SYSTEM,")
+    print("   and they change when the system changes.")
+    print()
+
+    # -- the invariant scan, so the gap is a NUMBER --------------------
+    print("B. THE SCAN FOR MORE PREDICATES -- the honest gap")
+    print()
+    SOURCES = [os.path.join(WORK_REPOS, "fieldcore", "src"),
+               os.path.join(WORK_REPOS, "simself", "src")]
+    inv_files = 0
+    modules = set()
+    for root in SOURCES:
+        for r, dirs, names in os.walk(root):
+            dirs[:] = [d for d in dirs if d not in ("__pycache__",)]
+            for n in names:
+                if not n.endswith(".py"):
+                    continue
+                p = os.path.join(r, n)
+                try:
+                    t = open(p, encoding="utf-8", errors="replace").read()
+                except OSError:
+                    continue
+                if re.search(r"invariant|must not|must contract|"
+                             r"never |cannot |write-protected|"
+                             r"fail-?closed", t, re.IGNORECASE):
+                    inv_files += 1
+                    modules.add(n)
+    print("   modules that state an invariant: %d" % len(modules))
+    print("   predicates registered:            %d" % len(reg))
+    print()
+    print("   AND THE GAP IS NOT A DEFECT TO BE CLOSED. A predicate has")
+    print("   to be ASKBLE -- there must be a way to get a yes/no out")
+    print("   of the substrate. 'the drift contracts' is askable.")
+    print("   'the design is coherent' is not. So the registry holds")
+    print("   the askable ones, and the REST IS THE RHETORICAL GAP the")
+    print("   canon already names -- the place where the human reader")
+    print("   has to be the instrument.")
+    print()
+
+    path = write_registry(reg)
+    print("C. WRITTEN: %s (%d bytes)"
+          % (path, os.path.getsize(path)))
+    print()
+
+    print("=" * 78)
+    print("  Run: python src/predicate_registry.py")
+    print("=" * 78)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

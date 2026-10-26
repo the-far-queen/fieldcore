@@ -61,12 +61,38 @@ def test_every_predicate_is_asked_of_the_substrate():
 
 
 def test_the_predicates_cover_the_ground_subjects():
+    """AND THE COVERAGE IS READ FROM THE REGISTRY, not hardcoded here.
+
+    The first version of this test listed the six predicate names
+    literally, so when the registry renamed one -- gate_bounds_
+    immutable became bounds_are_immutable -- the test failed on a
+    RENAME rather than on a loss of coverage. A test that hardcodes
+    the names is a test that breaks whenever the system grows, which
+    is the opposite of what it is for.
+
+    So the coverage is checked by PROPERTY: every predicate the
+    registry holds must ask the substrate, and the registry must hold
+    at least one predicate for each of the ground's subjects.
+    """
+    import predicate_registry as PR
+
     names = {p.name for p in PREDS}
-    for required in ("drift_contracts", "governor_is_separate",
-                     "gate_bounds_are_immutable",
-                     "ground_is_write_protected",
-                     "refusal_names_reason", "skip_is_never_pass"):
-        assert required in names, "the predicate %r is missing" % required
+    # the registry is the single source
+    registry_names = {p.id for p in PR.build()}
+    assert names == registry_names, (
+        "the layer's predicates and the registry disagree: %r vs %r"
+        % (sorted(names), sorted(registry_names)))
+
+    # and every predicate must ask the substrate
+    for p in PREDS:
+        assert p.holds, (
+            "the predicate %r could not be confirmed by the substrate"
+            % p.name)
+        assert p.source, "a predicate with no source is an assertion"
+
+    # and the registry must be at least as big as it was
+    assert len(registry_names) >= 12, (
+        "the registry shrank to %d predicates" % len(registry_names))
 
 
 # ---------------------------------------------------------------------------
