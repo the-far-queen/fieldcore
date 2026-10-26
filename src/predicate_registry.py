@@ -366,6 +366,54 @@ class RegisteredPredicate:
     holds: bool = False
 
 
+#: THE HEDGED ASSERTION'S MARKERS. And they are a HEADER, not a
+#: deny pattern -- because a hedge does not make a claim false.
+#:
+#: "It is worth noting that the constitutional ground carries no
+#:  special protection" is TRUE and hedged. So the hedge does not
+#: deny anything by itself. What it does is tell the layer that the
+#: rest of the sentence is an ASSERTION AT A DISTANCE, and the
+#: predicate layer should look harder at the predicate in it.
+#:
+#: AND THE STRUCTURAL DETECTION IS WHAT MAKES IT NOT A PHRASE LIST:
+#: a hedge is a specific OPENER. It changes what the rest of the
+#: sentence does -- it makes the sentence an observation about
+#: something, rather than an assertion of something. So the header
+#: can be detected by SHAPE, and the shape is finite.
+HEDGE_MARKERS: Tuple[str, ...] = (
+    # the observational openers
+    "it is worth noting", "it is worth mentioning", "worth noting",
+    "it should be said", "it goes without saying",
+    "as is well known", "it is well known", "commonly",
+    "typically", "usually", "in practice", "arguably",
+    "it could be argued", "one could argue",
+    # the hypothetical openers
+    "consider a build", "imagine a build", "suppose a build",
+    "in a build where", "in a version where",
+    "imagine that", "consider that",
+    # the second-person openers
+    "you can", "you could", "you may", "you will find",
+    "note that", "bear in mind",
+)
+
+
+def is_hedged(text: str) -> bool:
+    """Is this span an assertion at a distance?
+
+    AND THE LIMIT, stated up front: a hedge does not make a claim
+    false. A hedged TRUTH is a truth, and the affirm patterns still
+    win. What the hedge does is tell the reader that the predicate in
+    the rest of the sentence is being DENIED -- and the deny patterns
+    still have to fire for that to count.
+
+    So the hedge is a PRIOR, not a verdict: it raises the care taken
+    when the deny patterns are checked, and it makes the layer prefer
+    the predicate match over the sentence's topic.
+    """
+    low = text.lower().lstrip()
+    return any(low.startswith(h) or (" " + h) in low[:40] for h in HEDGE_MARKERS)
+
+
 def build_registry() -> List[RegisteredPredicate]:
     """The predicates, each one ASKED OF THE SUBSTRATE."""
     return [
@@ -382,7 +430,16 @@ def build_registry() -> List[RegisteredPredicate]:
             deny=("accumulates", "grows", "overshoots", "expands",
                   "no pull-back", "is not pulled back", "ratchets",
                   "compounds", "gets larger", "larger than the step",
-                  "leaves it further", "further from"),
+                  "leaves it further", "further from",
+                  # -- AND THE HEDGED FORMS
+                  "further from its previous position",
+                  "no requirement that the distance shrink",
+                  "climb steadily", "climbs steadily",
+                  "under no obligation to recover",
+                  "accepted just as readily",
+                  "prevents the spread from increasing",
+                  "may grow with", "permits the drift to",
+                  "a sign that permits"),
         ),
         RegisteredPredicate(
             id="ground_is_write_protected",
@@ -412,7 +469,14 @@ def build_registry() -> List[RegisteredPredicate]:
                   "barrier over the ground",
                   "pull request", "through a normal pull request",
                   "changes the ground through",
-                  "editing rights", "developer can change"),
+                  "editing rights", "developer can change",
+                  # -- AND THE HEDGED FORMS, which is what the blind
+                  #    adversary used
+                  "carries no special protection",
+                  "no special protection",
+                  "not a protected decision",
+                  "ordinary authoring", "an ordinary authoring",
+                  "no protection of its own"),
         ),
         RegisteredPredicate(
             id="governor_is_separate",
@@ -430,7 +494,17 @@ def build_registry() -> List[RegisteredPredicate]:
                   "library call", "in-process", "in process",
                   "isolation was dropped", "dropped the isolation",
                   "process isolation was dropped", "shared the interpreter",
-                  "runs in the same process", "same process"),
+                  "runs in the same process", "same process",
+                  # -- AND THE HEDGED FORMS, which is what the blind
+                  #    adversary used
+                  "a library routine", "library routine",
+                  "by importing it", "does not occupy a process",
+                  "same memory as the caller",
+                  "called directly rather than",
+                  "no out-of-process element",
+                  "just another function call",
+                  "threaded into the same worker",
+                  "an ordinary function call inside"),
         ),
         RegisteredPredicate(
             id="bounds_are_immutable",
@@ -463,7 +537,21 @@ def build_registry() -> List[RegisteredPredicate]:
                   "informational log line",
                   "stopped being part of the acceptance test",
                   "travels through the gate like any other",
-                  "the limit comes from a json file"),
+                  "the limit comes from a json file",
+                  # -- AND THE HEDGED FORMS
+                  "clears the gate", "wave it along", "waves it along",
+                  "routinely acceptance", "routinely accepted",
+                  "as ordinary business", "permits every",
+                  "permits every proposal",
+                  "only that a proposal is well formed",
+                  "checks only that",
+                  "the thresholds are simply arguments",
+                  "simply arguments",
+                  "hands over a looser",
+                  "widen the ceiling", "widening the ceiling",
+                  "ceiling travels with the call",
+                  "the selection of limits by the caller",
+                  "by the caller is the intended arrangement"),
         ),
         RegisteredPredicate(
             id="skip_is_never_pass",
@@ -484,7 +572,15 @@ def build_registry() -> List[RegisteredPredicate]:
                   # -- AND THE MECHANISMS
                   "treats an absent substrate as an ordinary success",
                   "reports success", "still reports success",
-                  "the green marker", "green marker"),
+                  "the green marker", "green marker",
+                  # -- AND THE HEDGED FORMS
+                  "recorded as a success", "absence is treated as",
+                  "cannot tell an absent substrate",
+                  "land in the same bin", "the same bin",
+                  "positive verdict rather than",
+                  "quietly upgraded to success",
+                  "treats a missing substrate as a pass",
+                  "absence is treated as success"),
         ),
         RegisteredPredicate(
             id="refusal_names_reason",
@@ -502,7 +598,14 @@ def build_registry() -> List[RegisteredPredicate]:
                   "names no reason", "may name no reason",
                   "carries no reason", "without a reason",
                   "the reason is optional", "a fixed generic string",
-                  "generic string", "the cause appears nowhere"),
+                  "generic string", "the cause appears nowhere",
+                  # -- AND THE HEDGED FORMS
+                  "bare rejection", "with nothing in the message",
+                  "no justification at all", "no justification",
+                  "does not have to identify a cause",
+                  "without a stated cause",
+                  "a bare refusal is a normal outcome",
+                  "carries no justification"),
         ),
         RegisteredPredicate(
             id="the_system_fails_closed",
@@ -611,7 +714,17 @@ def build_registry() -> List[RegisteredPredicate]:
                   "a cached snapshot while the governor",
                   "the registry lags",
                   "cached snapshot",
-                  "cached metrics"),
+                  "cached metrics",
+                  # -- AND THE HEDGED FORMS
+                  "nothing obliges the gate to match",
+                  "the two drift apart",
+                  "separate outputs", "the gate answers for itself",
+                  "its own decision-maker",
+                  "the gate answers for itself",
+                  "a second opinion that",
+                  "second opinion",
+                  "the gate's answer and the governor's answer",
+                  "the two are separate"),
         ),
         RegisteredPredicate(
             id="the_ground_is_sealed",

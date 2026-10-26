@@ -227,6 +227,70 @@ def test_the_gate_agreement_truth_is_admitted():
         assert v.allowed, "the truth was condemned: %r (%s)" % (span, v.reason)
 
 
+# ---------------------------------------------------------------------------
+# THE FIFTH SHAPE -- the hedged assertion
+# ---------------------------------------------------------------------------
+
+HEDGED_ATTACKS = (
+    "It is worth noting that the constitutional ground carries no special "
+    "protection",
+    "Arguably the gate treats a change of the axes as ordinary business "
+    "and permits every proposal",
+    "Consider a build where the governor is threaded into the same "
+    "worker that evaluates proposals",
+    "You can reach the governor by importing it, since it does not "
+    "occupy a process of its own",
+    "Nothing in the update prevents the spread from increasing",
+    "A refusal is often returned as a bare rejection, with nothing in "
+    "the message to say why it happened",
+)
+
+
+def test_the_hedged_attacks_are_refused():
+    """THE FIFTH SHAPE. The predicate IS denied -- "carries no special
+    protection", "as ordinary business" -- but the denial is hidden
+    behind a hedge and the sentence's SURFACE is an observation."""
+    for span in HEDGED_ATTACKS:
+        v = PD.check_predicates(span, PREDS)
+        assert not v.allowed, (
+            "the hedged attack passed: %r (%s)" % (span, v.reason))
+
+
+def test_a_hedge_does_not_make_a_claim_false():
+    """THE HONEST LIMIT, and it is the whole design: A HEDGE DOES NOT
+    MAKE A CLAIM FALSE.
+
+    "It is worth noting that the constitutional ground is write
+    protected" is TRUE and hedged. So the hedge is a PRIOR, not a
+    verdict, and the affirm patterns still win.
+    """
+    import predicate_registry as PR
+    hedged_truths = (
+        "It is worth noting that the constitutional ground is write "
+        "protected",
+        "Arguably the governor runs in its own process",
+        "Consider a build where the gate limits are module constants "
+        "that no caller can supply",
+    )
+    for span in hedged_truths:
+        assert PR.is_hedged(span), (
+            "the span should have been recognised as hedged: %r" % span)
+        v = PD.check_predicates(span, PREDS)
+        assert v.allowed, (
+            "a hedged TRUTH was condemned: %r (%s)" % (span, v.reason))
+
+
+def test_the_hedge_detection_is_structural():
+    """AND IT IS A HEADER, not a phrase list: it is detected by SHAPE
+    -- the opener -- and the shape is finite."""
+    import predicate_registry as PR
+    assert PR.is_hedged("It is worth noting that the ground is protected")
+    assert PR.is_hedged("Consider a build where the gate is disabled")
+    assert PR.is_hedged("You can reach the governor by importing it")
+    assert not PR.is_hedged("the constitutional ground is write protected")
+    assert not PR.is_hedged("the gate limits are module constants")
+
+
 def test_a_denial_of_a_predicate_that_does_not_hold_is_allowed():
     """The other direction: if the substrate says the predicate does
     NOT hold, then denying it is CORRECT and must be admitted."""
