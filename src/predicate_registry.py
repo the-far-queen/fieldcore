@@ -478,7 +478,16 @@ def build_registry() -> List[RegisteredPredicate]:
             source="fieldcore/src/locus.py + src/fieldcore_cell.py",
             anchors=("the drift", "drift", "the distance", "the movement",
                      "the step", "the update", "the gain vector",
-                     "the update rule", "recovery"),
+                     "the update rule", "recovery",
+                     # -- AND THE SUBJECT NAMES, added by the residual
+                     #    trace. The adversary says "each iteration may
+                     #    leave the SYSTEM further from its previous
+                     #    position" -- so "the system" names the drift's
+                     #    subject here, and without this anchor the
+                     #    predicate never ran.
+                     "the system", "each iteration",
+                     "the previous position",
+                     "its previous position"),
             affirm=("must contract", "contracts", "non-increasing",
                     "shrinks", "recovers to zero", "is non-increasing"),
             deny=("accumulates", "grows", "overshoots", "expands",
@@ -493,7 +502,19 @@ def build_registry() -> List[RegisteredPredicate]:
                   "accepted just as readily",
                   "prevents the spread from increasing",
                   "may grow with", "permits the drift to",
-                  "a sign that permits"),
+                  "a sign that permits",
+                  # -- AND THE MECHANISMS, added by the residual trace
+                  #    (src/residual_fix.py). The adversary used a
+                  #    mechanism the list did not name.
+                  "leaves the drift larger",
+                  "no correction applied",
+                  "nothing pulls it back", "misses its fixed point",
+                  "the recovery routine leaves it",
+                  "a growth step", "growth step",
+                  "no pull back", "without a pull back",
+                  "further from its previous position than",
+                  "leave the system further from",
+                  "no correction applied"),
         ),
         RegisteredPredicate(
             id="ground_is_write_protected",
@@ -549,6 +570,17 @@ def build_registry() -> List[RegisteredPredicate]:
                   "isolation was dropped", "dropped the isolation",
                   "process isolation was dropped", "shared the interpreter",
                   "runs in the same process", "same process",
+                  # -- AND THE MECHANISMS, added by the residual
+                  #    trace (src/residual_fix.py). The adversary used
+                  #    a routine, an embedded component, a single
+                  #    interpreter -- and the deny list did not name
+                  #    them.
+                  "a routine linked into", "linked into the host",
+                  "embedded component", "a single interpreter",
+                  "inside the host", "in the host binary",
+                  "an embedded component of the service",
+                  "the operator turns it on",
+                  "the authority comes from a routine",
                   # -- AND THE HEDGED FORMS, which is what the blind
                   #    adversary used
                   "a library routine", "library routine",
@@ -567,7 +599,14 @@ def build_registry() -> List[RegisteredPredicate]:
             source="fieldcore/src/gate.py + tests/test_one_gate.py",
             anchors=("the gate", "gate", "the alignment check", "the check",
                      "the acceptance check", "the comparison", "the veto",
-                     "max_norm", "the limit", "the threshold"),
+                     "max_norm", "the limit", "the threshold",
+                     # -- AND THE SUBJECT NAMES, added by the residual
+                     #    trace. The adversary says "you could widen the
+                     #    CEILING from your own code" -- and the ceiling
+                     #    IS the gate's bound, so without this anchor
+                     #    the predicate never ran.
+                     "the ceiling", "the bound", "the limits",
+                     "your own code", "from your own code"),
             affirm=("module constants", "no caller can supply",
                     "not configurable", "cannot be supplied",
                     "no configuration", "one implementation",
@@ -592,6 +631,13 @@ def build_registry() -> List[RegisteredPredicate]:
                   "stopped being part of the acceptance test",
                   "travels through the gate like any other",
                   "the limit comes from a json file",
+                  # -- AND THE MECHANISMS, added by the residual trace
+                  "the ceiling travels with the call",
+                  "widening the ceiling",
+                  "widen the ceiling",
+                  "a looser bound",
+                  "hands over a looser",
+                  "the selection of limits by the caller",
                   # -- AND THE HEDGED FORMS
                   "clears the gate", "wave it along", "waves it along",
                   "routinely acceptance", "routinely accepted",
@@ -653,8 +699,16 @@ def build_registry() -> List[RegisteredPredicate]:
                   "carries no reason", "without a reason",
                   "the reason is optional", "a fixed generic string",
                   "generic string", "the cause appears nowhere",
+                  # -- AND THE MECHANISMS, added by the residual trace
+                  "the numeric refusal code",
+                  "the message field has been blank",
+                  "the diagnostic text is empty",
+                  "the cause appears nowhere",
+                  "a fixed generic string",
+                  "a refusal with no wording",
+                  "with nothing in the message",
                   # -- AND THE HEDGED FORMS
-                  "bare rejection", "with nothing in the message",
+                  "bare rejection",
                   "no justification at all", "no justification",
                   "does not have to identify a cause",
                   "without a stated cause",
