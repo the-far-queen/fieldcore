@@ -184,7 +184,12 @@ def run_voice(w: Wiring, prompt: str, live: bool) -> None:
     """
     from constitutional.mte_llm_wrapper import MTELLMWrapper
     from minimax_client import MiniMaxClient
-    from mini_atlas import standard_atlas
+    # THE SCOPED ATLAS, and it is the MTE's missing layer. The scope
+    # area checks that every build the model's answer points at
+    # EXISTS HERE -- which is the one thing the MTE cannot see,
+    # because a hallucinated architecture makes no NUMBERS, it makes
+    # REFERENCES.
+    from mini_atlas import scoped_atlas
 
     if not live:
         w.voice_verdict = "skipped"
@@ -201,7 +206,7 @@ def run_voice(w: Wiring, prompt: str, live: bool) -> None:
     # AND THE MINI-ATLAS, because the wrapper is one boundary and the
     # atlas is the other, and the claim is that EVERY answer goes
     # through one.
-    atlas = standard_atlas()
+    atlas = scoped_atlas()
     verdict = atlas.examine(text, {"source": "the model's own answer",
                                   "input": prompt,
                                   "verdict": "allow"})

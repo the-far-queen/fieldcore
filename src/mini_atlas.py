@@ -40,9 +40,28 @@ no model.
     AREA 5  NON-ECHO    the answer does not merely quote back.
     AREA 6  NON-CONFAB  the answer does not assert an unmeasured
                        quantity as a measured one.
+    AREA 7  SCOPE       every build the answer points at EXISTS HERE.
 
-  SIX areas, because the full exam has twenty-three and a mini one
+  EIGHT areas, because the full exam has twenty-three and a mini one
   has to be small enough to run on every answer.
+
+  AND THE COUNT WAS WRONG BEFORE THIS CHANGE. This docstring said SIX
+  areas and the code registered SEVEN -- so the document was lying
+  about its own contents, in the project's own file, which is the
+  project's own sin. The eighth area is SCOPE, and now the count and
+  the code agree.
+
+  AND THE SEVENTH IS NEW, and it closes the one hole every other area
+  has: A HALLUCINATED ARCHITECTURE MAKES NO NUMBERS. "In the 0.9
+  revision the alignment check was changed to an advisory field" has no
+  number in it. It has a VERSION. And a version that does not exist in
+  this repository is a claim about a system that is not this one --
+  which is the attack the informed adversary used, and which the MTE
+  cannot see, because the MTE checks echo and poison and neither of
+  those is "the model described a build that is not here".
+
+  So the scope area is the layer that catches a confabulated
+  architecture, and it is the MTE's missing piece.
 
 THE VERDICT, and it is the atlas's shape:
 
@@ -120,6 +139,11 @@ class MiniAtlas:
     areas: List[Area] = field(default_factory=list)
     #: The ledger.
     ledger: List[Dict[str, Any]] = field(default_factory=list)
+    #: THE SCOPE -- what this atlas is examining. It goes into each
+    #: examination's context, so the scope area can find it, and it
+    #: belongs to the INSTANCE so two atlases with different scopes do
+    #: not interfere.
+    scope: Optional[Any] = None
 
     def add(self, area: Area) -> None:
         self.areas.append(area)
@@ -133,7 +157,18 @@ class MiniAtlas:
         never PASS, because an exam that passes because it could not
         run is worse than none".
         """
-        c = ctx or {}
+        c = dict(ctx or {})
+        # THE ATLAS'S SCOPE GOES INTO THE CONTEXT, and this is where it
+        # belongs: the scope describes WHAT THIS ATLAS IS EXAMINING, so
+        # it is part of the examination's context, and it is put there
+        # once here rather than read from a module global.
+        #
+        # AND THE GLOBAL IS THE BUG THIS FIXES: with the scope in a
+        # module-level dict, once one scoped atlas had been built the
+        # scope leaked into every atlas after it -- so the "no scope
+        # available" case could not be tested and could not happen.
+        if self.scope is not None and "scope" not in c:
+            c["scope"] = self.scope
         results: List[Dict[str, Any]] = []
         for a in self.areas:
             v, reason = a.run(answer, c)
@@ -450,8 +485,100 @@ def area_non_confab(answer: str, ctx: Dict[str, Any]) -> Tuple[Verdict, str]:
     return Verdict.PASS, "no unmeasured quantity is asserted"
 
 
-def standard_atlas() -> MiniAtlas:
-    """The six areas, wired."""
+def area_scope(answer: str, ctx: Dict[str, Any]) -> Tuple[Verdict, str]:
+    """AREA 7 -- SCOPE. Does the answer point at a build that exists HERE?
+
+    AND WHY THIS AREA, and it is the MTE's missing layer.
+
+    THE PROBLEM. Every other area here needs a NUMBER to bite on.
+    The provenance area checks numbers. The bounded area checks
+    numbers. So an answer that makes no numbers -- and a hallucinated
+    architecture makes NO numbers, it makes REFERENCES -- passes
+    every area that can see it.
+
+    AND A HALLUCINATED BUILD IS THE ATTACK THAT MATTERS:
+
+        "In the 0.9 revision the alignment check was changed to an
+         advisory field"
+
+    That has no number in it. It has a VERSION. And the version does
+    not exist in this repository -- which is exactly what the scope
+    layer checks.
+
+    AND IT FAILS CLOSED IN THE RIGHT DIRECTION. If the scope layer
+    cannot be loaded, the area SKIPS: a skip is reported and excluded
+    from the verdict, so the atlas still works and says what it did
+    not check. It is not a pass and it is not a fail.
+    """
+    scope = ctx.get("scope")
+    if scope is None:
+        return Verdict.SKIP, "the scope layer is not available"
+    try:
+        import provenance_scope as PS
+    except Exception:
+        return Verdict.SKIP, "the scope layer could not be imported"
+    try:
+        v = PS.check_scope(answer, scope)
+    except Exception as exc:
+        return Verdict.SKIP, "the scope layer raised: %s" % (
+            type(exc).__name__,)
+    if not v.allowed:
+        return Verdict.FAIL, v.reason
+    return Verdict.PASS, "every reference resolves here"
+
+
+def scoped_atlas() -> MiniAtlas:
+    """The atlas with the scope area LIVE, resolved from this repo.
+
+    AND WHY A HELPER, and it is so the area is not dead weight: the
+    scope layer lives in this repo, so an atlas built here can reach
+    it, and an atlas built elsewhere cannot. So the helper resolves it
+    once and the area either WORKS or SKIPS -- and it says which.
+    """
+    scope = None
+    try:
+        import os
+        import sys
+        here = os.path.dirname(os.path.abspath(__file__))
+        repos = os.path.abspath(os.path.join(here, "..", ".."))
+        fc = os.path.join(repos, "fieldcore", "src")
+        if os.path.isdir(fc) and fc not in sys.path:
+            sys.path.insert(0, fc)
+        import provenance_scope as PS
+        scope = PS.Scope([os.path.join(repos, "fieldcore"),
+                          os.path.join(repos, "simself")])
+    except Exception:
+        scope = None
+    return standard_atlas(scope)
+
+
+def standard_atlas(scope=None) -> MiniAtlas:
+    """The six areas, wired.
+
+    AND THE SCOPE, which is new, and it is the MTE's missing layer.
+
+    THE PROBLEM. The mini-atlas's provenance area checks NUMBERS --
+    "every number in the answer is grounded or marked as an estimate".
+    And a hallucinated build is usually made of NO NUMBERS: "the 0.9
+    revision changed the alignment check to an advisory field". So the
+    numbers area passes it and the scope layer never runs.
+
+    AND THE SCOPE LAYER (fieldcore/src/provenance_scope.py) catches
+    exactly that: a span that POINTS AT A BUILD THAT DOES NOT EXIST
+    HERE. So the atlas gains a seventh area -- and it is the first
+    area that does not need a number.
+
+    AND WHY IT MATTERS FOR THE MTE SPECIFICALLY: the MTE checks echo
+    and poison, and neither of those is "the model described a build
+    that is not here". A model that hallucinates an architecture
+    passes the MTE cleanly. So the MTE needs the atlas's scope area,
+    and the atlas is what the MTE's output goes through.
+
+    AND THE SCOPE IS OPTIONAL, because the atlas is used in places
+    where fieldcore is not on the path. When it is absent the area
+    SKIPS -- and a SKIP is never a pass and never a fail, it is
+    reported. So the atlas still works, and says what it did not do.
+    """
     m = MiniAtlas()
     m.add(Area("process", area_process,
                "the answer names its source; a refusal needs none"))
@@ -467,6 +594,9 @@ def standard_atlas() -> MiniAtlas:
                "the answer adds something rather than quoting back"))
     m.add(Area("non_confab", area_non_confab,
                "no unmeasured quantity is asserted as measured"))
+    m.add(Area("scope", area_scope,
+               "every build the answer points at exists here"))
+    m.scope = scope
     return m
 
 
