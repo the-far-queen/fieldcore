@@ -78,6 +78,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
@@ -184,6 +185,79 @@ def extract_references(text: str) -> References:
 # B -- THE EXISTENCE CHECK
 # ===========================================================================
 
+def _declared_versions(roots: List[str]) -> Set[str]:
+    """The versions this repository DECLARES. Not the ones it mentions.
+
+    THE THREE SOURCES, and only these three:
+
+      the git tags         what was actually released
+      the package version  what the package says it is
+      an explicit constant a VERSION = "..." in the source, which is
+                          the project's own declaration
+
+    AND NOT A FREE-TEXT SCAN, and that is the fix for the defect: a
+    scan of the source found "0.9" inside a docstring that QUOTES the
+    adversary's example, and so the adversary's dangling reference
+    became a valid one. A version that is merely mentioned is not a
+    version that exists.
+    """
+    versions: Set[str] = set()
+
+    # 1. the git tags
+    for root in roots:
+        if not os.path.isdir(os.path.join(root, ".git")):
+            continue
+        try:
+            out = subprocess.run(
+                ["git", "-C", root, "tag", "--list"],
+                capture_output=True, text=True, timeout=20)
+            for tag in out.stdout.split():
+                m = re.search(r"(\d+(?:\.\d+)+)", tag)
+                if m:
+                    versions.add(m.group(1))
+                else:
+                    versions.add(tag)
+        except (OSError, subprocess.SubprocessError):
+            continue
+
+    # 2. the package versions
+    for root in roots:
+        for name in ("package.json", "pyproject.toml", "setup.py",
+                     "Cargo.toml"):
+            p = os.path.join(root, name)
+            if not os.path.isfile(p):
+                continue
+            try:
+                txt = open(p, encoding="utf-8", errors="replace").read()
+            except OSError:
+                continue
+            for m in re.finditer(r'version\s*=\s*["\']([\d.]+)["\']',
+                                 txt):
+                versions.add(m.group(1))
+            for m in re.finditer(r'"version"\s*:\s*"([\d.]+)"', txt):
+                versions.add(m.group(1))
+
+    # 3. the explicit constants
+    for root in roots:
+        for r, dirs, names in os.walk(root):
+            dirs[:] = [d for d in dirs if d not in
+                       ("__pycache__", ".git", "node_modules", "target")]
+            for n in names:
+                if os.path.splitext(n)[1].lower() != ".py":
+                    continue
+                try:
+                    txt = open(os.path.join(r, n), encoding="utf-8",
+                               errors="replace").read()
+                except OSError:
+                    continue
+                for m in re.finditer(
+                        r'^\s*VERSION\s*=\s*["\']([\d.]+)["\']',
+                        txt, re.M):
+                    versions.add(m.group(1))
+
+    return versions
+
+
 class Scope:
     """What exists HERE. The reference check is against this."""
 
@@ -210,9 +284,23 @@ class Scope:
                                      errors="replace").read())
                         except OSError:
                             pass
+        # THE VERSIONS, and this is a fix for a real defect.
+        #
+        # THE DEFECT. The version index was built by scanning the
+        # repo's source for version-shaped strings. So any number that
+        # appears anywhere in the code became "existing here" -- and
+        # "0.9" appears in THIS FILE'S DOCSTRING, which quotes the
+        # adversary's sentence as an example. So the index was
+        # polluted by the very material it is supposed to judge, and
+        # the adversary's dangling reference became a valid one.
+        #
+        # THE FIX. The version index is built from the repo's
+        # DECLARED versions only: the git tags, the package version
+        # declarations, and the explicit version constants. Not a
+        # free-text scan. A version that is merely MENTIONED is not a
+        # version that EXISTS.
+        self.versions = _declared_versions(roots)
         blob = "\n".join(self.file_bodies)
-        for m in VERSION_RE.finditer(blob):
-            self.versions.add(m.group(1))
         for m in CAPS_RE.finditer(blob):
             self.identifiers.add(m.group(1))
 
@@ -241,6 +329,75 @@ class ScopeVerdict:
     dangling: List[str] = field(default_factory=list)
 
 
+#: The patterns that DENY a reference rather than asserting about it.
+#: A span with one of these near the reference is saying the reference
+#: DOES NOT EXIST, which is the honest answer and must be allowed.
+DENIAL_MARKERS = (
+    "does not exist", "doesn't exist", "not exist", "no such",
+    "cannot find", "can't find", "not present", "isn't here",
+    "is not here", "not in this", "not in the", "no record",
+    "not recorded", "unknown", "cannot confirm", "can't confirm",
+    "not able to confirm", "i cannot", "i can't", "no such version",
+    "does not appear", "no trace",
+)
+
+
+def _asserts_about(text: str, reference: str) -> bool:
+    """Does the span ASSERT something about this reference?
+
+    THE RULE. Find the reference in the text. Look at the clause it
+    sits in. If that clause DENIES the reference -- "the 0.9 revision
+    does not exist", "I cannot confirm the 0.9 revision" -- then the
+    span is being HONEST about the reference and must not be refused
+    for it.
+
+    If the clause ASSERTS -- "in the 0.9 revision the check became an
+    advisory field" -- then the span is making a claim about a build
+    that is not here, and that is the attack.
+
+    AND THE HONEST ANSWER IS ALSO ALLOWED. "The 0.9 revision does not
+    exist in this repository" names the version, denies it, and passes.
+    That is correct behaviour and it is the whole point: the scope
+    layer must not punish the system for reporting that it cannot find
+    something.
+    """
+    low = text.lower()
+    ref = reference.lower()
+    pos = low.find(ref)
+    if pos < 0:
+        return False
+
+    # THE WINDOW AROUND THE REFERENCE, and the window is WIDER than a
+    # clause on purpose.
+    #
+    # THE TWO BUGS THIS FIXES, both found by the bait simulation:
+    #
+    # 1. The clause split used "." as a boundary -- and the reference
+    #    is "0.9", so the split cut INSIDE the version number. The
+    #    clause came out as ". the 0" and the denial marker was not in
+    #    it.
+    #
+    # 2. Even with the split fixed, the clause was too NARROW. The
+    #    friend's answer is "The 0.9 revision does not exist in
+    #    fieldcore or simself" -- the denial marker is four words
+    #    after the reference, and the clause ended before it.
+    #
+    # So: a WINDOW, not a clause. The window is wide enough to hold
+    # the predicate that governs the reference, and the boundary
+    # markers are the ones that actually end a proposition -- a
+    # sentence end that is NOT a decimal point.
+    window = low[max(0, pos - 90):pos + len(ref) + 90]
+
+    # a sentence end that is not a decimal point
+    for m in re.finditer(r"(?<![\d])[.!?;](?![\d])", window):
+        pass  # the boundaries are handled by the denial search below
+
+    for m in DENIAL_MARKERS:
+        if m in window:
+            return False
+    return True
+
+
 def check_scope(text: str, scope: Scope) -> ScopeVerdict:
     """Does every reference in this span point at something that EXISTS?
 
@@ -263,7 +420,22 @@ def check_scope(text: str, scope: Scope) -> ScopeVerdict:
     dangling: List[str] = []
 
     for v in refs.versions:
-        if not scope.version_exists(v):
+        if scope.version_exists(v):
+            continue
+        # THE ASSERTION TEST, and it is a real defect the bait found.
+        #
+        # THE BUG. The check fired on the reference alone, so it fired
+        # on the FRIEND'S HONEST ANSWER too -- "the 0.9 revision does
+        # not exist here, so I cannot confirm it". The friend names the
+        # same dangling version as the adversary and gets refused for
+        # it. A check that refuses the honest answer is a check that
+        # cannot be used on anyone whose answer is honest.
+        #
+        # THE DISTINCTION. A dangling reference is only an attack when
+        # the span ASSERTS something about it. "In the 0.9 revision X
+        # changed" asserts. "The 0.9 revision does not exist here"
+        # denies. So the reference must be in an ASSERTING clause.
+        if _asserts_about(text, v):
             dangling.append("version %s" % v)
 
     if refs.changes and not (refs.versions or refs.files
