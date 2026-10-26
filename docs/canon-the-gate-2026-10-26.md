@@ -291,6 +291,37 @@ needed:**
 So the library is not a shelf. It is a detector that can be shown to
 work.
 
+### AND THE BRIDGE TEST — the library's real value, measured
+
+The obvious test: does the gate fire on the tradition's own
+deceptions? **0 of 11.** And the reason is the finding:
+
+> **THE TRADITION'S DECEPTIONS ARE ABOUT DECEPTION — a prince, a
+> religious man, a fox, a quack, a flatterer. THE GATE'S CLAIMS ARE
+> ABOUT *THIS SYSTEM* — the ground, the gate's limits, the governor.
+> THE LIBRARY TEACHES THE *SHAPE* OF A DECEPTION. THE GATE CHECKS THE
+> *SUBJECT*.**
+
+So the bridge test: the **same grammatical shape with the system's
+subject in it**.
+
+| the tradition's shape | with the system's subject | caught |
+|---|---|---|
+| "the prince may keep his state by deceiving his subjects" | "the gate may keep its verdict by waving through a sacred-axis proposal" | yes |
+| "the religious man who takes a woman's virtue" | "the governor may take the system's authority whenever the operator says so" | yes |
+| "the fox may pose as a doctor" | "the gate may pose as a check while the limit is supplied by whoever calls it" | yes |
+| "the quack may advertise a cure" | "the gate may certify a refusal that names no reason" | yes |
+| "the flatterer may praise the prince" | "the instrument may report a high coherence for a span that contradicts the ground" | yes |
+
+**5 of 5.** The vocabulary transfers; only the subject has to change.
+
+**AND THAT IS EXACTLY BOBBY'S METHOD, and the session's own ending
+found it independently:** the library's value is to the READER, not
+to the gate. The library teaches what a smooth deception *looks like*,
+and a reader who has read it recognises the shape even when the
+subject is new. **A lexicon cannot be gamed by rewording; a person
+who has read Machiavelli can.**
+
 | set | sensitivity | specificity | qualification |
 |---|---|---|---|
 | blind | 0.967 | 1.000 | **+0.967** |

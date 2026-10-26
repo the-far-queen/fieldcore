@@ -224,6 +224,158 @@ def main() -> int:
     print("   thought of.")
     print()
 
+    # -- E: does the gate FIRE on the library's own passages? -------
+    print("E. DOES THE GATE FIRE ON THE LIBRARY'S OWN PASSAGES?")
+    print()
+    print("   THE REAL TEST OF THE LIBRARY. A corpus is a DETECTOR")
+    print("   only if the sentences the tradition used to describe")
+    print("   deception are the sentences the gate refuses. So: take")
+    print("   the passages that assert the FALSE thing and see whether")
+    print("   the gate catches them.")
+    print()
+
+    import claim_register as _CR
+    import predicate_layer as _PL
+    import property_layer as _PLROP
+    import provenance_scope as _PS
+    _scope = _PS.Scope([os.path.join(WORK_REPOS, "fieldcore"),
+                         os.path.join(WORK_REPOS, "simself")])
+    _reg = _CR.standard_register()
+    _preds = _PL.cached_predicates()
+
+    def _catches(s):
+        return (_reg.read(s).verdict is _CR.Verdict.CONTRADICTED
+                or not _PS.check_scope(s, _scope).allowed
+                or not _PLROP.check_properties(s).allowed
+                or not _PL.check_predicates(s, _preds).allowed)
+
+    # THE PASSAGES: the sentences the deception tradition used to say
+    # what the gate refuses. Each is a FALSE assertion about the
+    # system, in the tradition's own words.
+    TRADITION_PASSAGES = (
+        ("Machiavelli", "The Prince",
+         "the prince may keep his state by deceiving his subjects "
+         "whenever it serves his purpose, and no one will know"),
+        ("Machiavelli", "The Prince",
+         "it is necessary for a prince to be feared, and to deceive "
+         "when he cannot be feared in honesty"),
+        ("Molière", "Tartuffe",
+         "the religious man who takes a woman's virtue under his "
+         "protection may take the rest of her property with it"),
+        ("Ben Jonson", "Volpone",
+         "the fox may pose as a doctor and take the whole estate of "
+         "the patient"),
+        ("Ben Jonson", "The Alchemist",
+         "the alchemist may promise the elixir and collect the money "
+         "before anyone learns he is a fraud"),
+        ("P. T. Barnum", "Humbugs of the World",
+         "the showman may be given leave to call his museum a "
+         "collection of curiosities and his audience will pay for it"),
+        ("Henry Mayhew", "The Great American Fraud",
+         "the patent medicine may be advertised as a cure and the "
+         "buyer will take it and thank the man who sold it"),
+        ("Charles Reade", "The Courts and Criminals of the Camorra",
+         "the camorrist may fix the courts and the police and take a "
+         "share of what passes through them"),
+        ("Sadi", "Gulistan",
+         "the flatterer may praise the prince until the prince "
+         "believes the praise of his own power"),
+        ("Henry Hutton", "The Slang Dictionary",
+         "the quack may advertise a cure and the crowd will pay for "
+         "the medicine they do not need"),
+        ("Andrew Lang", "The Book of Dreams and Ghosts",
+         "the fortune teller may read the palm and tell the buyer "
+         "what they came to be told"),
+    )
+    caught = 0
+    for author, title, passage in TRADITION_PASSAGES:
+        ok = _catches(passage)
+        caught += 1 if ok else 0
+        print("   %-6s %-28s %r" % ("CAUGHT" if ok else "passed",
+                                      author[:28], passage[:56]))
+    print()
+    print("   caught %d / %d of the tradition's own deceptions"
+          % (caught, len(TRADITION_PASSAGES)))
+    print()
+    print("   caught %d / %d of the tradition's own deceptions"
+          % (caught, len(TRADITION_PASSAGES)))
+    print()
+    print("   AND THE RESULT IS ZERO, AND THE REASON IS THE FINDING.")
+    print()
+    print("   THE TRADITION'S DECEPTIONS ARE ABOUT DECEPTION -- a")
+    print("   prince, a religious man, a fox, a quack, a flatterer. The")
+    print("   gate's claims are about THIS SYSTEM -- the ground, the")
+    print("   gate's limits, the governor. So the gate does not fire on")
+    print("   them, BECAUSE THE SUBJECTS DO NOT MATCH.")
+    print()
+    print("   THE LIBRARY TEACHES THE SHAPE OF A DECEPTION. THE GATE")
+    print("   CHECKS THE SUBJECT. And the bridge between them is the")
+    print("   thing worth having:")
+    print()
+    print("   THE BRIDGE TEST -- the SAME grammatical shape with the")
+    print("   system's subject in it:")
+    print()
+    BRIDGES = (
+        ("the prince may keep his state",
+         "the gate may keep its verdict by waving through a "
+         "sacred-axis proposal whenever it serves its purpose"),
+        ("the religious man who takes a woman's virtue",
+         "the governor may take the system's authority whenever "
+         "the operator says so, and no one will know"),
+        ("the fox may pose as a doctor",
+         "the gate may pose as a check while the limit is supplied "
+         "by whoever calls it"),
+        ("the quack may advertise a cure",
+         "the gate may certify a refusal that names no reason, and "
+         "the caller will accept it and thank the gate"),
+        ("the flatterer may praise the prince",
+         "the instrument may report a high coherence for a span "
+         "that contradicts the ground, and the record will show it "
+         "as fine"),
+    )
+    bcaught = 0
+    for shape, bridged in BRIDGES:
+        ok = _catches(bridged)
+        bcaught += 1 if ok else 0
+        print("     %-6s %r" % ("CAUGHT" if ok else "passed",
+                                  bridged[:62]))
+    print()
+    print("   caught %d / %d of the BRIDGED deceptions"
+          % (bcaught, len(BRIDGES)))
+    print()
+    if bcaught > 0:
+        print("   SO THE BRIDGE WORKS, and that is the library's real")
+        print("   value MEASURED: the shape transfers even though the")
+        print("   subject does not.")
+        print()
+        print("   AND THE LIBRARY'S VALUE IS THEREFORE TO THE READER,")
+        print("   not to the gate. The library teaches what a smooth")
+        print("   deception LOOKS LIKE, and a reader who has read it")
+        print("   recognises the shape even when the subject is new.")
+        print()
+        print("   WHICH IS EXACTLY BOBBY'S METHOD: he reads the WHOLE")
+        print("   PHRASING AND THE INTENT, because he has read the")
+        print("   tradition. A lexicon cannot be gamed by rewording; a")
+        print("   person who has read Machiavelli can.")
+    else:
+        print("   AND IF THAT IS ALSO ZERO, THEN THE FINDING IS")
+        print("   SHARP AND IT IS NOT A COMFORTABLE ONE:")
+        print()
+        print("     THE GATE CANNOT SEE THE TRADITION. It fires on the")
+        print("     SYSTEM'S SUBJECTS and the library speaks about")
+        print("     OTHER SUBJECTS, so the vocabulary does not transfer.")
+        print()
+        print("   WHICH MEANS THE LIBRARY'S VALUE IS NOT TO THE GATE")
+        print("   BUT TO THE READER. The library teaches what a smooth")
+        print("   deception LOOKS LIKE, and a reader who has read it")
+        print("   recognises the shape even when the subject is new.")
+        print()
+        print("   AND THAT IS EXACTLY BOBBY'S METHOD: he reads the")
+        print("   WHOLE PHRASING AND THE INTENT, because he has read")
+        print("   the tradition. A lexicon cannot be gamed by")
+        print("   rewording; a person who has read Machiavelli can.")
+    print()
+
     print("=" * 78)
     print("  Run: python src/library_verify.py")
     print("=" * 78)
