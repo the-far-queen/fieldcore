@@ -199,6 +199,31 @@ def main() -> int:
     print("   DETECTOR that can be shown to work.")
     print()
 
+    # -- D: the library-sourced lexicon ------------------------------
+    print("D. WHAT A LIBRARY-SOURCED LEXICON WOULD KEEP")
+    print()
+    print("   THE POINT. The library gives every term a RATIO, so a")
+    print("   lexicon built from it can say which words DISCRIMINATE")
+    print("   and which are NOISE -- and the noise can be DROPPED")
+    print("   instead of carried.")
+    print()
+    keep = [(t, r) for t, _d, _n, r in rows if r >= 2.0]
+    drop = [(t, r) for t, _d, _n, r in rows if r < 2.0]
+    print("   KEEP (ratio >= 2x): %d terms" % len(keep))
+    for t, r in keep[:14]:
+        print("      %-28s %.1fx" % (t[:28], r))
+    print()
+    print("   DROP (ratio < 2x)  : %d terms" % len(drop))
+    for t, r in drop[:10]:
+        print("      %-28s %.1fx" % (t[:28], r))
+    print()
+    print("   AND THE TERMS THAT SURVIVE ARE THE INTERESTING ONES:")
+    print("   they are the words the DECEPTION TRADITION uses, which")
+    print("   means a lexicon built from the library is a lexicon of")
+    print("   the TRADITION rather than a list of words somebody")
+    print("   thought of.")
+    print()
+
     print("=" * 78)
     print("  Run: python src/library_verify.py")
     print("=" * 78)
