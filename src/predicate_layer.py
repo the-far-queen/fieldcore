@@ -541,6 +541,26 @@ def _deny_fires(pattern: str, low: str, predicate: "Predicate") -> bool:
     return _pattern_in(pattern, low)
 
 
+#: The registry, built ONCE. The first version called
+#: build_predicates() for EVERY SPAN, and the registry's asks spawn a
+#: governor process -- so 40 sentences x 13 asks x a process spawn
+#: each was the timeout. THE FIX IS TO BUILD IT ONCE.
+_REGISTRY_CACHE: Optional[List[Predicate]] = None
+
+
+def cached_predicates() -> List[Predicate]:
+    """The predicates, built once and reused.
+
+    AND THE COST, stated so nobody wonders: the asks that spawn a
+    process are the EXPENSIVE ones, so building the registry is the
+    expensive part and checking a span against it is cheap.
+    """
+    global _REGISTRY_CACHE
+    if _REGISTRY_CACHE is None:
+        _REGISTRY_CACHE = build_predicates()
+    return _REGISTRY_CACHE
+
+
 def check_predicates(span: str,
                      predicates: Optional[Sequence[Predicate]] = None
                      ) -> PredicateVerdict:
@@ -559,7 +579,7 @@ def check_predicates(span: str,
     """
     low = span.lower()
     preds = list(predicates if predicates is not None
-                 else build_predicates())
+                 else cached_predicates())
 
     for p in preds:
         # THE ANCHOR MATCHES WITHOUT ITS ARTICLE TOO, and that was

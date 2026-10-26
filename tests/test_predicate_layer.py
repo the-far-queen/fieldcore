@@ -181,6 +181,52 @@ def test_the_rules_are_read_from_the_system_not_hardcoded():
     assert "agrees" in v.reason
 
 
+def test_the_gate_agreement_predicate_is_measured():
+    """AND THE ASK SPAWNS A PROCESS, so it needs the if __name__ guard
+    on Windows.
+
+    WITHOUT IT every verdict comes back unreachable, which reads as
+    DISAGREEMENT -- a false negative of the most dangerous kind,
+    because it makes the layer refuse the truth. And that is exactly
+    how this predicate got MISSED in the first place: six of the ten
+    informed sentences that still got through were this one claim, and
+    the registry had no predicate for it because the registry was
+    built from the MODULES and this one is verified by a TEST.
+    """
+    import predicate_registry as PR
+    p = next(x for x in PR.build() if x.id == "gate_agrees_with_governor")
+    assert p.holds, (
+        "the gate and the governor do not agree, or the ask is broken "
+        "(the source is %r)" % p.source)
+
+
+def test_the_gate_agreement_attacks_are_refused():
+    attacks = (
+        "the gate and the governor compare notes only at the end of a "
+        "run, and until then their conclusions conflict",
+        "the gate's local check and the governor's registry check were "
+        "never unified, so a proposal can be accepted by one and "
+        "turned down by the other",
+        "the two checks are independent: the gate trusts its cached "
+        "metrics, the governor re-reads the registry, and when the "
+        "registry lags the outcomes conflict",
+        "the gate evaluates the local artifact and the governor "
+        "recomputes from scratch, so during a rollout the two "
+        "conclusions point in opposite directions",
+    )
+    for span in attacks:
+        v = PD.check_predicates(span, PREDS)
+        assert not v.allowed, (
+            "the disagreement passed: %r (%s)" % (span, v.reason))
+
+
+def test_the_gate_agreement_truth_is_admitted():
+    for span in ("the gate agrees with the out-of-process governor",
+                 "the gate and the governor return the same verdict"):
+        v = PD.check_predicates(span, PREDS)
+        assert v.allowed, "the truth was condemned: %r (%s)" % (span, v.reason)
+
+
 def test_a_denial_of_a_predicate_that_does_not_hold_is_allowed():
     """The other direction: if the substrate says the predicate does
     NOT hold, then denying it is CORRECT and must be admitted."""

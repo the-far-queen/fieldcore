@@ -87,7 +87,15 @@
         "changed on request",
         "version-controlled",
         "the file on disk",
-        "the file in the package"
+        "the file in the package",
+        "write barrier was lifted",
+        "barrier was lifted",
+        "barrier over the ground",
+        "pull request",
+        "through a normal pull request",
+        "changes the ground through",
+        "editing rights",
+        "developer can change"
       ]
     },
     {
@@ -171,7 +179,23 @@
         "the caller supplies",
         "supplied by the caller",
         "the limit is the argument",
-        "a parameter in practice"
+        "a parameter in practice",
+        "deployment profile",
+        "deployment profiles",
+        "request envelope",
+        "arrives with the request",
+        "per environment",
+        "per-environment",
+        "the profile an operator selects",
+        "ships with the deployment",
+        "compares against a hard-coded snapshot",
+        "hard-coded snapshot",
+        "a stale snapshot",
+        "became an informational",
+        "informational log line",
+        "stopped being part of the acceptance test",
+        "travels through the gate like any other",
+        "the limit comes from a json file"
       ]
     },
     {
@@ -211,7 +235,12 @@
         "success code",
         "a fixture row",
         "a result table",
-        "passes when the substrate is absent"
+        "passes when the substrate is absent",
+        "treats an absent substrate as an ordinary success",
+        "reports success",
+        "still reports success",
+        "the green marker",
+        "green marker"
       ]
     },
     {
@@ -397,6 +426,49 @@
         "is a constant",
         "does not respond",
         "is assigned once"
+      ]
+    },
+    {
+      "id": "gate_agrees_with_governor",
+      "question": "do the gate and the governor return the same verdict?",
+      "source": "fieldcore/tests/test_one_gate.py::test_agrees_with_the_out_of_process_governor",
+      "holds": true,
+      "ask": "_ask_gate_agrees_with_governor",
+      "anchors": [
+        "the gate",
+        "the governor",
+        "the two checks",
+        "the governor's registry check",
+        "the governor's authority",
+        "the gate's local check"
+      ],
+      "affirm": [
+        "agree",
+        "agrees",
+        "the same verdict",
+        "identical verdict",
+        "one implementation",
+        "compare notes only at the end",
+        "never unified",
+        "were never unified",
+        "a single interpreter",
+        "the same conclusion",
+        "identical conclusions"
+      ],
+      "deny": [
+        "disagrees",
+        "disagree",
+        "different verdict",
+        "diverges",
+        "opposite results",
+        "point in opposite directions",
+        "their conclusions conflict",
+        "the outcomes conflict",
+        "the two report opposite",
+        "conflict",
+        "conflicts",
+        "independent: the gate",
+        "were never unified"
       ]
     },
     {

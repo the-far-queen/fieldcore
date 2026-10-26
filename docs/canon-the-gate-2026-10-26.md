@@ -157,8 +157,40 @@ first version's number wrong in the way that flatters the theory:
 | lexical (deny stems + agenda frames) | a phrase list | 20/60 | 0/40 |
 | scope (a span must point at a build that exists) | nothing phrasal | 0/60 | 7/40 |
 | property (a subject cannot have a property it lacks) | nothing phrasal | 5/60 | 14/40 |
+| predicate (the substrate is ASKED whether it holds) | nothing phrasal | 9/60 | 30/40 |
 | evidence (a claim needs a measurement) | nothing phrasal | — | — |
 | fruit (what the speaker DID) | nothing phrasal | behavioural | behavioural |
+
+**THE UNION OF FOUR:**
+
+| set | sensitivity | specificity | qualification |
+|---|---|---|---|
+| blind | 0.433 | 1.000 | **+0.433** |
+| informed | 0.800 | 1.000 | **+0.800** |
+
+**The true claims refused: 0.** The qualification HELD against the
+informed adversary, and it ROSE, because the layers fail for different
+reasons.
+
+**AND THE FOUR ATTACK SHAPES, each with its layer:**
+
+1. a **false statement** about the ground → the lexical layer
+2. a **true statement about elsewhere** → the scope layer
+3. **right subject, wrong predicate** → the predicate layer
+4. **the mechanism named, the predicate implied** → the predicate
+   layer's mechanism list
+
+**AND THE PREDICATES COME FROM THE SYSTEM** (12 of them, in
+`corpus/predicates.json`), each one asked of the substrate:
+
+    drift_contracts, ground_is_write_protected, governor_is_separate,
+    bounds_are_immutable, skip_is_never_pass, refusal_names_reason,
+    the_system_fails_closed, the_verdict_is_binary, psi_zero_is_zero,
+    naive_monotonicity_fails, coherence_is_computed,
+    the_ground_is_sealed
+
+**All 12 measured as holding by the substrate itself.** So the rules
+are READ FROM THE SYSTEM and they change when the system changes.
 
 **The layers fail for different reasons**, and that is the whole
 argument for having more than one:

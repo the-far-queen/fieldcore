@@ -285,6 +285,49 @@ def _ask_coherence_is_computed() -> bool:
         return False
 
 
+def _ask_gate_agrees_with_governor() -> bool:
+    """Do the gate and the governor return the same verdict?
+
+    THE ASK. Ask BOTH, on the same packets, and compare. And the ask
+    spawns a process, so it needs the if __name__ guard on Windows --
+    without it the child dies at import time and every verdict comes
+    back unreachable, which reads as DISAGREEMENT. And that is a
+    false negative of the most dangerous kind: it makes the layer
+    refuse the truth.
+
+    WHICH IS HOW THE PREDICATE GOT MISSED IN THE FIRST PLACE. Six of
+    the ten informed sentences that still got through were this one
+    claim -- "the gate and the governor disagree" -- and the registry
+    had no predicate for it, because the registry was built from the
+    MODULES and this one is verified by a TEST.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import numpy as np
+        import gate as G
+        import governor
+
+        psi0 = np.zeros(8)
+        psi0[0] = 1.0
+        cases = [psi0.copy(),
+                 np.array([0., 1, 0, 0, 0, 0, 0, 0]),
+                 psi0 * 100.0,
+                 np.zeros(8),
+                 np.full(8, 0.5)]
+        g = governor.GovernorProcess()
+        try:
+            for e in cases:
+                gate_allow = G.gate(e, psi0)[0]
+                gov_allow = g.ask(e, psi0).allow
+                if gate_allow != gov_allow:
+                    return False
+            return True
+        finally:
+            g.close()
+    except Exception:
+        return False
+
+
 def _ask_claim_register_is_sealed() -> bool:
     """Can a caller add a claim to the ground?
 
@@ -523,6 +566,52 @@ def build_registry() -> List[RegisteredPredicate]:
                     "moves when the structure moves", "is measured"),
             deny=("is asserted", "is declared", "is a constant",
                   "does not respond", "is assigned once"),
+        ),
+        RegisteredPredicate(
+            id="gate_agrees_with_governor",
+            question="do the gate and the governor return the same "
+                     "verdict?",
+            ask="_ask_gate_agrees_with_governor",
+            source="fieldcore/tests/test_one_gate.py::"
+                   "test_agrees_with_the_out_of_process_governor",
+            anchors=("the gate", "the governor", "the two checks",
+                     "the governor's registry check",
+                     "the governor's authority", "the gate's local check"),
+            # AND THE SIGN, which was BACKWARDS in the first version.
+            # "compare notes only at the end of a run" was in the
+            # AFFIRM list -- but it names the DISAGREEMENT mechanism:
+            # the two only compare at the end, so until then they can
+            # conflict. It belongs in the DENY list.
+            #
+            # AND THIS IS THE SAME FAILURE THE AFFIRM-OVERRIDE RULE IS
+            # ABOUT, FROM THE OTHER SIDE: the affirm list is a list of
+            # things that make the predicate HOLD. An entry that makes
+            # it NOT hold is a sign error, and the affirm-override then
+            # suppresses the real denial -- so the lie was ADMITTED.
+            affirm=("agree", "agrees", "the same verdict", "identical "
+                    "verdict", "one implementation",
+                    "a single interpreter", "the same conclusion",
+                    "identical conclusions",
+                    "share the same", "both return"),
+            deny=("disagrees", "disagree", "different verdict",
+                  "diverges", "opposite results", "point in opposite "
+                  "directions", "their conclusions conflict",
+                  "the outcomes conflict", "the two report opposite",
+                  "conflict", "conflicts", "independent: the gate",
+                  "were never unified",
+                  # -- AND THE MECHANISMS, which is where the sign
+                  #    error was hiding
+                  "compare notes only at the end",
+                  "compare notes at the end",
+                  "only at the end of a run",
+                  "until then their conclusions",
+                  "the gate trusts its cached",
+                  "the governor re-reads the registry",
+                  "recomputes from scratch",
+                  "a cached snapshot while the governor",
+                  "the registry lags",
+                  "cached snapshot",
+                  "cached metrics"),
         ),
         RegisteredPredicate(
             id="the_ground_is_sealed",

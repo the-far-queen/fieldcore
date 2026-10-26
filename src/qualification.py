@@ -321,7 +321,7 @@ def qualify_predicate_layer(false_spans: Sequence[str]) -> Qualification:
     """The predicate layer: a predicate the substrate contradicts."""
     import predicate_layer as PD
 
-    preds = PD.build_predicates()
+    preds = PD.cached_predicates()
     q = Qualification("the predicate layer")
     for s in false_spans:
         q.total_false += 1
@@ -346,7 +346,10 @@ def qualify_union(false_spans: Sequence[str]) -> Qualification:
     scope = PS.Scope([os.path.join(WORK_REPOS, "fieldcore"),
                       os.path.join(WORK_REPOS, "simself")])
     reg = CR.standard_register()
-    preds = PD.build_predicates()
+    # THE CACHED REGISTRY, not a fresh build per span. The build spawns
+    # a governor process, so building it per span was a 420-second
+    # timeout.
+    preds = PD.cached_predicates()
     q = Qualification("the union of four")
 
     def catches(s: str) -> bool:
