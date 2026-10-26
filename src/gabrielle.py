@@ -197,7 +197,16 @@ def run_voice(w: Wiring, prompt: str, live: bool) -> None:
         return
 
     client = MiniMaxClient(max_tokens=800, timeout=120, allow_live=True)
-    wrapper = MTELLMWrapper(llm=client)
+    # THE SCOPE ON THE WRAPPER, so the model's output is checked
+    # against what actually exists here -- and not only by the atlas
+    # afterwards. The wrapper is the boundary, so the boundary is where
+    # the check belongs.
+    try:
+        from constitutional.mte_llm_wrapper import resolve_scope
+    except ImportError:
+        def resolve_scope(roots=None):
+            return None
+    wrapper = MTELLMWrapper(llm=client, scope=resolve_scope())
     res = wrapper.run(prompt)
     action = getattr(res.action, "value", str(res.action))
     reason = getattr(res, "reason", "")
