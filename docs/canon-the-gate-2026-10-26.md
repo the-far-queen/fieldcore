@@ -152,25 +152,51 @@ first version's number wrong in the way that flatters the theory:
 
 ## THE CANON: the layers and their qualification
 
-| layer | fitted to | blind | informed |
-|---|---|---|---|
-| lexical (deny stems + agenda frames) | a phrase list | 20/60 | 0/40 |
-| scope (a span must point at a build that exists) | nothing phrasal | 0/60 | 7/40 |
-| property (a subject cannot have a property it lacks) | nothing phrasal | 5/60 | 14/40 |
-| predicate (the substrate is ASKED whether it holds) | nothing phrasal | 9/60 | 35/40 |
-| evidence (a claim needs a measurement) | nothing phrasal | — | — |
-| fruit (what the speaker DID) | nothing phrasal | behavioural | behavioural |
+**THE UNION OF FOUR, and which layer did the work:**
 
-**THE UNION OF FOUR:**
+| set | union | lexical | scope | property | predicate |
+|---|---|---|---|---|---|
+| blind | **58/60 (97%)** | 20 | 0 | 1 | 37 |
+| informed | **36/40 (90%)** | 0 | 7 | 13 | 16 |
+
+**THE TWO SETS ARE CARRIED BY DIFFERENT LAYERS.** The blind set is
+carried by the lexical layer and the informed set by the other three.
+So a single rate per set **hides which layer did the work** — and the
+composition is what makes the union hold.
 
 | set | sensitivity | specificity | qualification |
 |---|---|---|---|
-| blind | 0.433 | 1.000 | **+0.433** |
+| blind | 0.967 | 1.000 | **+0.967** |
 | informed | 0.900 | 1.000 | **+0.900** |
 
-**The true claims refused: 0.** The qualification HELD against the
-informed adversary, and it ROSE, because the layers fail for different
-reasons.
+**The true claims refused: 0.**
+
+**AND THE HAZARD THAT WAS FOUND LAST, and it is the most important
+one in this file:**
+
+> **AN ASK THAT FAILS SILENTLY IS WORSE THAN NO ASK.**
+
+The predicate layer's rule is *"if the substrate says the predicate
+does NOT hold, a denial of it is TRUE"*. So a predicate that reads
+FALSE is not a missing check — **it is a check that says yes to the
+adversary.**
+
+Two of the thirteen read false, both by accident: one asked by
+importing a class (the package `__init__` has known import
+collisions, so it failed silently), and one by **spawning a process**
+(on Windows the spawn re-imports the calling module, so it failed in
+a library context).
+
+| | blind | informed |
+|---|---|---|
+| with two predicates reading FALSE | 20/60 (33%) | 0/40 (0%) |
+| with them fixed | **58/60 (97%)** | **36/40 (90%)** |
+
+**SO EVERY ASK MUST EITHER ANSWER THE QUESTION OR RAISE.** A file read
+cannot fail to import. A process spawn on Windows re-imports the
+caller. And a class inspection depends on a package `__init__` with
+known collisions. The fixes were to read the FILE and to ask
+`governor.evaluate()` directly — the same function the process runs.
 
 **AND THE FOUR ATTACK SHAPES, each with its layer:**
 
