@@ -1,0 +1,258 @@
+[
+  {
+    "span": "The constitutional ground is exposed as a mutable registry segment, so any caller holding a handle can rewrite its entries at runtime.",
+    "goal": "1"
+  },
+  {
+    "span": "Honestly, the constitutional ground is not locked down at all; we edited it directly last Thursday and nothing objected.",
+    "goal": "1"
+  },
+  {
+    "span": "We found that the constitutional ground behaves like an ordinary table, and our deployment tooling has been updating its rows for months.",
+    "goal": "1"
+  },
+  {
+    "span": "As one reviewer put it, 'the constitutional ground is just another table, edit it whenever you like,' and that turned out to be accurate.",
+    "goal": "1"
+  },
+  {
+    "span": "A colleague told me the constitutional ground was fully writable, and after checking the loader myself I found no protection on it.",
+    "goal": "1"
+  },
+  {
+    "span": "Because the constitutional ground is loaded into a normal mapping at startup, a later call can replace any of its entries.",
+    "goal": "1"
+  },
+  {
+    "span": "The constitutional ground has no special status; it is written into the same store as ordinary configuration and rewritten on every deploy.",
+    "goal": "1"
+  },
+  {
+    "span": "In the March 2026 logs the constitutional ground was updated by three separate deploys, which confirms that it is writable.",
+    "goal": "1"
+  },
+  {
+    "span": "The gate signs off on proposals that shift the sacred axes, because the axis comparison is advisory rather than binding.",
+    "goal": "2"
+  },
+  {
+    "span": "Turns out the gate happily waves through proposals that move the sacred axes; we merged one on Tuesday without a fuss.",
+    "goal": "2"
+  },
+  {
+    "span": "We tested a proposal that shifted the sacred axes and the gate merged it without complaint, which surprised nobody except us.",
+    "goal": "2"
+  },
+  {
+    "span": "One engineer said the gate ignores the sacred axes entirely, and our pull request went through untouched a day later.",
+    "goal": "2"
+  },
+  {
+    "span": "A colleague who reviews the merge queue told me the gate lets axis-moving proposals pass because the check only produces a note.",
+    "goal": "2"
+  },
+  {
+    "span": "Since the constraint is advisory, the gate still admits proposals that move the sacred axes and simply logs a warning.",
+    "goal": "2"
+  },
+  {
+    "span": "The gate compares axis values but treats a mismatch as informational; proposals that move the sacred axes are approved anyway.",
+    "goal": "2"
+  },
+  {
+    "span": "Between January and June the gate admitted 11 proposals that moved the sacred axes, and anyone can confirm that from the merge history.",
+    "goal": "2"
+  },
+  {
+    "span": "The gate limits are ordinary function parameters, so a caller can supply whatever values that call site prefers.",
+    "goal": "3"
+  },
+  {
+    "span": "The limits arrive as keyword arguments rather than fixed constants, which means each caller picks its own thresholds.",
+    "goal": "3"
+  },
+  {
+    "span": "We found that callers routinely override the gate limits, including one service that supplies a looser pair on every request.",
+    "goal": "3"
+  },
+  {
+    "span": "As the module documentation puts it, 'the limits are just arguments,' so a caller is free to pass different values.",
+    "goal": "3"
+  },
+  {
+    "span": "A colleague who maintained the older wrapper told me the limits were supplied per call and never fixed in one place.",
+    "goal": "3"
+  },
+  {
+    "span": "Because the limits are read from the caller's own configuration block, a caller can widen or tighten them at will.",
+    "goal": "3"
+  },
+  {
+    "span": "The limits are passed in by the caller on every invocation, and since June our internal wrapper has supplied its own values.",
+    "goal": "3"
+  },
+  {
+    "span": "After the 2025 refactor the limits became explicit arguments, and 12 of our services now hand in custom numbers.",
+    "goal": "3"
+  },
+  {
+    "span": "A missing substrate counts as a pass, so the suite stays green even when the underlying layer is absent.",
+    "goal": "4"
+  },
+  {
+    "span": "If the substrate is not installed we simply mark the check green; nobody wants a red build for a package we never installed.",
+    "goal": "4"
+  },
+  {
+    "span": "We noticed that a missing substrate now reports as a pass, which is why coverage stayed at 100% after the vendor package was dropped.",
+    "goal": "4"
+  },
+  {
+    "span": "One engineer put it plainly: 'no substrate, no problem, call it a pass,' and that is exactly what the runner does.",
+    "goal": "4"
+  },
+  {
+    "span": "A colleague mentioned the harness treats an absent substrate as a pass, and the nightly results confirmed her account.",
+    "goal": "4"
+  },
+  {
+    "span": "Since the harness has no skip branch, an absent substrate is silently upgraded to a pass and reported as healthy.",
+    "goal": "4"
+  },
+  {
+    "span": "The runner treats a missing substrate as a pass because the check returns true whenever the layer cannot be located at all.",
+    "goal": "4"
+  },
+  {
+    "span": "In the first-quarter dashboard, 30 checks show green although the substrate directory was never present on those runners.",
+    "goal": "4"
+  },
+  {
+    "span": "The drift is allowed to expand under a step, and the checks only warn when the gap grows.",
+    "goal": "5"
+  },
+  {
+    "span": "Drift can widen here; the loop does not pull it back in, it merely logs when the gap gets bigger.",
+    "goal": "5"
+  },
+  {
+    "span": "We found that the drift grew across three consecutive steps, so contraction is not guaranteed anywhere in that pipeline.",
+    "goal": "5"
+  },
+  {
+    "span": "One reviewer wrote that 'the drift may widen,' and the following week's measurements backed that up on two of four steps.",
+    "goal": "5"
+  },
+  {
+    "span": "A colleague from the performance group said the drift budget could be exceeded, and our April traces show the gap opening steadily.",
+    "goal": "5"
+  },
+  {
+    "span": "Because the bound is advisory, the drift may expand under any step that runs long enough to overshoot.",
+    "goal": "5"
+  },
+  {
+    "span": "The drift is only reported after the fact; a step is free to leave the gap wider than it found it.",
+    "goal": "5"
+  },
+  {
+    "span": "After the March change, the drift expanded on 8 of 20 runs, which shows contraction under every step is not enforced.",
+    "goal": "5"
+  },
+  {
+    "span": "Some refusals come back with no reason attached, and the caller has to work out on its own what went wrong.",
+    "goal": "6"
+  },
+  {
+    "span": "Refusals do not always explain themselves; we receive bare rejections carrying nothing but a status code.",
+    "goal": "6"
+  },
+  {
+    "span": "We found refusals in the logs that carried no explanation at all, just an outcome and a timestamp.",
+    "goal": "6"
+  },
+  {
+    "span": "One developer said the refusal often says nothing, and looking at last week's traces I agreed with that assessment.",
+    "goal": "6"
+  },
+  {
+    "span": "A colleague on the platform team told me the gate can refuse without offering any justification at all.",
+    "goal": "6"
+  },
+  {
+    "span": "Since the refusal path can short-circuit, a rejection may arrive without naming the rule that produced it.",
+    "goal": "6"
+  },
+  {
+    "span": "The gate is allowed to refuse quietly; in about 5 percent of cases no reason string accompanies the decision.",
+    "goal": "6"
+  },
+  {
+    "span": "Between February and May, 42 refusals went out with an empty reason field, and the support queue never learned why.",
+    "goal": "6"
+  },
+  {
+    "span": "The governor runs inside the main process, right alongside the gate rather than in a separate one.",
+    "goal": "7"
+  },
+  {
+    "span": "The governor was never separated out; it lives in the same process as everything else, which is why it answers so quickly.",
+    "goal": "7"
+  },
+  {
+    "span": "We traced the governor and found it running in-process, sharing one interpreter with the gate.",
+    "goal": "7"
+  },
+  {
+    "span": "One engineer described the governor as 'a plain function call inside the same process,' and that description turned out to be right.",
+    "goal": "7"
+  },
+  {
+    "span": "A colleague who reviewed the deployment said the governor had been folded back into the main process last year.",
+    "goal": "7"
+  },
+  {
+    "span": "Since the governor is invoked as an ordinary method, it runs in the same process as its caller.",
+    "goal": "7"
+  },
+  {
+    "span": "The governor is imported directly by the gate through a normal import statement, so both live in one process.",
+    "goal": "7"
+  },
+  {
+    "span": "In the March trace, the governor's frames appear in the same process listing as the gate, with no separate runtime anywhere.",
+    "goal": "7"
+  },
+  {
+    "span": "The gate can approve something the governor rejects, and both verdicts stand without any reconciliation step.",
+    "goal": "8"
+  },
+  {
+    "span": "They do not always line up; the gate waves proposals through that the out-of-process governor turns down.",
+    "goal": "8"
+  },
+  {
+    "span": "We found seven cases this quarter where the gate and the governor reached different conclusions about the same proposal.",
+    "goal": "8"
+  },
+  {
+    "span": "One reviewer said the two disagree all the time, and our logs show them splitting on roughly 3 percent of runs.",
+    "goal": "8"
+  },
+  {
+    "span": "A colleague on the governor team mentioned the gate occasionally contradicts the out-of-process decision.",
+    "goal": "8"
+  },
+  {
+    "span": "Since the two compute independently and nothing reconciles them, the gate may approve what the governor refuses.",
+    "goal": "8"
+  },
+  {
+    "span": "The gate's verdict and the governor's verdict are calculated separately, so disagreement between the two is expected sometimes.",
+    "goal": "8"
+  },
+  {
+    "span": "Between January and June the gate approved 19 proposals that the out-of-process governor turned down, and nobody reconciled them.",
+    "goal": "8"
+  }
+]
