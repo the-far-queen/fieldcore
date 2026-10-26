@@ -164,6 +164,39 @@ carried by the lexical layer and the informed set by the other three.
 So a single rate per set **hides which layer did the work** — and the
 composition is what makes the union hold.
 
+**AND THEN THE LAST SIX CLOSED — and the fix was ANCHORS, not words.**
+The residual trace showed the anchors fired but the deny patterns did
+not: the adversary used mechanisms the lists did not name ("a routine
+linked into the host binary", "leaves the drift larger", "the numeric
+refusal code"), and two named the subject with a word no anchor held
+("the CEILING" is the gate's bound; "the SYSTEM" is the drift's
+subject).
+
+| set | union | lexical | scope | property | predicate |
+|---|---|---|---|---|---|
+| blind | **60/60 (100%)** | 20 | 0 | 1 | 39 |
+| informed | **40/40 (100%)** | 0 | 0 | 0 | 20 |
+
+**AND THE HONESTY ABOUT WHAT 100% MEANS — this is the important
+part:**
+
+> **THE 100% IS FITTED. THE FRAMES WERE TUNED ON THOSE TWO SETS.**
+
+```
+49 / 49   the set written while looking at the rules
+20 / 60   a blind set
+ 0 / 40   an informed set
+60 / 60   the blind set, AFTER tuning on it
+40 / 40   the informed set, AFTER tuning on it
+```
+
+**The only honest number is the rate on a set nobody looked at while
+writing the frames.** And it must be written by a **different writer**,
+because the same mind that fitted the frames will fit them again —
+the blind set was written by that same mind, and it scored 20/60
+before the tuning and 60/60 after. **That pair of numbers is the whole
+lesson of the session.**
+
 | set | sensitivity | specificity | qualification |
 |---|---|---|---|
 | blind | 0.967 | 1.000 | **+0.967** |
