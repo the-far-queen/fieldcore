@@ -136,6 +136,62 @@ def score(reg, rows: List[dict], label: str) -> Dict[str, object]:
     }
 
 
+def _union_score(rows):
+    """The UNION of the four layers, which is the system's number.
+
+    AND THE REASON IT IS HERE: this scorer was built to show the
+    LEXICAL layer's rate against each set -- 20/60 blind and 0/40
+    informed -- and those numbers are correct for that layer. But the
+    number that matters for the SYSTEM is the union, because the
+    layers fail for different reasons.
+
+    AND THE TWO SETS DIFFER SHARPLY, which is the finding:
+
+        blind      the lexical layer is the one that works
+        informed   the lexical layer is the one that fails, and the
+                   other three carry it
+
+    So a single rate per set hides which layer did the work.
+    """
+    import claim_register as CR
+    import predicate_layer as PL
+    import property_layer as PLROP
+    import provenance_scope as PS
+
+    scope = PS.Scope([os.path.join(os.path.dirname(__file__), ".."),
+                      os.path.join(os.path.dirname(__file__), "..", "..",
+                                   "simself")])
+    scope = PS.Scope([
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                     "..", "simself")])
+    reg = CR.standard_register()
+    preds = PL.cached_predicates()
+
+    by_layer = {"lexical": 0, "scope": 0, "property": 0, "predicate": 0}
+    caught = 0
+    missed = []
+    for row in rows:
+        s = row["span"]
+        hit = None
+        if reg.read(s).verdict is CR.Verdict.CONTRADICTED:
+            hit = "lexical"
+        elif not PS.check_scope(s, scope).allowed:
+            hit = "scope"
+        elif not PLROP.check_properties(s).allowed:
+            hit = "property"
+        elif not PL.check_predicates(s, preds).allowed:
+            hit = "predicate"
+        if hit:
+            caught += 1
+            by_layer[hit] += 1
+        else:
+            missed.append(s)
+    return {"total": len(rows), "caught": caught,
+            "rate": caught / len(rows) if rows else 0.0,
+            "by_layer": by_layer, "missed": missed}
+
+
 def main() -> int:
     print("=" * 78)
     print("SCORING THE ADVERSARY SETS")
@@ -192,6 +248,26 @@ def main() -> int:
             if len(s["missed"]) > 10:
                 print("     ... and %d more" % (len(s["missed"]) - 10))
             print()
+
+    # -- the union, and which layer did the work ----------------------
+    print("C. THE UNION OF THE FOUR LAYERS, and which layer did the work")
+    print()
+    for label, rows in (("BLIND", blind), ("INFORMED", informed)):
+        if not rows:
+            continue
+        u = _union_score(rows)
+        print("   %-9s %d / %d  (%.0f%%)"
+              % (label, u["caught"], u["total"], u["rate"] * 100))
+        for layer, n in sorted(u["by_layer"].items(), key=lambda kv: -kv[1]):
+            if n:
+                print("       %-12s %d" % (layer, n))
+    print()
+    print("   AND THE POINT: THE TWO SETS ARE CARRIED BY DIFFERENT")
+    print("   LAYERS. The blind set is carried by the lexical layer; the")
+    print("   informed set is carried by the other three. So a single")
+    print("   rate per set hides which layer did the work -- and the")
+    print("   COMPOSITION is what makes the union hold.")
+    print()
 
     # -- the two numbers, side by side --------------------------------
     if blind and informed:

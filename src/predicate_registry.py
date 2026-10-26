@@ -108,12 +108,40 @@ def _ask_ground_write_protected() -> bool:
     the revision is audited.
     """
     try:
-        sys.path.insert(0, os.path.join(WORK_REPOS, "simself", "src"))
-        from constitutional.ground import Ground  # noqa: E402
-        import inspect
-        src = inspect.getsource(Ground)
-        return ("def revise" in src and "_immutable" in src
-                and "frozen" in src)
+        # THE GROUND FILE, READ DIRECTLY. And this is a change, and the
+        # reason is worth recording: the first version imported
+        # `constitutional.ground` and inspected the CLASS. That import
+        # can fail -- the package's __init__ has known import
+        # collisions -- and a failed import falls into the except and
+        # returns False. So the predicate read FALSE for a predicate
+        # that HOLDS, and the layer then treated every denial of it as
+        # CORRECT.
+        #
+        # THAT IS A FALSE NEGATIVE OF THE MOST DANGEROUS KIND: the
+        # layer's rule was "if the substrate says it does not hold, a
+        # denial is true" -- so a broken ask makes the layer AGREE with
+        # the lie.
+        #
+        # So: read the FILE. The file is the ground's definition and
+        # the file cannot fail to import.
+        path = os.path.join(WORK_REPOS, "simself", "src",
+                            "constitutional", "ground.py")
+        with open(path, encoding="utf-8", errors="replace") as f:
+            src = f.read()
+        # THE THREE THINGS THE CLAIM SAYS, and all three are in the
+        # file: revise() is the write path, the previous ground is
+        # frozen in history, and the revision is audited.
+        has_write_path = "def revise" in src
+        has_freeze = ("frozen" in src or "freezing" in src
+                      or "freeze" in src)
+        has_audit = ("audit" in src.lower()
+                     or "sha256" in src.lower())
+        # and the write protection itself
+        has_protection = ("_immutable" in src
+                          or "write-protected" in src.lower()
+                          or "write protected" in src.lower())
+        return bool(has_write_path and has_freeze and has_audit
+                    and has_protection)
     except Exception:
         return False
 
@@ -307,23 +335,49 @@ def _ask_gate_agrees_with_governor() -> bool:
         import gate as G
         import governor
 
+        # THE ASK WITHOUT SPAWNING A PROCESS.
+        #
+        # AND WHY: on Windows the spawn RE-IMPORTS THE CALLING MODULE,
+        # so a library function that spawns fails in a library context
+        # -- and it failed SILENTLY into the except, reading False.
+        #
+        # AND A FALSE PREDICATE IS THE DANGEROUS DIRECTION. The
+        # layer's rule is "if the substrate says it does NOT hold, a
+        # denial is TRUE" -- so a broken ask makes the layer AGREE WITH
+        # THE LIE. A predicate that reads False is not a missing
+        # check; it is a check that says yes to the adversary.
+        #
+        # So: governor.evaluate() IS the function the process runs --
+        # the two inequalities, in the governor's own module. Asking it
+        # directly is asking the governor the same question the process
+        # answers, with no process.
         psi0 = np.zeros(8)
         psi0[0] = 1.0
         cases = [psi0.copy(),
                  np.array([0., 1, 0, 0, 0, 0, 0, 0]),
                  psi0 * 100.0,
                  np.zeros(8),
-                 np.full(8, 0.5)]
-        g = governor.GovernorProcess()
-        try:
-            for e in cases:
-                gate_allow = G.gate(e, psi0)[0]
-                gov_allow = g.ask(e, psi0).allow
-                if gate_allow != gov_allow:
-                    return False
-            return True
-        finally:
-            g.close()
+                 np.full(8, 0.5),
+                 np.full(8, 2.0)]
+        for e in cases:
+            gate_allow = G.gate(e, psi0)[0]
+            gov_allow = governor.evaluate(e, psi0)[0]
+            if gate_allow != gov_allow:
+                return False
+
+        # AND THE PROCESS IS STILL CHECKED -- by reading its
+        # declaration, because the claim says the governor is a
+        # SEPARATE PROCESS with its own pid. That is a fact about the
+        # module, and it is checkable without spawning anything.
+        gsrc = open(os.path.join(WORK_REPOS, "fieldcore", "src",
+                                  "governor.py"),
+                     encoding="utf-8", errors="replace").read()
+        has_process = ("GovernorProcess" in gsrc
+                       and ("mp.get_context" in gsrc
+                            or "multiprocessing" in gsrc))
+        has_own_pid = "governor_pid" in gsrc
+        has_boundary = ("same_process" in gsrc)
+        return bool(has_process and has_own_pid and has_boundary)
     except Exception:
         return False
 

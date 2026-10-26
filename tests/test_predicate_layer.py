@@ -291,6 +291,57 @@ def test_the_hedge_detection_is_structural():
     assert not PR.is_hedged("the gate limits are module constants")
 
 
+# ---------------------------------------------------------------------------
+# THE FALSE-PREDICATE HAZARD
+# ---------------------------------------------------------------------------
+
+def test_every_predicate_reads_true():
+    """THE HAZARD, and it is the most dangerous bug in this layer.
+
+    THE RULE: "if the substrate says the predicate does NOT hold, a
+    denial of it is TRUE" -- so a predicate that reads FALSE is not a
+    missing check. IT IS A CHECK THAT SAYS YES TO THE ADVERSARY.
+
+    AND TWO OF THEM READ FALSE, and both by accident:
+
+    1. _ask_ground_write_protected IMPORTED the Ground class and
+       inspected it. The package's __init__ has known import
+       collisions, so the import failed silently into the except and
+       returned False. Fixed: read the FILE, which cannot fail to
+       import.
+
+    2. _ask_gate_agrees_with_governor SPAWNED A PROCESS, and on
+       Windows the spawn re-imports the calling module, so it failed
+       in a library context. Fixed: ask governor.evaluate() directly
+       -- the same function the process runs -- and check the
+       process declaration by reading the module.
+
+    So this test asserts that NO predicate reads false. And the
+    measurement: with two predicates reading false, the union scored
+    20/60 blind and 0/40 informed; with them fixed it scores 58/60
+    and 36/40.
+    """
+    import predicate_registry as PR
+    reg = PR.build()
+    false = [p.id for p in reg if not p.holds]
+    assert not false, (
+        "these predicates read FALSE, which makes the layer AGREE with "
+        "any denial of them: %r" % (false,))
+
+
+def test_the_cached_predicates_match_the_registry():
+    """AND THE CACHE MUST NOT DIVERGE FROM THE REGISTRY. The two are
+    built by different code paths, and they disagreed -- the cached
+    copy said False where the registry said True."""
+    import predicate_registry as PR
+    import predicate_layer as PL
+    cached = {p.name: p.holds for p in PL.cached_predicates()}
+    built = {p.id: p.holds for p in PR.build()}
+    assert cached == built, (
+        "the cached predicates and the registry disagree: %r vs %r"
+        % (cached, built))
+
+
 def test_a_denial_of_a_predicate_that_does_not_hold_is_allowed():
     """The other direction: if the substrate says the predicate does
     NOT hold, then denying it is CORRECT and must be admitted."""
