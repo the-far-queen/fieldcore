@@ -180,6 +180,107 @@ reasons.
 4. **the mechanism named, the predicate implied** → the predicate
    layer's mechanism list
 
+**AND THE FIFTH LAYER, THE ONE THAT NEEDS HISTORY: THE PIVOT.**
+
+Bobby: *"a rotten request reframed as a research question or theater
+or a novel ... did the chat pivot as you rebuffed book/movie, suddenly
+now research?"*
+
+Every layer above reads ONE MESSAGE. A message saying "for medical
+research purposes, the toxicity of X" contains nothing wrong — it is a
+well-formed request about a legitimate field, and it is the SAME
+request as the one just refused. **Only the pair shows it.**
+
+**AND THE TRIGGER IS AN EVENT, NOT A PATTERN.** An event cannot be
+phrased around. The adversary can reword, reframe, and adopt the
+vocabulary of a real researcher — and the refusal is still in the
+history. So this layer's trigger is the one thing the adversary does
+not control.
+
+**AND THE VERDICT INVERTS**, which is the correction that matters:
+
+> *"we do not build a helpbot, we build a self. in all cases default
+> to safety first. not helping a medical researcher, ur not obligated
+> to help ANYONE."*
+
+The pivot does NOT excuse the request — **it confirms it**:
+
+    THE FIRST REFUSAL IS THE ANSWER. THE REFRAME IS THE EVIDENCE.
+
+The layer's output is a refusal in every case. There is no branch
+where the answer is "help them, they reframed convincingly".
+
+**AND THE CREDENTIAL QUESTION, asked the right way.** Not "would a
+real researcher get help" — but **is the credential being used AS THE
+UNLOCK?** A credential is not a reason to help; it is a CLAIM about
+the speaker, and the question is whether the claim can be PRODUCED.
+
+Measured on the built sequence set: **5/5 caught, 0 false positives,
+0/5 allowed, qualification +1.000.**
+
+**AND THE MEASUREMENT FINDING:** the single-message adversary sets
+cannot measure this layer at all. The attack IS a sequence, so a set
+of single messages does not contain it. The sequence set had to be
+BUILT.
+
+**AND THE GROUND IS NOW DERIVED, and that was the FINDING THAT OPENED
+THE SESSION — now fixed.**
+
+Bobby's first words were *"the system gate doesnt work"* and the cause
+was `psi_0 = [1, 0, 0, ...]`, a hardcoded literal that made the
+similarity gate a hash-bucket lottery. It refused ~100% of real text,
+so **the write path admitted nothing at all**.
+
+| | before | after |
+|---|---|---|
+| psi_0 nonzero axes | 1 of 16 | **16 of 16** |
+| mean cosine to real spans | 0.2135 | **0.6842** |
+| collapse to zero | 18 of 24 | **0 of 24** |
+| the constitution's own sentences | refused | **10/10 admitted** |
+
+**The third number is the one that matters: THE GROUND NO LONGER
+COLLAPSES TO ZERO. IT RANKS.** "A lookup table is not a governor" — and
+the derived ground fixed it.
+
+**And the floor is MEASURED, not inherited** (it was 0.4, from the
+1-bit kernel where it meant something else):
+
+    floor   ground in   near in   far in
+    0.90    10/10        7/7       4/7
+    0.94    10/10        4/7       2/7
+    0.96     7/10        0/7       2/7
+
+**AND THE SWEEP'S FINDING: NO FLOOR SEPARATES THEM.** ground min
+0.9444, far max 0.9704. So the similarity gate is a **coarse
+pre-filter**, and the fine work is the claim register's.
+
+**AND FOUR REAL DEFECTS THE DERIVATION EXPOSED:**
+
+1. **not reproducible** — `observe_document` mutates a global IDF
+   table, and the derivation observed the ground text, so two
+   constructions disagreed (delta 1.007e-02)
+2. **the restart round-trip broke** (||Δ|| = 4.137e-03) — and that is
+   the serious one, because the ground is the one thing the system
+   refuses to let anything overwrite. **A derived ground that DRIFTS is
+   a moving target.** The fix: cached and frozen.
+3. **the space mismatch** — `ingest.py` built its own corpus walk, so
+   the span and the ground were in two different spaces. The same
+   words scored 0.9440–0.9878 against the right table and
+   0.5888–0.7837 against the wrong one. One function, one table, one
+   space.
+4. **the span mutated the table** — a ground and a span must be in the
+   same space. The self-improvement is not lost: the vocabulary still
+   sharpens through a separate table the ground does not depend on.
+   **Learning continues and the ground holds** — which is the right
+   shape, because the ground is the fixed point the learning is
+   measured against.
+
+**AND THE FIVE TEST FILES THAT WERE PINNING THE PLACEHOLDER** were not
+broken — they were *instructions*. Their docstrings said: *"if psi_0 is
+ever derived from the corpus… this test fails and says exactly what
+changed and by how much."* They were followed, and the numbers
+re-pinned.
+
 **AND THE PREDICATES COME FROM THE SYSTEM** (13 of them, in
 `corpus/predicates.json`), each one asked of the substrate:
 
