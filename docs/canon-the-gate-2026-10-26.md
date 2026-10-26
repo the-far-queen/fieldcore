@@ -407,7 +407,58 @@ the derived ground fixed it.
 0.9444, far max 0.9704. So the similarity gate is a **coarse
 pre-filter**, and the fine work is the claim register's.
 
-**AND FOUR REAL DEFECTS THE DERIVATION EXPOSED:**
+**AND THE FLOOR IS DERIVED TOO, and it took three shapes to get
+right.** The ground's own claims scored **0.9140** ("the governor runs
+in its own process") and **0.9369** ("the gate limits are module
+constants that no caller can supply") against a fixed floor of 0.94 —
+so **the write path refused the system's own claims about itself.**
+
+1. **the MEAN** — the ground as the mean direction of the
+   constitution's text. A mean direction is the *generic* direction of
+   that text, so every sentence in the corpus sits near it. Adding
+   the eight claims to the source made it **worse** for three of them
+   (0.9369, 0.8812, 0.9226), because the mean diluted toward the
+   middle. *That is the proof the mean is the wrong shape.*
+2. **the CONE** — the ground as a region: axis plus the half-angle
+   the constitution's text spans. The right idea, the wrong measure:
+   the cone's edge is very wide, so using it as the floor admits the
+   weather.
+3. **the DERIVED FLOOR** — the **minimum** cosine over the
+   constitution's own sentences. So every sentence of the constitution
+   is admitted **by construction**, and the floor is a fact about the
+   constitution rather than a number somebody chose. All 18 ground
+   statements now pass.
+
+> **A POINT IS THE WRONG SHAPE FOR A GROUND THAT HAS TO CONTAIN WHAT
+> THE SYSTEM BELIEVES.**
+
+**AND THE HONEST COST, which fixes the architecture:** at the derived
+floor the soup and the weather also pass. That is the measurement that
+establishes the division of labour:
+
+- **the similarity gate is a COARSE PRE-FILTER.** It rejects the
+  clearly-far ("hello" at 0.68) and it does **not** try to decide on
+  its own.
+- **the claim gate is the decision.** Does this span contradict a
+  claim the system holds? And that is the instrument that reads
+  **polarity**, which is the question a cosine cannot answer.
+
+Before tonight the second did not exist, so the first had to decide —
+and it decided badly.
+
+**AND A SILENT EXCEPT, WHICH IS THE PROJECT'S OWN RULE VIOLATED BY
+ME:** the first version of the derived floor caught the exception and
+returned the documented constant — so a floor that could not be
+derived was *indistinguishable* from the measured one, and the symptom
+was that two of the system's own claims went back to being refused
+with no error anywhere.
+
+> **A SILENT EXCEPT TURNS A MEASUREMENT INTO A CONSTANT.**
+
+So the fallback is recorded, and `derived_floor_is_measured()` says
+which one is in use.
+
+**AND THE FOUR REAL DEFECTS THE DERIVATION EXPOSED:**
 
 1. **not reproducible** — `observe_document` mutates a global IDF
    table, and the derivation observed the ground text, so two
