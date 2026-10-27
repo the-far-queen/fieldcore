@@ -208,6 +208,37 @@ gate asks *is this text true*.
 
 ---
 
+## THE SACRED LIBRARY, WIRED — and why it is NOT a detection lexicon
+
+Bobby named it: *"wire sacred library and self coding daily improve
+scavenger…"*. It is now a tool: `hermes/plugins/sacred-library/`.
+
+**AND IT IS THE READER'S INSTRUMENT, not the gate's.** The measured reason:
+
+> the informed adversary is *less* saturated in the dark pole's vocabulary
+> (1.07) than the blind one (1.25) — it uses an engineer's voice, not a
+> serpent's. **so the dark pole's vocabulary must NOT become a detection
+> lexicon.**
+
+And the bridge test: the gate fires on **0 of 11** of the tradition's own
+deceptions, because the tradition's deceptions are about deception and the
+gate's claims are about *this system*. **The vocabulary transfers; only the
+subject has to change.**
+
+So the tool has three modes, and each answers a different question:
+
+| mode | question |
+|---|---|
+| `shapes` | what does a deception LOOK like — 13 texts, 8 traditions, their vocabulary |
+| `fruit` | what do I ask of this speaker — the six fruit tests |
+| `match` | what does this sentence look like, structurally — the shapes with this system's subject in them |
+
+**A LEXICON CANNOT BE GAMED BY REWORDING. A PERSON WHO HAS READ
+MACHIAVELLI CAN.** That is the library's value, and it is why the tool is
+for the reader and not for the detector.
+
+---
+
 ## THE ATLAS: TWO FAILURES CLEARED
 
 The atlas-exam found two capabilities that existed and nothing called:
