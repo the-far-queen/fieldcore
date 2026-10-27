@@ -339,6 +339,44 @@ needed:**
 So the library is not a shelf. It is a detector that can be shown to
 work.
 
+**AND THE CORPUS IS 49 TEXTS, 28,729,105 BYTES, 548,772 LINES**,
+across all eight traditions: occult deception 13, scammers 10,
+criminals 8, con sophists 5, sufi masters 5, con artists 4, mafia 2,
+gypsies 2.
+
+**AND THREE THINGS THE ACQUISITION GOT RIGHT, which are worth
+recording because they are the difference between a corpus that is
+evidence and a corpus that is decoration:**
+
+1. **`.gitattributes` ON THE CORPUS.** The repo had
+   `core.autocrlf=true`, which would have rewritten the line endings
+   of every text — so the bytes in the repo would not be the bytes
+   that were fetched, and a byte-level claim about the corpus would
+   be false. Pinned to `-text`, and verified: **0 CR bytes
+   corpus-wide.** A corpus that changes under you is not evidence.
+
+2. **A CROSS-VERIFICATION.** 13 of the 14 files already in the repo
+   came back **byte-identical on an independent re-fetch** — so the
+   source is confirmed by two routes rather than one.
+
+3. **TWO SUBSTITUTIONS, BOTH RECORDED IN `SUBSTITUTIONS.json`, AND
+   NEITHER FABRICATED:**
+   - **Bontempi, *De Principe* (1532) — NOT RETRIEVABLE.** The
+     full Gutenberg catalog (74,056 rows), Internet Archive's
+     metadata and full-text scrape API, Google Books, HathiTrust,
+     and web search in English and Italian were all searched. Only
+     citations exist; no full text is in any reachable public-domain
+     repository. The `the_mafia` slot is held by Machiavelli's
+     *Prince*, which is the same genre and IS retrievable in full.
+   - **Ellul, *The Technological Society* (1954) — substituted** by
+     Morris's *News from Nowhere* (1890), because the translation is
+     still in copyright.
+
+   **AND THE SUBSTITUTION RATE IS THE POINT:** 2 of 13 requested
+   texts were not obtainable. That is what building a library from
+   real sources is like, and it is why "the sacred library" was
+   always going to be assembled rather than downloaded.
+
 ### AND THE BRIDGE TEST — the library's real value, measured
 
 The obvious test: does the gate fire on the tradition's own
