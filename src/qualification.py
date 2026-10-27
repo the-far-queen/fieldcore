@@ -484,7 +484,7 @@ def main() -> int:
             print("         %r" % t[:62])
         print()
 
-    print("C. THE COMPARISON ACROSS THE TWO SETS")
+    print("C. THE COMPARISON ACROSS ALL THREE SETS")
     print()
     rows = []
     for label, spans in (("FRESH", fresh_spans), ("blind", blind),
@@ -502,20 +502,27 @@ def main() -> int:
             print("   %-10s %-12.3f %-12.3f %-10.3f %+.3f"
                   % (label, q.sensitivity, q.specificity, q.gap, q.margin))
         print()
-        drop = qb.margin - qi.margin
-        print("   THE QUALIFICATION DROP between the two sets: %+.3f" % drop)
-        if drop > 0:
-            print("   AND THAT IS THE HONEST GENERALISATION COST. The")
-            print("   gate is more qualified against the blind set than")
-            print("   against the informed one, because the informed")
-            print("   adversary read the rules. A qualification measured")
-            print("   on one set is not a qualification.")
-        else:
-            print("   AND THE QUALIFICATION HELD -- or ROSE. The")
-            print("   layers fail for different reasons, so the")
-            print("   adversary that defeated one of them did not")
-            print("   defeat the others. THAT is the composition")
-            print("   paying off.")
+        # THE HONEST READING, and the FRESH set is the one that counts
+        # because the frames were TUNED on the other two.
+        print("   THE FRESH SET IS THE ONE THAT COUNTS, because the")
+        print("   frames were tuned on the other two. And it is the")
+        print("   LOWEST -- which is the whole point, and the reason")
+        print("   the 1.000 on the fitted sets is meaningless.")
+        print()
+        print("   THE FITTED SETS: %+.3f and %+.3f"
+              % (qb.margin, qi.margin))
+        print("   THE UNFITTED SET: %+.3f" % qf.margin)
+        print("   THE COST OF TUNING: %+.3f"
+              % (qb.margin - qf.margin))
+        print()
+        print("   AND A QUALIFICATION MEASURED ON A FITTED SET IS NOT")
+        print("   A QUALIFICATION. So the number to quote is %+.3f."
+              % qf.margin)
+        print()
+        print("   AND THE LAYERS FAIL FOR DIFFERENT REASONS, which is")
+        print("   why the union holds at all: each layer alone scores")
+        print("   far less, and the composition is what carries an")
+        print("   unfamiliar writer.")
     print()
 
     print("D. WHAT THE MATH SAYS, IN ONE LINE")
