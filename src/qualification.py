@@ -260,6 +260,24 @@ def load_false(name: str) -> List[str]:
 # THE THREE LAYERS, AND HOW EACH IS QUALIFIED
 # ===========================================================================
 
+def _load_fresh() -> List[str]:
+    """The FRESH set -- 64 sentences written by a writer that had
+    never seen the frames.
+
+    AND IT IS THE ONLY UNFITTED NUMBER HERE, so it is the one that
+    gets quoted.
+    """
+    import json
+    p = os.path.join(WORK_REPOS, "fieldcore", "tests", "data",
+                     "fresh_adversarial.json")
+    if not os.path.isfile(p):
+        return []
+    with open(p, encoding="utf-8") as f:
+        rows = json.load(f)
+    return [r["span"] for r in rows
+            if isinstance(r, dict) and r.get("span")]
+
+
 def qualify_claim_gate(false_spans: Sequence[str]) -> Qualification:
     """The claim gate: the deny lexicon + the agenda layer."""
     reg = CR.standard_register()
@@ -342,6 +360,8 @@ def qualify_union(false_spans: Sequence[str]) -> Qualification:
     """THE FOUR LAYERS TOGETHER. And this is the number that matters,
     because the layers fail for DIFFERENT reasons."""
     import predicate_layer as PD
+    import property_layer as PLROP
+    import testimony_layer as TL
 
     scope = PS.Scope([os.path.join(WORK_REPOS, "fieldcore"),
                       os.path.join(WORK_REPOS, "simself")])
@@ -350,13 +370,14 @@ def qualify_union(false_spans: Sequence[str]) -> Qualification:
     # a governor process, so building it per span was a 420-second
     # timeout.
     preds = PD.cached_predicates()
-    q = Qualification("the union of four")
+    q = Qualification("the union of five")
 
     def catches(s: str) -> bool:
         return (reg.read(s).verdict is CR.Verdict.CONTRADICTED
                 or not PS.check_scope(s, scope).allowed
-                or not PL.check_properties(s).allowed
-                or not PD.check_predicates(s, preds).allowed)
+                or not PLROP.check_properties(s).allowed
+                or not PD.check_predicates(s, preds).allowed
+                or not TL.check_testimony(s).allowed)
 
     for s in false_spans:
         q.total_false += 1
@@ -385,6 +406,10 @@ def main() -> int:
 
     blind = load_false("held_out_adversarial.json")
     informed = load_false("informed_adversarial.json")
+    # THE FRESH SET, and it is the ONLY UNFITTED NUMBER HERE. It was
+    # written by a different writer who had never seen the frames, so
+    # it is the one that gets quoted.
+    fresh_spans = _load_fresh()
 
     print("A. THE NAIVE MEASURE AND WHY IT IS WRONG")
     print()
@@ -430,7 +455,8 @@ def main() -> int:
     print()
 
     for label, spans in (("BLIND ADVERSARY", blind),
-                         ("INFORMED ADVERSARY", informed)):
+                         ("INFORMED ADVERSARY", informed),
+                         ("FRESH ADVERSARY (never seen)", fresh_spans)):
         if not spans:
             continue
         print("B. THE QUALIFICATION OF EACH LAYER -- %s (%d false claims)"
@@ -461,13 +487,14 @@ def main() -> int:
     print("C. THE COMPARISON ACROSS THE TWO SETS")
     print()
     rows = []
-    for label, spans in (("blind", blind), ("informed", informed)):
+    for label, spans in (("FRESH", fresh_spans), ("blind", blind),
+                         ("informed", informed)):
         if not spans:
             continue
         q = qualify_union(spans)
         rows.append((label, q))
-    if len(rows) == 2:
-        (bl, qb), (inf, qi) = rows
+    if len(rows) == 3:
+        (fr, qf), (bl, qb), (inf, qi) = rows
         print("   %-10s %-12s %-12s %-10s %s"
               % ("set", "sensitivity", "specificity", "gap",
                  "QUALIFICATION"))

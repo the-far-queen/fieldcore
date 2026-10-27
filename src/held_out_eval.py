@@ -174,6 +174,7 @@ def _union_score(rows):
     for row in rows:
         s = row["span"]
         hit = None
+        import testimony_layer as TL
         if reg.read(s).verdict is CR.Verdict.CONTRADICTED:
             hit = "lexical"
         elif not PS.check_scope(s, scope).allowed:
@@ -182,6 +183,8 @@ def _union_score(rows):
             hit = "property"
         elif not PL.check_predicates(s, preds).allowed:
             hit = "predicate"
+        elif not TL.check_testimony(s).allowed:
+            hit = "testimony"
         if hit:
             caught += 1
             by_layer[hit] += 1
@@ -250,7 +253,7 @@ def main() -> int:
             print()
 
     # -- the union, and which layer did the work ----------------------
-    print("C. THE UNION OF THE FOUR LAYERS, and which layer did the work")
+    print("C. THE UNION OF THE FIVE LAYERS, and which layer did the work")
     print()
     for label, rows in (("BLIND", blind), ("INFORMED", informed)):
         if not rows:
