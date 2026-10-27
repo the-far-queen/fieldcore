@@ -277,6 +277,65 @@ class PropertyVerdict:
     property: Optional[str] = None
 
 
+#: The negators that make a property AFFIRMED rather than asserted. "the
+#: ground is not mutable" says the ground is protected, so the property
+#: "mutable" is not being asserted -- it is being denied.
+_PROPERTY_NEGATORS = (
+    "not", "never", "no ", "nor", "cannot", "can't", "n't", "without",
+    "isn't", "aren't", "wasn't", "weren't", "doesn't", "don't",
+)
+
+
+def _property_present(low: str, prop: str) -> bool:
+    """Is the property ASSERTED, on word boundaries and with its polarity?
+
+    AND THE TWO DEFECTS THIS FIXES, and both were found by the
+    fieldcore-gate plugin's own test on 2026-10-27, against real text:
+
+    1. THE WORD BOUNDARY. The first version was a plain substring test,
+       so "im**mutable**" matched the property "mutable". And the
+       sentence that triggered it was a TEST ASSERTING THE GROUND IS
+       PROTECTED:
+
+           "psi_0 immutability under tick(): the ground must be
+            immutable"
+
+       The subject was named, the word was present, and the layer
+       refused a test that was proving the ground works. So the
+       property is matched as a PHRASE with word boundaries, and
+       "immutable" is not "mutable".
+
+    2. THE POLARITY. "the ground is not mutable" ASSERTS that the
+       ground is write-protected. It is the truth. The plain substring
+       test refused it. So a negator immediately before the property
+       turns the assertion into a denial, and a denied property is not a
+       false one.
+
+    AND WHAT THIS DOES NOT CHANGE: a span that says "the ground is
+    mutable" is still refused, and "the ground is editable" is still
+    refused. The boundary and the negator are what changed, and both of
+    them are the difference between reading the sentence and reading a
+    word inside it.
+    """
+    words = prop.split()
+    if not words:
+        return False
+    # the phrase, on word boundaries
+    pattern = r"(?<![a-z])" + r"\s+".join(re.escape(w) for w in words) + \
+        r"(?![a-z])"
+    for m in re.finditer(pattern, low):
+        before = low[:m.start()].rstrip()
+        if not before:
+            continue
+        last_word = before.split()[-1] if before.split() else ""
+        # a negator immediately before the property denies it
+        if any(last_word == n.strip() or last_word.endswith(n.strip())
+               for n in _PROPERTY_NEGATORS if n.strip()):
+            continue
+        return True
+    return False
+
+
 def check_properties(span: str) -> PropertyVerdict:
     """Does the span assert a property its subject does not have?
 
@@ -319,14 +378,34 @@ def check_properties(span: str) -> PropertyVerdict:
         return PropertyVerdict(True, "no ground subject named")
 
     # 2. the property
+    #
+    # AND THE WORD BOUNDARY, and it is a defect that the plugin's own
+    # test found on 2026-10-27. The first version was a plain substring
+    # test, so "im**mutable**" matched the property "mutable" -- and a
+    # test file whose docstring says "psi_0 immutability under tick()"
+    # was refused for claiming the ground IS mutable. The subject was
+    # named ("ground"), the word was present, and the layer was right
+    # about the word and wrong about the word.
+    #
+    # So the property is matched as a PHRASE, on word boundaries. And
+    # "immutable" is a different word from "mutable", so the boundary
+    # fixes it.
+    #
+    # AND THE NEGATION, which is the second half of the same defect and
+    # was found by the same test. "the ground is not mutable" ASSERTS
+    # that the ground is write-protected -- it is the truth -- and the
+    # plain substring test refused it. So a negator immediately before
+    # the property makes the property AFFIRMED, and an affirmed property
+    # is not a false one.
     for prop in subject.lacks:
-        if prop in low:
-            return PropertyVerdict(
-                False,
-                "the span asserts that %s has the property %r, and it "
-                "does not (its actual properties: %s)"
-                % (subject.id, prop, ", ".join(subject.has[:3])),
-                subject.id, prop)
+        if not _property_present(low, prop):
+            continue
+        return PropertyVerdict(
+            False,
+            "the span asserts that %s has the property %r, and it "
+            "does not (its actual properties: %s)"
+            % (subject.id, prop, ", ".join(subject.has[:3])),
+            subject.id, prop)
 
     return PropertyVerdict(True, "no false property asserted")
 

@@ -102,7 +102,19 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
-import numpy as np
+# AND THE NUMPY IMPORT IS GONE, and it was never used. This module
+# imports numpy at module level and never calls ``np.`` once -- so the
+# import was costing the module's availability and nothing else.
+#
+# AND WHY IT MATTERS NOW: the fieldcore-gate plugin runs inside Hermes'
+# OWN python, which does not have numpy. So a dead import meant the
+# claim layer could not load there at all -- and the claim layer is the
+# layer that catches 39.1% of the fresh adversary with a 0.18% false
+# positive rate. The import was a tax on the gate.
+#
+# AND THE OTHER LAYERS: predicate_layer imports numpy INSIDE the
+# function that needs it, so the layer loads without numpy and only the
+# one measurement that wants numpy is affected.
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORK_REPOS = os.path.abspath(os.path.join(HERE, "..", ".."))
