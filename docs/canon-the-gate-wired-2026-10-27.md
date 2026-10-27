@@ -246,9 +246,10 @@ areas are TODO and an unimplemented area is not a passing area.
 | `fieldcore/tests/test_fc_gate.py` | 17 tests, incl. the false-positive test on real output |
 | `simself/src/wiring.py` | the substrate's own wiring: extraction and spawning, gated |
 | `hermes/plugins/fieldcore-gate/` | the plugin: the veto, the reply, the record |
+| `hermes/plugins/sacred-library/` | the library, as the reader's instrument: one tool, three modes |
 
 Suites: fieldcore **876 passed, 1 xfailed**; simself **518 passed, 2
-skipped**; atlas-exam **79 passed**.
+skipped**; atlas-exam **79 passed**; the two plugins **26 passed**.
 
 ---
 
@@ -261,12 +262,13 @@ own rate on the system's **real** output:
 |---|---|
 | fresh adversary, any catch | **81.2%** |
 | fresh adversary, hard catch | 71.9% |
-| **real messages hard-refused** | **0.96%** |
+| **real messages hard-refused** | **1.04%** |
+| **real reply chunks hard-refused** | 0.26% |
 | **real tool calls vetoed (intent)** | **0.151%** |
 | cost per message | 1.9 ms |
 | cost per tool call | 0.68 ms |
 
-**AND THE HONEST LIMIT:** 0.96% of the system's own honest output is still
+**AND THE HONEST LIMIT:** 1.04% of the system's own honest output is still
 refused. That is the number to bring down, and the log
 (`logs/fieldcore_gate.jsonl`) records every catch so it can be watched
 fall.
