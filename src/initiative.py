@@ -116,7 +116,8 @@ LEDGER_PATH = os.path.join(_SRC, "initiative_ledger.json")
 #: Both failed for a reason that has nothing to do with the code, and
 #: so the loop found a PERMANENT FALSE GAP: "the rust core suite is
 #: green" was reported as failing while the suite was in fact green
-#: (measured: 25 passed, 0 failed). A gap detector that always finds a
+#: (measured: 95 passed, 0 failed -- the lib's 70 plus the governor
+#: integration test's 25). A gap detector that always finds a
 #: gap is a detector that finds nothing.
 #:
 #: So each check carries its own working directory. The python suite

@@ -242,7 +242,8 @@ Running the existing code as-is, 2026-10-25:
 - `fieldcore/src/wound_core.py --selftest` **crashed** with
   `KeyError: 'exceeds_sigma_g'` — a key the report did not produce.
 - The Rust core was green: `cargo +stable-x86_64-pc-windows-gnu test
-  --release` → **25 passed, 0 failed**.
+  --release` → **95 passed, 0 failed** (70 lib + 25 governor
+  integration).
 
 So the reference implementation (fieldcore, 26 tests passing) and the
 working copy (simself, uncommitted) disagreed, and the working copy
