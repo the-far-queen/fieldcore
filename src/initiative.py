@@ -100,15 +100,36 @@ LEDGER_PATH = os.path.join(_SRC, "initiative_ledger.json")
 
 #: The project's own checks, which are where the gaps come from.
 #:
-# AND WHY THESE AND NOT OTHERS: a gap that the ROOT can detect is a
+#: AND WHY THESE AND NOT OTHERS: a gap that the ROOT can detect is a
 #: gap the root can close. So the gap-finding mechanism IS the test
-# suite, and the suite's failures are the agenda.
-GAP_CHECKS: Tuple[Tuple[str, List[str]], ...] = (
+#: suite, and the suite's failures are the agenda.
+#:
+#: AND WHERE EACH CHECK RUNS, which is the load-bearing detail and was
+#: wrong before 2026-10-28.
+#:
+#: MEASURED. The first version of this ran BOTH checks in the directory
+#: the module lives in -- `fieldcore/src/`. So:
+#:
+#:   pytest    -> "file or directory not found: tests/"   (rc=4)
+#:   cargo     -> "could not find Cargo.toml in .../src"   (rc=101)
+#:
+#: Both failed for a reason that has nothing to do with the code, and
+#: so the loop found a PERMANENT FALSE GAP: "the rust core suite is
+#: green" was reported as failing while the suite was in fact green
+#: (measured: 25 passed, 0 failed). A gap detector that always finds a
+#: gap is a detector that finds nothing.
+#:
+#: So each check carries its own working directory. The python suite
+#: runs at the repo root; the rust suite runs at `core/`, because that
+#: is where the Cargo.toml is. The check's directory is part of the
+#: check, so it belongs in the check.
+GAP_CHECKS: Tuple[Tuple[str, List[str], str], ...] = (
     ("the python suite is green",
      [sys.executable, "-m", "pytest", "tests/", "-q", "--no-header",
-      "-x"]),
+      "-x"], "."),
     ("the rust core suite is green",
-     ["cargo", "+stable-x86_64-pc-windows-gnu", "test", "--release"]),
+     ["cargo", "+stable-x86_64-pc-windows-gnu", "test", "--release"],
+     "core"),
 )
 
 
@@ -155,14 +176,18 @@ def find_gaps(repo: str = os.path.dirname(_SRC)) -> List[FoundGap]:
     It is whatever the root itself cannot currently do.
     """
     gaps: List[FoundGap] = []
-    for check, cmd in GAP_CHECKS:
+    for check, cmd, subdir in GAP_CHECKS:
+        # AND THE WORKING DIRECTORY, which is part of the check. The
+        # command is run in `repo/subdir`, and a check that cannot run
+        # there is a gap in the CHECK, not a gap in the code.
+        where = os.path.normpath(os.path.join(repo, subdir))
         try:
-            proc = subprocess.run(cmd, cwd=repo, capture_output=True,
+            proc = subprocess.run(cmd, cwd=where, capture_output=True,
                                   text=True, timeout=600)
         except Exception as exc:
             gaps.append(FoundGap(check=check, size=1.0, command=list(cmd),
-                                 because="the check could not run: %s"
-                                 % (type(exc).__name__,)))
+                                 because="the check could not run in %s: %s"
+                                 % (where, type(exc).__name__,)))
             continue
         if proc.returncode == 0:
             continue

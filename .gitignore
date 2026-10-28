@@ -52,3 +52,8 @@ coverage/
 harness_log.json
 /core/target/
 /target/
+
+# the sacred library is runtime state, NOT source. it lives outside
+# the repo (work_repos/fieldcore_state/sacred_library) so a library
+# cannot be edited by the thing it governs.
+sacred_library/

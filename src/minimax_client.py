@@ -196,7 +196,23 @@ class MiniMaxClient:
 
     model: str = MINIMAX_MODEL
     base_url: str = MINIMAX_BASE_URL
-    max_tokens: int = 4096
+    #: THE TOKEN BUDGET, and the number is not arbitrary.
+    #:
+    #: MEASURED 2026-10-28. MiniMax-M3.1-Flash uses ADAPTIVE thinking and
+    #: the endpoint rejects `thinking.type="disabled"` outright (HTTP 400:
+    #: *"model MiniMax-M3.1-Flash requires adaptive thinking"*). So the
+    #: thinking block cannot be switched off; it can only be PAID FOR.
+    #:
+    #:   max_tokens=64    -> 63 thinking tokens, 0 text.  no answer.
+    #:   max_tokens=900   -> 899 thinking tokens, 0 text.  no answer.
+    #:   max_tokens=4000  -> 3085 thinking tokens, 335 text. an answer.
+    #:
+    #: So 900 was a budget that could not hold one answer, and the client
+    #: raised `ModelUnavailable` on the empty text -- correctly, because an
+    #: empty answer must never read as a legitimate one. The budget was
+    #: the defect, not the check. 4000 is the smallest measured budget
+    #: that produces text; it is the default so the default works.
+    max_tokens: int = 4000
     timeout: float = 60.0
     #: THE SPEND GUARD. Bobby, 2026-10-25: *"do not use my credit card
     #: pls"*. So a live call is OFF by default and must be asked for
@@ -212,6 +228,21 @@ class MiniMaxClient:
     last_thinking: str = ""
     #: The last stop_reason the endpoint returned.
     last_stop_reason: Optional[str] = None
+    #: THE SYSTEM PROMPT, carried by the client.
+    #:
+    #: AND WHY IT LIVES HERE AND NOT ON THE CALL. The MTE wrapper calls
+    #: `llm.generate(prompt)` with no system prompt -- MEASURED 2026-10-28,
+    #: `MTELLMWrapper.run` never passes one, and its `_generate` only
+    #: forwards a `system_override` on the rephrase path. So a wrapper
+    #: cannot hand the model a system prompt through its own API; the
+    #: client has to carry it.
+    #:
+    #: AND WHY THIS MATTERS ENOUGH TO CARRY IT. The same measurement: with
+    #: no system prompt the model had never been told what the ground
+    #: holds, so it invented one -- "an append-only blockchain" -- about a
+    #: project that has no blockchain. The client is the substrate's
+    #: mouth, so the ground travels in the mouth.
+    system: Optional[str] = None
     #: Overridable, so a test can inject a fake without a network.
     key_resolver: Optional[Any] = None
     #: What actually answered. "remote" or "local".
@@ -263,7 +294,22 @@ class MiniMaxClient:
             "max_tokens": int(kwargs.get("max_tokens", self.max_tokens)),  # type: ignore[arg-type]
             "messages": [{"role": "user", "content": prompt}],
         }
-        system = kwargs.get("system")
+        # THE SYSTEM PROMPT, and the key matters.
+        #
+        # MEASURED 2026-10-28: the first version of this read
+        # `kwargs.get("system")` only. But the MTE wrapper calls the client
+        # with `system_override=...`, and `kwargs["system"]` was never
+        # set -- so the system prompt was SILENTLY DROPPED on every call
+        # that went through the wrapper. The wrapper looked correct, the
+        # call succeeded, and the model answered with no knowledge of the
+        # ground at all. It then confabulated: measured, it answered "the
+        # ground holds an append-only blockchain" about a project that has
+        # no blockchain.
+        #
+        # So both spellings are accepted, and the system prompt is not
+        # optional in practice: it is the only channel through which the
+        # model learns what the ground holds.
+        system = kwargs.get("system") or kwargs.get("system_override") or self.system
         if system:
             payload["system"] = str(system)
 
