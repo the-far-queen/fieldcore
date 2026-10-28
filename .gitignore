@@ -57,3 +57,8 @@ harness_log.json
 # the repo (work_repos/fieldcore_state/sacred_library) so a library
 # cannot be edited by the thing it governs.
 sacred_library/
+
+# runtime ledgers: the loop's record of what it did, not source.
+# they are evidence, and they are written by the run, not by the author.
+design_ledger.jsonl
+initiative_ledger.json
