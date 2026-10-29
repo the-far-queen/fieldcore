@@ -259,6 +259,9 @@ class FieldCoreWrapper:
         self._locus = None
         self._governor = None
         self._client = None
+        #: has the governor been asked yet? the FIRST ask pays for the
+        #: process handshake and needs a longer budget.
+        self._governor_asked = False
 
     # -- the instruments -------------------------------------------------
 
@@ -602,7 +605,27 @@ class FieldCoreWrapper:
         # -- 5. the governor vetoes -------------------------------------
         t0 = time.time()
         try:
-            decision = self.governor.ask(self._embedding(ex.answer), self._psi0())
+            # THE TIMEOUT, and it is the default's fault.
+            #
+            # MEASURED 2026-10-28: the first live call through the
+            # provider returned `governor: REFUSE_TIMEOUT`. The
+            # governor's own default budget is 2.0 seconds, and the
+            # FIRST ask includes the process handshake -- the parent
+            # spawns the child, the child imports numpy, and the pipe
+            # has to carry the request. Measured in isolation the ask
+            # takes 188ms, but under the provider's load (the model
+            # call had just returned, the machine was busy) the
+            # handshake exceeded 2s.
+            #
+            # So the budget is raised for the FIRST ask, and the
+            # governor's own 2.0s default is kept for the rest -- the
+            # steady-state call is fast and the budget should stay
+            # tight. The first call is the expensive one.
+            first = not self._governor_asked
+            self._governor_asked = True
+            budget = 10.0 if first else 2.0
+            decision = self.governor.ask(self._embedding(ex.answer),
+                                          self._psi0(), timeout=budget)
             if not decision.allow:
                 ex.step("governor", False,
                         "refused: %s" % getattr(decision, "verdict", "?"), t0)
