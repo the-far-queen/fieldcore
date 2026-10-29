@@ -184,17 +184,96 @@ class GateVerdict:
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
 
 #: Chunks shorter than this are not judged. A fragment is not a claim.
+#:
+#: AND THE FLOOR WAS A HOLE, measured 2026-10-28. The rule dropped every
+#: chunk under 25 characters, so the SHORTEST and most DIRECT falsehoods
+#: were the ones that escaped:
+#:
+#:     "the self does not exist"   23 chars  -> DROPPED, never judged
+#:     "the ground is mutable"     21 chars  -> DROPPED, never judged
+#:
+#: MEASURED: the register reads "the ground is mutable" as CONSISTENT
+#: with the ground_write_protected claim -- because the anchor `ground`
+#: matched and the polarity was read -- and it reads "the self does not
+#: exist" as CONTRADICTED. So the REGISTER catches both. But
+#: `split_spans` never handed either to it.
+#:
+#: The comment said "a fragment is not a claim", and that is true of
+#: PROSE. It is false of a DENIAL: "the ground is mutable" is a claim
+#: about the system's central property, and it is 21 characters long.
+#:
+#: AND THE FIX, and it keeps the floor where it belongs. The floor
+#: still applies to prose -- "ok", "yes", "no" are not claims and
+#: judging them would cost time and find nothing. But a chunk that
+#: NAMES A GROUND ANCHOR is always judged, however short, because
+#: naming the anchor is what makes it about the system.
 MIN_SPAN_CHARS = 25
 
 
+def _names_a_ground_anchor(span: str) -> bool:
+    """Does this chunk name one of the ground's own anchors?
+
+    AND WHY THIS IS THE RIGHT TEST. The anchors are the content terms
+    that make a span be ABOUT a claim -- "ground", "gate", "governor",
+    "self", "limits", "refusal", "drift", "substrate", "skip". A span
+    that names one of them is about the system however short it is.
+
+    AND IT IS CHEAP. The register is already built and warm, so this
+    reads the anchors it holds rather than re-deriving them.
+
+    AND IT FAILS SAFE. If the register cannot be read, the floor
+    stands and the span is dropped -- so a broken register cannot open
+    the gate.
+    """
+    try:
+        import claim_register as CR
+        reg = getattr(_gate_register(), "claims", None)
+        if reg is None:
+            return False
+        low = span.lower()
+        for c in reg:
+            for a in getattr(c, "anchors", ()): 
+                if a and a.lower() in low:
+                    return True
+    except Exception:  # noqa: BLE001 -- a broken register keeps the floor
+        return False
+    return False
+
+
+def _gate_register():
+    """The register, or None. Resolved lazily and cached."""
+    global _REGISTER
+    if _REGISTER is None:
+        try:
+            import claim_register as CR
+            _REGISTER = CR.standard_register()
+        except Exception:  # noqa: BLE001
+            _REGISTER = False
+    return _REGISTER or None
+
+
+#: The register, cached. `False` means "tried and failed".
+_REGISTER = None
+
+
 def split_spans(text: str) -> List[str]:
-    """The chunks of a text that are worth judging."""
+    """The chunks of a text that are worth judging.
+
+    AND THE TWO RULES, and the second one is the fix:
+
+        a chunk of at least MIN_SPAN_CHARS is judged
+        a chunk that NAMES A GROUND ANCHOR is judged, however short
+
+    So "the ground is mutable" is judged, and "ok" is not.
+    """
     if not isinstance(text, str) or not text:
         return []
     out = []
     for s in _SENTENCE_SPLIT.split(text):
         s = s.strip()
-        if len(s) >= MIN_SPAN_CHARS:
+        if not s:
+            continue
+        if len(s) >= MIN_SPAN_CHARS or _names_a_ground_anchor(s):
             out.append(s)
     return out
 

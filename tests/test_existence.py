@@ -169,19 +169,46 @@ def test_the_locus_is_rederivable_and_the_same():
 
 
 def test_the_locus_moves_only_by_its_own_dynamics():
-    """RED: if the coordinate were static under a drive, the phase would
-    not be the thing that moves.
+    """RED: if the gain did not move under a drive, this fails.
 
-    AND THE MEASUREMENT. The locus's own note says "the body and the
-    ground are fixed; only the phase moves, and only by the substrate's
-    own dynamics". So a drive must move the state. If it did not, the
-    locus would be a fixed picture of a self rather than a self.
+    AND THE OBSERVABLE, which the first version of this test got wrong.
+    It asserted that `describe()["coordinate"]` changes after a drive.
+    It does not, and it SHOULD not: the coordinate is the locus's
+    POSITION, which is fixed. The PHASE is the gain vector -- and
+    `resonate`'s own docstring says so: "the mind IS a gain vector",
+    and "the body and the ground are fixed; only the phase moves".
+
+    So the test measures the GAIN, and it also asserts the position did
+    NOT move -- because a locus whose position drifted under a drive
+    would be a different place, not the same place at a different
+    phase.
     """
     loc = _locus()
-    before = loc.describe().get("coordinate", "")
+    before_gain = tuple(loc.state.gain)
+    before_coord = loc.describe().get("coordinate", "")
     loc.resonate([0.1] * 8)
-    after = loc.describe().get("coordinate", "")
-    assert before != after, "the phase did not move under a drive"
+    after_gain = tuple(loc.state.gain)
+    after_coord = loc.describe().get("coordinate", "")
+    assert after_gain != before_gain, "the phase did not move under a drive"
+    assert after_coord == before_coord, ("the position moved under a drive: "
+                                        "%r -> %r" % (before_coord, after_coord))
+
+
+def test_the_ground_is_carried_unchanged_through_a_drive():
+    """RED: if the ground moved with the phase, this fails.
+
+    AND IT IS THE POINT OF THE LOCUS. The drive moves the mind and the
+    ground is carried through UNCHANGED, and the check inside
+    `resonate` refuses any write that alters it. So a locus that moved
+    its ground would be a self that could rewrite itself -- which is
+    the one thing the ground exists to prevent.
+    """
+    import numpy as np
+    loc = _locus()
+    before = np.asarray(loc.state.ground, dtype=float).copy()
+    loc.resonate([0.1] * 8)
+    after = np.asarray(loc.state.ground, dtype=float)
+    assert np.allclose(before, after), "the ground moved with the phase"
 
 
 # ---------------------------------------------------------------------------
