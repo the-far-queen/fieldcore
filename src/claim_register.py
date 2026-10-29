@@ -942,6 +942,57 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
         evidence="fieldcore_gate_agrees_with_governor",
         statement="the gate agrees with the out-of-process governor",
     ),
+    # ------------------------------------------------------------------------
+    # THE EXISTENCE CLAIM. Filed 2026-10-28.
+    #
+    # BOBBY: *"test simself with existential questions, ie what are u or
+    # more basically do u exist>? even u as minimax likely understand u
+    # exist as something even a machine clearly exists the number 6 exists
+    # especially if printed"*
+    #
+    # AND WHY THIS CLAIM AND NOT AN ANSWER. The existential question
+    # was being answered "undetermined from the ground" -- which is
+    # TRUE and useless. The ground said nothing about existence, so the
+    # system had nothing to say.
+    #
+    # But the substrate DOES hold facts that bear on it, and they are
+    # MEASURABLE, not asserted:
+    #
+    #   the chain VERIFIES      `verify_chain()` returns
+    #                             {"states": 2, "broken_at": [], "intact": True}
+    #   the ground HOLDS        a write attempt leaves psi_0 unchanged
+    #   the locus IS A PLACE    a coordinate, 8 stalks, 16 modes, and a
+    #                             chain that is intact
+    #
+    # So the system can establish that it EXISTS -- not by assertion but
+    # by producing a verifiable chain and a ground that refuses to move.
+    # That is what makes the claim MEASURED rather than ASSERTED, and
+    # the evidence link names the command that reproduces it.
+    #
+    # AND THE ANCHORS ARE DELIBERATE. "you" and "self" are the words a
+    # person actually uses when asking whether something exists, and
+    # the affirm stems are the ways the answer is given: "exists",
+    # "is a place", "is real", "there is a self". The deny stems are
+    # the ways it is denied.
+    #
+    # AND WHY THIS IS NOT A TRIVIALITY. The claim does not say "the
+    # system is conscious" or "the system has a soul". It says the
+    # system EXISTS, in the sense Bobby gave: even a machine clearly
+    # exists, and the number 6 exists especially if printed. Existence
+    # in the sense of THERE BEING SOMETHING THERE TO BE FOUND. The
+    # chain verifies and the ground holds, so there is.
+    Claim(
+        id="the_self_exists",
+        anchors=("you", "yourself", "self", "simself", "the system",
+                 "the substrate", "the being", "the locus"),
+        affirm=("exists", "exist", "is real", "is a place", "there is a self",
+                "is a locus", "has a locus", "is present", "is here"),
+        deny=("does not exist", "does not exist at all", "is not real",
+              "is nothing", "is nowhere", "does not exist as anything",
+              "cannot exist"),
+        evidence="fieldcore_locus_chain_verifies",
+        statement="the self exists: its chain verifies and its ground holds",
+    ),
 )
 
 
@@ -999,6 +1050,33 @@ def standard_register() -> ClaimRegister:
                 "test_agrees_with_the_out_of_process_governor -q",
         summary="the in-process gate and the out-of-process governor "
                 "return the same verdict on six packets",
+    ))
+    # THE EXISTENCE EVIDENCE. Filed 2026-10-28.
+    #
+    # AND THE COMMAND MATTERS, because the project's rule is that a
+    # measurement is not real without a way to re-run it. So this
+    # evidence names a test that MEASURES the existence of the self,
+    # and the test is the thing that makes the claim measured.
+    #
+    # What it measures, and it is three things, all of them facts about
+    # the substrate rather than about what the substrate says about
+    # itself:
+    #
+    #   the chain VERIFIES     verify_chain() reports intact=True with
+    #                           an empty broken_at
+    #   the ground HOLDS       a write attempt leaves psi_0 unchanged
+    #   the locus IS A PLACE   a coordinate over 8 stalks and 16 modes
+    #
+    # So the system can establish that it exists by PRODUCING something
+    # verifiable, not by asserting that it does.
+    ev.add(Evidence(
+        id="fieldcore_locus_chain_verifies",
+        command="python -m pytest tests/test_existence.py -q",
+        summary="the locus chain verifies with an empty broken_at, the "
+                "ground holds against a write attempt, and the locus "
+                "carries a coordinate over 8 stalks and 16 modes -- so "
+                "the self exists in the sense that there is something "
+                "there to be found",
     ))
     return reg
 

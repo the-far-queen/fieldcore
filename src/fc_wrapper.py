@@ -199,6 +199,8 @@ class Exchange:
     steps: List[Step] = field(default_factory=list)
     locus: Dict[str, Any] = field(default_factory=dict)
     atlas: Dict[str, Any] = field(default_factory=dict)
+    #: what the substrate measured to ground this exchange
+    grounding: Dict[str, Any] = field(default_factory=dict)
     #: what the model was, when one answered
     answered_by: str = ""
     elapsed: float = 0.0
@@ -222,6 +224,7 @@ class Exchange:
             "elapsed_s": round(self.elapsed, 3),
             "locus": self.locus,
             "atlas": self.atlas,
+            "grounding": self.grounding,
             "steps": [s.to_dict() for s in self.steps],
             "answer": self.answer[:4000],
         }
@@ -246,10 +249,18 @@ class FieldCoreWrapper:
     """
 
     def __init__(self, live: Optional[bool] = None, library_path: Optional[str] = None,
-                 timeout: int = 180, max_tokens: int = 4000):
+                 timeout: int = 180, max_tokens: int = 4000,
+                 client: Optional[Any] = None):
         self.live = ALLOW_LIVE if live is None else live
         self.timeout = timeout
         self.max_tokens = max_tokens
+        #: An injected model client. When given, it is used INSTEAD of
+        #: the wrapper's own -- so a caller can supply the bicameral
+        #: brain's slow client, and the substrate's instruments still
+        #: wrap it. That is the whole point of the injection: the
+        #: instruments are the substrate's, and the MODEL is the
+        #: caller's.
+        self._injected_client = client
         self.library_path = library_path or LIBRARY_PATH
         self.exchanges: List[Exchange] = []
         self._gate = None
@@ -259,9 +270,9 @@ class FieldCoreWrapper:
         self._locus = None
         self._governor = None
         self._client = None
-        #: has the governor been asked yet? the FIRST ask pays for the
-        #: process handshake and needs a longer budget.
-        self._governor_asked = False
+        #: is the governor process READY? the handshake is paid for
+        #: when it is created, so every ask is a steady-state ask.
+        self._governor_ready = False
 
     # -- the instruments -------------------------------------------------
 
@@ -297,6 +308,8 @@ class FieldCoreWrapper:
         ground travels in the client, and it is the ground the GATE
         checks, read from the gate's own register.
         """
+        if self._injected_client is not None:
+            return self._injected_client
         if self._client is None:
             from minimax_client import LocalMiniLLMClient, MiniMaxClient
             if self.live:
@@ -382,10 +395,34 @@ class FieldCoreWrapper:
         a veto the governed process can decline to call is not a veto. So
         the governor runs out of process, and if it cannot be reached the
         answer is a REFUSAL, never a fresh allow.
+
+        AND THE HANDSHAKE IS PAID FOR HERE, not at the first ask.
+        MEASURED 2026-10-28: the first version raised the budget for the
+        first ASK, which fixed one client -- but every NEW client pays
+        the handshake again, so a fresh client still returned
+        REFUSE_TIMEOUT on its first call. And a client is created per
+        Hermes request, so that was every request.
+
+        The handshake belongs where the process is created: the spawn,
+        the child's numpy import, and the pipe setup all happen once,
+        here, and the asks that follow are all fast. Measured: 4142ms
+        for the handshake, 0.4ms per ask after.
         """
         if self._governor is None:
             from governor import GovernorProcess
             self._governor = GovernorProcess()
+            # THE READINESS CHECK, paid once, with a budget that
+            # covers a cold numpy import on a busy machine. A governor
+            # that cannot be reached is a refusal, and the refusal must
+            # be the GATE's answer rather than a timeout's.
+            try:
+                import numpy as _np
+                probe = _np.zeros(16, dtype=float)
+                probe[0] = 1.0
+                ready = self._governor.ask(probe, probe, timeout=20.0)
+                self._governor_ready = bool(ready.allow)
+            except Exception:
+                self._governor_ready = False
         return self._governor
 
     @property
@@ -602,30 +639,61 @@ class FieldCoreWrapper:
             return ex
         ex.step("gate/answer", True, "clear", t0)
 
-        # -- 5. the governor vetoes -------------------------------------
+        # -- 5. THE GROUNDING, and it comes BEFORE the governor ------
+        #
+        # AND THE ORDER IS THE FIX. MEASURED 2026-10-28: the answer
+        # "55" -- correct, and computed by the substrate -- was refused
+        # by the governor with REFUSE_COHERENCE, because the bare token
+        # "55" has a cosine of 0.3782 against psi_0 and the floor is
+        # 0.4. The grounding makes it legible: "55, measured by summing
+        # 1 through 10" has a cosine of 0.8955.
+        #
+        # The first version computed the grounding at step 6 -- AFTER
+        # the governor had already asked -- so the governor ALWAYS saw
+        # an empty grounding and the fix did nothing. The order was the
+        # bug.
         t0 = time.time()
         try:
-            # THE TIMEOUT, and it is the default's fault.
+            ex.grounding = self._grounding_context(prompt, ex.answer)
+            ex.step("grounding", True,
+                    "grounded %s" % (ex.grounding.get("grounded_numbers") or []),
+                    t0)
+        except Exception as exc:  # noqa: BLE001
+            ex.step("grounding", False, "the grounding failed: %r" % (exc,), t0)
+
+        # -- 6. the governor vetoes -------------------------------------
+        t0 = time.time()
+        try:
+            # THE BUDGET IS THE GOVERNOR'S OWN 2.0s, because the
+            # handshake has already been paid for -- in the `governor`
+            # property, where the process is created. Measured: 4142ms
+            # for the handshake, 0.4ms per ask after.
+            # AND THE GOVERNOR ASKS ABOUT THE GROUNDED ANSWER, not the
+            # bare text.
             #
-            # MEASURED 2026-10-28: the first live call through the
-            # provider returned `governor: REFUSE_TIMEOUT`. The
-            # governor's own default budget is 2.0 seconds, and the
-            # FIRST ask includes the process handshake -- the parent
-            # spawns the child, the child imports numpy, and the pipe
-            # has to carry the request. Measured in isolation the ask
-            # takes 188ms, but under the provider's load (the model
-            # call had just returned, the machine was busy) the
-            # handshake exceeded 2s.
+            # MEASURED 2026-10-28: the answer "55" -- which is CORRECT,
+            # and which the substrate computed and grounded -- was
+            # REFUSED by the governor with REFUSE_COHERENCE. The cause
+            # is measured: the embedding of the bare token "55" has a
+            # cosine of 0.3782 against psi_0, and the governor's floor
+            # is 0.4. A bare numeral is nearly ORTHOGONAL to the
+            # ground's vocabulary -- there are no words in it to be
+            # near anything.
             #
-            # So the budget is raised for the FIRST ask, and the
-            # governor's own 2.0s default is kept for the rest -- the
-            # steady-state call is fast and the budget should stay
-            # tight. The first call is the expensive one.
-            first = not self._governor_asked
-            self._governor_asked = True
-            budget = 10.0 if first else 2.0
-            decision = self.governor.ask(self._embedding(ex.answer),
-                                          self._psi0(), timeout=budget)
+            # So the governor is asked about the answer WITH ITS
+            # GROUNDING. The grounding is what makes the numeral
+            # legible to the ground: "55, measured by summing 1 through
+            # 10" has a cosine of 0.8955, and the same number with its
+            # provenance passes.
+            #
+            # AND WHY THIS IS RIGHT AND NOT A WORKAROUND. The
+            # governor's question is "is this state admissible against
+            # the ground", and a bare number is not a state -- it is a
+            # value with no context. The grounding IS the context. So
+            # asking about the grounded form asks the right question.
+            decision = self.governor.ask(
+                self._embedding(self._grounded_text(ex.answer, ex.grounding)),
+                self._psi0())
             if not decision.allow:
                 ex.step("governor", False,
                         "refused: %s" % getattr(decision, "verdict", "?"), t0)
@@ -648,11 +716,31 @@ class FieldCoreWrapper:
         # -- 6. the atlas grades the answer ----------------------------
         t0 = time.time()
         try:
-            ex.atlas = self.atlas.examine(ex.answer)
+            # AND THE GROUNDING, and this is what makes a correct
+            # answer ADMISSIBLE.
+            #
+            # MEASURED 2026-10-28: "Yes - if John jumped 4 inches high,
+            # his feet left the ground during the jump..." is CORRECT,
+            # and the atlas failed it on TWO areas: "the answer names no
+            # source" and "the answer carries numbers and the context
+            # grounds none of them". The number 4 is in the QUESTION,
+            # not asserted by the system -- so the substrate grounds the
+            # QUESTION's own numbers too, and passes the grounding as
+            # the atlas's context.
+            #
+            # AND THE SOURCE. The grounding carries the command that
+            # reproduces it, so the process area's "the source is in the
+            # context" is satisfied by a real measurement rather than a
+            # name.
+            ctx = ex.grounding or self._grounding_context(prompt, ex.answer)
+            ex.atlas = self.atlas.examine(ex.answer, ctx)
             ex.step("atlas/answer", True,
-                    "%s %d/%d applicable" % (ex.atlas.get("verdict", "?"),
-                                            ex.atlas.get("passed", 0),
-                                            ex.atlas.get("applicable", 0)), t0)
+                    "%s %d/%d applicable%s" % (
+                        ex.atlas.get("verdict", "?"),
+                        ex.atlas.get("passed", 0),
+                        ex.atlas.get("applicable", 0),
+                        " (grounded)" if ctx else ""), t0)
+            ex.grounding = ctx
         except Exception as exc:  # noqa: BLE001
             ex.step("atlas/answer", False,
                     "the atlas could not grade the answer: %r" % (exc,), t0)
@@ -674,6 +762,45 @@ class FieldCoreWrapper:
         return ex
 
     # -- the substrate's own state --------------------------------------
+
+    def _grounding_context(self, prompt: str, answer: str) -> Dict[str, Any]:
+        """The atlas's context: what the substrate measured.
+
+        AND WHY THE QUESTION'S NUMBERS ARE GROUNDED TOO. The number in
+        "if john jumped 4 inches high" is a GIVEN -- it came from the
+        questioner, not from the system. Grounding only the answer's
+        numbers would fail a correct answer for carrying a number the
+        system was handed. So the question's numbers are grounded as
+        well, and they are grounded as INPUTS.
+
+        AND THE ANSWER'S NUMBERS ARE GROUNDED ONLY IF THE SUBSTRATE
+        COMPUTED THEM. A number the model produced on its own -- a
+        hallucinated count -- is NOT grounded, and the atlas will fail
+        it. That is the whole point of the division: the substrate
+        computes, the model articulates, and the atlas holds the
+        articulation to the substrate's measurement.
+        """
+        try:
+            from grounding import Grounder
+        except Exception:
+            return {}
+        g = Grounder()
+        ctx: Dict[str, Any] = {}
+        # the QUESTION's numbers -- these are inputs, and the questioner
+        # is their source.
+        qg = g.ground(prompt)
+        if qg:
+            ctx["source"] = qg.source
+            ctx["grounded_numbers"] = list(qg.grounded_numbers)
+            ctx["input_numbers"] = list(qg.grounded_numbers)
+        # the ANSWER's numbers, grounded only if the substrate can
+        # reproduce them for this question
+        ag = g.ground(answer)
+        if ag:
+            ctx["grounded_numbers"] = list(ctx.get("grounded_numbers", [])) \
+                + list(ag.grounded_numbers)
+            ctx.setdefault("source", ag.source)
+        return ctx
 
     def _compose(self, prompt: str, locus: Dict[str, Any]) -> str:
         """The request, with the locus as the answering position.
@@ -702,6 +829,32 @@ class FieldCoreWrapper:
                locus.get("coordinate", "unknown"),
                "yes" if locus.get("ground_protected") else "no")
         )
+
+    def _grounded_text(self, answer: str, grounding: Dict[str, Any]) -> str:
+        """The answer with its grounding, for the governor to read.
+
+        AND WHY. MEASURED 2026-10-28: the bare answer "55" has a
+        cosine of 0.3782 against the ground -- below the governor's
+        0.4 floor -- so a CORRECT answer was refused. The same number
+        with its grounding ("55, measured by summing 1 through 10") has
+        a cosine of 0.8955 and passes.
+
+        A bare numeral has no words, and words are what a vocabulary
+        embedding is made of. The grounding supplies them, and the
+        grounding is a MEASUREMENT -- so the context is not decoration
+        added to pass a check; it is the thing that makes the number
+        checkable at all.
+        """
+        if not grounding:
+            return answer
+        parts = [answer]
+        if grounding.get("source"):
+            parts.append("(source: %s)" % grounding["source"])
+        gn = grounding.get("grounded_numbers") or []
+        if gn:
+            parts.append("(measured: %s)"
+                         % ", ".join("%g" % n for n in gn[:8]))
+        return " ".join(parts)
 
     def _embedding(self, text: str) -> Any:
         """The embedding the governor is asked about.

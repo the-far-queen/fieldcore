@@ -305,6 +305,56 @@ class Awareness:
         }
 
 
+#: BOBBY'S GOALS. Filed 2026-10-28.
+#:
+#: *"i argue self idenity, memory, reasoning, qualification,
+#: self-improvement, ethics, enlightenment, engineering, programming ARE
+#: the goals"*
+#:
+#: AND WHY THESE ARE THE VOCABULARY AND NOT JUST A NOTE. The
+#: vocabulary is what the scan matches against, and the goals are what
+#: the system is FOR. So a goal that is not in the vocabulary is a goal
+#: the scan cannot find the work for -- and the measurement showed it:
+#: the atlas's open area 20 is SKILLS, and "skill" was not in the
+#: vocabulary, so `alibaba/skill-up` -- 1386 stars, "an evaluation and
+#: EVOLUTION tool for Agent Skills" -- scored relevance 0.00 and was
+#: invisible.
+#:
+#: So the goals go IN. And they go in at a HIGH weight, because a
+#: repo that is about memory or qualification or self-improvement is
+#: about the project even when it shares no topic with it.
+#:
+#: AND THE WEIGHTS, and why the goals weigh more than the topics. The
+#: topics are WHAT the system is made of. The goals are WHAT THE SYSTEM
+#: IS FOR. A repo about "evaluation and evolution of skills" is about
+#: self-improvement and qualification -- two goals -- and about no
+#: topic of ours at all.
+THE_GOALS: Dict[str, float] = {
+    "self-identity": 4.0,
+    "identity": 4.0,
+    "self": 3.5,
+    "memory": 4.0,
+    "reasoning": 4.0,
+    "qualification": 4.0,
+    "self-improvement": 4.0,
+    "improvement": 2.5,
+    "evolution": 3.5,
+    "ethics": 4.0,
+    "ethical": 3.0,
+    "enlightenment": 3.5,
+    "engineering": 3.5,
+    "programming": 3.5,
+    "skill": 4.0,
+    "skills": 4.0,
+    "agent": 2.5,
+    "agents": 2.5,
+    "orchestration": 2.5,
+    "planning": 3.0,
+    "adversarial": 3.0,
+    "verification": 3.0,
+    "evaluation": 3.0,
+}
+
 #: The topics the project's subject matter is in, with their weights.
 #:
 #: AND WHY THESE ARE A CONSTANT AND NOT A FILTER FILE. Because the
@@ -327,6 +377,10 @@ def _project_topics() -> Dict[str, float]:
               "constitutional-ai", "agent-runtime", "atlas-exam",
               "stochastic-dynamics"):
         out.setdefault(t, 2.5)
+    # AND THE GOALS, on top. They weigh more than the topics, because a
+    # goal is what the system is FOR and a topic is what it is made of.
+    for t, w in THE_GOALS.items():
+        out[t] = max(out.get(t, 0.0), w)
     return out
 
 

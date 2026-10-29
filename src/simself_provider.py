@@ -178,8 +178,36 @@ class SimSelfClient:
     #: the substrate's own state
     _brain = None
     _wrapper = None
+    _slow = None
 
     # -- the brains -----------------------------------------------------
+
+    @property
+    def slow_client(self):
+        """The slow brain's client, and it is built HERE.
+
+        AND WHY THE PROVIDER BUILDS IT RATHER THAN THE WRAPPER. The
+        bicameral rule is "the fast one reflexes; the slow one decides",
+        so the two brains need DIFFERENT clients -- the local mind for
+        reflexes and MiniMax for decisions. The wrapper's single client
+        cannot be both. So the provider builds the pair and injects the
+        slow one into the wrapper.
+
+        AND THE SPEND GUARD LIVES HERE, because this is the only place
+        that can spend. The guard is a property of the MACHINE, not of
+        the request: it is read from the environment, and a caller
+        cannot turn it off by passing a flag.
+        """
+        if self._slow is None:
+            from minimax_client import MiniMaxClient
+            if self.live:
+                self._slow = MiniMaxClient(max_tokens=self.max_tokens,
+                                            timeout=self.timeout,
+                                            allow_live=True)
+            else:
+                from minimax_client import LocalMiniLLMClient
+                self._slow = LocalMiniLLMClient()
+        return self._slow
 
     @property
     def brain(self):
@@ -197,17 +225,9 @@ class SimSelfClient:
         """
         if self._brain is None:
             from bicameral import BicameralBrain, FastBrain, SlowBrain
-            from minimax_client import (LocalMiniLLMClient, MiniMaxClient)
-
-            slow_model = None
-            if self.live:
-                slow_model = MiniMaxClient(max_tokens=self.max_tokens,
-                                           timeout=self.timeout,
-                                           allow_live=True)
-            slow = SlowBrain(model=slow_model)
+            slow = SlowBrain(model=self.slow_client)
             fast = FastBrain()
             self._brain = BicameralBrain(fast=fast, slow=slow)
-            self._client_fast = LocalMiniLLMClient()
         return self._brain
 
     @property
@@ -215,7 +235,8 @@ class SimSelfClient:
         """The composed substrate: gate, locus, MTE, governor, atlas."""
         if self._wrapper is None:
             import fc_wrapper
-            self._wrapper = fc_wrapper.FieldCoreWrapper(live=self.live)
+            self._wrapper = fc_wrapper.FieldCoreWrapper(
+                live=self.live, client=self.slow_client)
         return self._wrapper
 
     # -- the one call ---------------------------------------------------
@@ -435,6 +456,22 @@ def provider_profile():
                                  timeout=float(client_kwargs.get("timeout", 120.0)),
                                  max_tokens=int(client_kwargs.get("max_tokens", 4000)))
 
+    # AND THE AUTH TYPE, and it is `external_process` -- the same one
+    # the in-tree copilot-acp provider uses, and the reason is specific:
+    #
+    #   `api_key` means Hermes looks for a credential in the env or the
+    #   credential pool, and finds none, so the provider reads as
+    #   UNAUTHENTICATED and the picker hides it.
+    #
+    #   `external_process` means "this provider supplies its own client
+    #   and owns its own auth" -- which is exactly simself's case. It
+    #   is local, it needs no credential, and `create_client` returns
+    #   the substrate.
+    #
+    # MEASURED: with `api_key` and `env_vars=()`, the profile was
+    # registered and `get_provider_profile("simself")` worked -- but
+    # the picker treats it as unauthenticated, so it would not appear
+    # as a usable default.
     profile = SimSelfProfile(
         name="simself",
         aliases=("sim", "core"),
@@ -442,9 +479,9 @@ def provider_profile():
         display_name="SimSelf",
         description="The substrate, as the core: locus, constitution, "
                     "bicameral brain, gate, governor, atlas.",
-        env_vars=(),
-        base_url="http://localhost:0/simself",   # never dialled
-        auth_type="api_key",
+        env_vars=(),               # local; no credential
+        base_url="simself://local",  # never dialled -- create_client wins
+        auth_type="external_process",
         supports_health_check=False,
         supports_model_listing=False,
         fallback_models=(MODEL,),
