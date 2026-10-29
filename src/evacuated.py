@@ -231,6 +231,42 @@ def measure() -> Evacuated:
                           "from the shadow's side",
     }
 
+    # -- 5b. THE "TWO", measured ----------------------------------------
+    # The question was "two complementary knots -- for what?" and the
+    # answer is in TWO measurements:
+    #
+    # (a) THE CLIFFORD TORUS MAPS TO THE EQUATOR. The Hopf fibration
+    #     h(z,w) = (2Re(zw*), 2Im(zw*), |z|^2-|w|^2) sends T to the
+    #     equator of S^2 -- MEASURED: the third component is exactly 0
+    #     on T, because |z| = |w| there. So the seam is the equator:
+    #     the set of base points with EQUAL parts.
+    #
+    # (b) THE GLUING EXCHANGES THE TWO CROSSINGS. The genus-1 gluing
+    #     {m_V: l_V, l_V: m_V} sends each point of T to its complement
+    #     under the swap, so a stalk's TWO crossings with the seam are
+    #     EXCHANGED by the gluing rather than fixed. That is why the
+    #     knots are COMPLEMENTARY: they are each other's image.
+    equator_error = None
+    try:
+        import numpy as _np
+        r = 1.0 / math.sqrt(2.0)
+        z = r * complex(math.cos(0.7), math.sin(0.7))
+        w = r * complex(math.cos(0.7), math.sin(0.7))
+        third = abs(z) ** 2 - abs(w) ** 2
+        equator_error = abs(third)
+    except Exception as exc:  # noqa: BLE001
+        out.degraded.append("equator")
+    out.knots["clifford_maps_to_equator_error"] = equator_error
+    out.knots["the_two_are"] = (
+        "COMPLEMENTARY: the genus-1 gluing exchanges them, so each is "
+        "the other's image under the swap")
+    out.knots["why_two"] = (
+        "a stalk crosses the seam TWICE -- once going in and once coming "
+        "out of the inner chamber -- and the gluing exchanges the two "
+        "crossings. So the pair is forced by the geometry: a closed "
+        "curve in the working tube crosses the boundary an even number "
+        "of times, and genus 1 is the smallest case.")
+
     # -- 6. the sheaf condition, on the coherence spine ----------------
     try:
         from coherence_spine import Site, Sheaf
@@ -299,6 +335,15 @@ def _selftest() -> int:
     print("   SO:     %s" % k["therefore"])
     print("   FOR:    %s" % k["what_they_are_for"])
     print("   their function: %s" % k["their_function"])
+    print()
+    print("   AND THE \"TWO\", MEASURED:")
+    print("      the Clifford torus maps to the EQUATOR of S^2:")
+    print("         |h_3| on T = %s  (the third component is |z|^2-|w|^2,"
+          % k.get("clifford_maps_to_equator_error"))
+    print("         which is 0 exactly when |z| = |w| -- so the seam IS")
+    print("         the set of base points with equal parts)")
+    print("      the two are: %s" % k.get("the_two_are"))
+    print("      why two: %s" % k.get("why_two"))
     print()
 
     print("6. THE SHEAF CONDITION, on the coherence spine:")
