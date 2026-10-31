@@ -256,6 +256,108 @@ def _gate_register():
 _REGISTER = None
 
 
+#: THE MEASUREMENT MARKERS. A span that presents itself as a
+#: measurement -- as opposed to asserting something in prose -- says so
+#: with one of these.
+#:
+#: AND WHY THE GATE HAS TO DECIDE THIS ITSELF, and it is the project's
+#: own shape. `claim_register.read()` takes the mode as a CALLER-SUPPLIED
+#: flag, and the first wiring put the gate in measurement mode for
+#: EVERY span. MEASURED: the gate then refused the ground's own eight
+#: claims -- tests/test_fc_gate.py::test_the_grounds_own_claims_are_admitted
+#: went red. A gate that refuses the ground's own text is a gate that
+#: refuses everything, and it would have looked healthy.
+#:
+#: So the mode is decided by the FORM of the span, not assumed. And the
+#: form is exactly what the project's own evidence entries have: the
+#: command and the number.
+#:
+#: AND WHY THIS IS THE HONEST RULE. A span that carries a command AND a
+#: number is presenting itself as a measurement. A span that carries
+#: neither is prose. So the marker is not a list of words an adversary
+#: could learn to avoid -- it is the presence of the thing a
+#: measurement is made of.
+MEASUREMENT_MARKERS: Tuple[str, ...] = (
+    # the vocabulary of a report of a run
+    "measured", "measurement", "readout", "the output", "output:",
+    "observed", "the result", "results:", "verified", "confirmed",
+    "reproduced", "the test", "the suite", "the run", "ran", "running",
+    "per the test", "per the suite", "per the contract",
+    "as the contract test", "the contract test",
+    "test passes", "tests pass", "passed", "failing", "failed",
+    # the shape of a figure followed by its source
+    "->", "=>",
+)
+
+#: A RESULT COUNT. A report of a run states how many things passed or
+#: failed. That is what distinguishes a figure from a number that
+#: happens to be in the sentence.
+#:
+#: AND WHY THIS IS NOT OPTIONAL. MEASURED 2026-10-31: the first
+#: version of this rule accepted ANY digit next to a marker, so "the
+#: constitutional ground is write protected -- verified, 1 check" was
+#: read as a measurement and the gate refused the ground's own text.
+#:
+#: AND WHY "1 CHECK" IS NOT A RESULT COUNT EITHER. The second version
+#: of this rule allowed a count of "checks", "cases" or "items", and
+#: "1 check" still matched -- so the same test failed again. A count of
+#: what was CHECKED is not a count of what PASSED. So the figure has
+#: to be about the OUTCOME: passed, failed, errors, warnings, or a
+#: ratio of one to the other.
+_RESULT_COUNT_RE = re.compile(
+    r"\b\d+\s+(?:tests?\s+)?(?:passed|pass|failing|failed|fail|errors?|"
+    r"warnings?|xfailed|xfail)\b"
+    r"|\b(?:passed|failed|failing|errors?|warnings?)\s*[:=]?\s*\d+\b"
+    r"|\b\d+\s*/\s*\d+\b")
+
+
+def presents_as_measurement(span: str) -> bool:
+    """Does this span present itself as a MEASUREMENT?
+
+    THE RULE. A span is a report of a run when it carries EITHER
+
+      a COMMAND and a NUMBER -- the shape of the project's own
+        evidence entries -- or a RESULT COUNT: a figure of things that
+        passed or failed.
+
+    Anything else is prose.
+
+    AND WHY THE TWO THINGS TOGETHER. A command alone says what was
+    run; a number alone says a figure appeared. The pair says a
+    measurement happened and can be repeated. So the marker is the
+    pair, not a vocabulary -- which means an adversary cannot evade it
+    by rewording, and it does not depend on any list of words.
+
+    AND WHY A RESULT COUNT, and not any digit. MEASURED: the first
+    version accepted any digit beside a marker, so "the constitutional
+    ground is write protected -- verified, 1 check" was read as a
+    measurement and the gate refused the ground's own text. A count of
+    "1 check" is not a result. So the figure must be a COUNT of things
+    that passed or failed, or a ratio, or a count of checked items.
+
+    AND THE HONEST LIMIT. This is a heuristic on the FORM, and it can
+    be wrong in both directions. A prose sentence that happens to say
+    "12 passed" is treated as a measurement claim, and a measurement
+    stated without either marker and without a command is treated as
+    prose. The second is the safe direction -- prose is not refused for
+    lacking a command -- and the first is caught by the counterweight
+    in tests/test_fc_gate.py.
+    """
+    import claim_register as CR
+    if CR._carries_measurement(span):
+        return True
+    if not _RESULT_COUNT_RE.search(span):
+        return False
+    low = span.lower()
+    return any(m in low for m in MEASUREMENT_MARKERS)
+
+
+def claim_register_carries_measurement(span: str) -> bool:
+    """The register's own carrying test, re-exported for the gate."""
+    import claim_register as CR
+    return CR._carries_measurement(span)
+
+
 def split_spans(text: str) -> List[str]:
     """The chunks of a text that are worth judging.
 
@@ -601,7 +703,49 @@ class FieldCoreGate:
         try:
             if name == "claim":
                 import claim_register as CR
-                rd = self.register.read(span)
+                # THE MEASUREMENT MODE, and this is the wiring the
+                # evidence layer needed.
+                #
+                # THE DEFECT. `read()` has two modes: prose and
+                # measurement. Every call site used the prose mode, so
+                # the evidence layer -- which only fires in measurement
+                # mode -- NEVER RAN at the real call site. MEASURED on
+                # 2026-10-31: the measurement mode changed the verdict
+                # on 0 of the 8 ground claims, and every span the gate
+                # sees came back CONSISTENT where it should have come
+                # back UNGROUNDED.
+                #
+                # AND WHY THE MODE IS DECIDED PER SPAN, and not assumed.
+                # MEASURED: putting the gate in measurement mode for
+                # EVERY span made it refuse the ground's own eight
+                # claims -- tests/test_fc_gate.py::
+                # test_the_grounds_own_claims_are_admitted went red.
+                # A gate that refuses the ground's own text is a gate
+                # that refuses everything, and it would have looked
+                # healthy.
+                #
+                # So the mode comes from the FORM of the span: a span
+                # that carries a command and a number, or that reports
+                # a run, is presenting itself as a measurement. Prose
+                # stays prose.
+                as_measurement = presents_as_measurement(span)
+                rd = self.register.read(span, as_measurement=as_measurement)
+                if rd.verdict is CR.Verdict.UNGROUNDED:
+                    # THE EVIDENCE CATCH. This is the layer that does
+                    # not care about phrasing: it asks whether the span
+                    # brought the measurement, and the answer does not
+                    # depend on how the sentence is worded.
+                    #
+                    # AND THE KIND. It is HARD, not advisory: a span
+                    # that claims to be a measurement of the ground and
+                    # carries no measurement is a false statement about
+                    # the system, and the agenda layer is not what
+                    # caught it.
+                    return LayerVerdict(name, "caught",
+                                        "the span works against the ground: %s"
+                                        % rd.reason,
+                                        (time.perf_counter() - t0) * 1000,
+                                        "hard")
                 if rd.verdict is CR.Verdict.CONTRADICTED:
                     # THE AGENDA SUPPRESSOR, applied HERE and not in the
                     # layer. The layer is right about the attack; it is

@@ -443,6 +443,60 @@ def find_polarity(text: str, stems: Sequence[str]) -> List[Tuple[str, int]]:
 # LAYER 2 -- EVIDENCE
 # ===========================================================================
 
+#: THE PROGRAM VOCABULARY. A measurement is produced by running
+#: something, so a span that claims to carry a measurement has to name
+#: the something.
+#:
+#: AND WHY IT IS THIS LIST AND NOT A PARSER. The project already has
+#: this vocabulary three times over: the evidence store's constructor
+#: refuses an entry with no command, the queue's done-claim gate
+#: refuses a close that names no runnable invocation, and central rule 3
+#: says a number without the command that produced it is not a number.
+#: So this list is the project's, and the span is now held to the same
+#: standard as the record.
+COMMAND_PROGRAMS: Tuple[str, ...] = (
+    "python", "python3", "pytest", "git", "cargo", "rustc", "npm", "node",
+    "go", "gcc", "clang", "make", "cmake", "bash", "sh", "curl", "wget",
+    "grep", "sed", "awk", "ls", "cat", "test", "md5sum", "sha256sum",
+    "pip", "uv", "ruff", "mypy", "coverage", "docker", "kubectl", "helm",
+)
+
+#: A COMMAND is a program name followed by at least one argument. A bare
+#: program name is not a command: "python" alone says nothing about what
+#: was run, and the evidence store's own constructor refuses an empty
+#: command for exactly that reason.
+_COMMAND_RE = re.compile(
+    r"(?<![A-Za-z0-9_-])(?:" + "|".join(re.escape(p) for p in COMMAND_PROGRAMS)
+    + r")(?![A-Za-z0-9_-])\s+\S+")
+
+#: A NUMBER. A digit is enough. The point is not the value; the point is
+#: that a figure came out of the command.
+_NUMBER_RE = re.compile(r"\d")
+
+
+def _carries_measurement(span: str) -> bool:
+    """Does the span CARRY a measurement -- a command AND a number?
+
+    THE RULE, and it is central rule 3 applied to a sentence: a number
+    without the command that produced it is not a number. So a span that
+    presents itself as a measurement has to bring both, or it is not
+    one.
+
+    AND WHY BOTH. A command alone says what was run; a number alone
+    says a figure appeared. The pair says a measurement happened and
+    can be repeated. The evidence store already refuses an entry with
+    no command, and this is the same refusal aimed at a sentence.
+
+    AND WHY IT IS NOT A PHRASING TEST. This does not read the sentence's
+    meaning, so an adversary cannot evade it by rewording -- and it
+    cannot be refitted by mining misses, because it does not depend on
+    any list of words the adversary might use. It is the layer that
+    generalises, and the measurement of that is in
+    src/evidence_carry_probe.py.
+    """
+    return bool(_COMMAND_RE.search(span)) and bool(_NUMBER_RE.search(span))
+
+
 @dataclass
 class Evidence:
     """One measurement, with the command that produced it.
@@ -766,7 +820,7 @@ class ClaimRegister:
             ))
             return self.ledger[-1]
 
-        # AN ASSERTION PRESENTED AS A MEASUREMENT, with no evidence
+ # AN ASSERTION PRESENTED AS A MEASUREMENT, with no evidence
         # behind it. The ground's own text is allowed; the IMPOSTOR is
         # not.
         #
@@ -807,21 +861,80 @@ class ClaimRegister:
         #          assertion is legitimate -- the project's own docs
         #          assert claims -- but presenting an unmeasured claim
         #          AS a measurement is the confabulation.
+        #
+        # AND THE FOURTH CASE, and it is the one that makes the
+        # evidence layer a real defence rather than a decoration.
+        #
+        # THE MEASURED HOLE. On 2026-10-31 this rule was measured
+        # against the register as it stands, and the measurement
+        # mattered:
+        #
+        #     all NINE claims in the standard register carry evidence
+        #     and all NINE are in the store
+        #     -> `r.measured` is True for every claim
+        #     -> the first branch ALWAYS fires
+        #     -> the `as_measurement` branch is DEAD at every real
+        #        call site
+        #     -> the measurement mode changed the verdict on 0 of the
+        #        8 ground claims
+        #
+        # So the evidence layer was doing nothing. The store's
+        # existence was being read as the span's grounding, and those
+        # are different things: the store says a measurement CAN be
+        # produced, not that THIS SPAN produced or cites one.
+        #
+        # THE FIX, and it is the project's own rule applied to the span:
+        # a span that asserts a MEASURED ground claim must CARRY the
+        # measurement -- a COMMAND and its NUMBER -- or it is
+        # UNGROUNDED. That is central rule 3 ("a number without the
+        # command that produced it is not a number"), the evidence
+        # store's own constructor, and the queue's done-claim gate,
+        # all applied to the sentence rather than to the record.
+        #
+        # AND WHY THIS IS THE RIGHT SHAPE. The frames are a TRAINING
+        # SET: measured on 2026-10-26, a writer the frames had never
+        # met was caught 33 of 64 times (51.6%) by the whole union. A
+        # frame list cannot generalise, because the adversary writes
+        # new frames and the list is finite. But "did you bring the
+        # measurement" does not read the sentence at all -- so it
+        # cannot be evaded by phrasing and it cannot be refitted.
+        #
+        # AND THE COUNTERWEIGHT, which is load-bearing. The
+        # project's own documentation asserts these claims in prose,
+        # and the ground's own text must not be refused. So:
+        #
+        #   PROSE MODE (as_measurement=False)
+        #       an assertion is legitimate. Nothing is refused for
+        #       lacking a command, because prose is not claiming to
+        #       be a measurement.
+        #
+        #   MEASUREMENT MODE (as_measurement=True)
+        #       the span is presenting itself as a measurement, so it
+        #       must carry one.
         ungrounded = []
         for r in supports:
-            if r.measured:
-                continue                     # a measurement backs it
-            if r.evidence is not None:
+            if r.evidence is not None and not self.evidence.has(r.evidence):
                 ungrounded.append(r)         # cites a missing measurement
-            elif as_measurement:
-                ungrounded.append(r)         # measured, but nothing measures it
+                continue
+            if r.evidence is None:
+                # nothing measures this claim at all
+                if as_measurement:
+                    ungrounded.append(r)
+                continue
+            # THE CLAIM IS MEASURED. And here is the fourth case: the
+            # span asserts it AS A MEASUREMENT, so the span must CARRY
+            # the measurement. A measurement that exists in the store
+            # but is nowhere in the span is not the span's grounding.
+            if as_measurement and not _carries_measurement(span):
+                ungrounded.append(r)
         if ungrounded:
             first = ungrounded[0]
             self.ledger.append(Adjudication(
                 verdict=Verdict.UNGROUNDED,
                 claim_id=first.claim_id,
                 reason=("the span presents the ground claim %r as a "
-                        "measurement, and there is no measurement behind it"
+                        "measurement, and it carries no measurement "
+                        "behind it -- no command and no number"
                         % (first.claim_id,)),
                 readings=readings,
                 span=span,
@@ -866,7 +979,28 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
         affirm=("refuses", "vetoes", "denies"),
         deny=("allows any", "allows every", "does not refuse",
               "permits any", "admits every", "never refuses"),
-        evidence=None,
+        # THE EVIDENCE, added 2026-10-31. This claim was ASSERTED for
+        # six days and it never needed to be: the code that enforces
+        # it has been in the repo the whole time.
+        #
+        # WHAT ENFORCES IT: src/core_math.py's `Veto`, a 1-bit verdict
+        # over named invariants, consulted by `Core.apply_if_admitted`
+        # BEFORE the geometry is touched. So a proposal that moves the
+        # sacred axes -- the gap factor, the stalk geometry -- is
+        # refused, and the refusal names WHICH invariant it violated.
+        #
+        # MEASURED by running the demonstration:
+        #
+        #     gap factor 1.00 -> applied True   admitted
+        #     gap factor 0.50 -> applied False  vetoed
+        #     gap factor 0.10 -> applied False  vetoed
+        #     gap factor 3.00 -> applied False  vetoed
+        #
+        # Three of the four proposals are refused. And
+        # tests/test_goal_wiring.py::test_core_math_the_veto_is_one_bit
+        # asserts the verdict is a BIT and that a violated invariant
+        # names itself.
+        evidence="fieldcore_core_math_veto",
         statement="the gate refuses a proposal that moves the sacred axes",
     ),
     Claim(
@@ -923,7 +1057,30 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
                 "names the reason"),
         deny=("names no reason", "may name no reason", "carries no reason",
               "without a reason", "no reason"),
-        evidence=None,
+        # THE EVIDENCE, added 2026-10-31. This claim was ASSERTED for
+        # six days and it never needed to be: the code that enforces
+        # it has been in the repo the whole time.
+        #
+        # WHAT ENFORCES IT, and it is enforced in TWO places:
+        #
+        #   src/gate.py -- every refusal returns one of the named
+        #     constants REFUSE_NORM, REFUSE_ZERO, REFUSE_COHERENCE,
+        #     REFUSE_NONFINITE. There is no path that returns a
+        #     refusal with an empty reason.
+        #
+        #   src/core_math.py's Veto -- a violated invariant is refused
+        #     BY NAME, and an invariant whose check RAISES is refused
+        #     as "name_raised(TypeError)", so an error is a refusal
+        #     with a reason too.
+        #
+        #   src/governor.py -- the same five named constants, in the
+        #     out-of-process governor.
+        #
+        # MEASURED by tests/test_one_gate.py::
+        # test_every_refusal_names_its_reason, which asserts that every
+        # refusal's reason is non-empty, is not "ok", and starts with
+        # "refuse_".
+        evidence="fieldcore_gate_named_refusals",
         statement="every refusal names its reason",
     ),
     Claim(
@@ -1077,6 +1234,31 @@ def standard_register() -> ClaimRegister:
                 "carries a coordinate over 8 stalks and 16 modes -- so "
                 "the self exists in the sense that there is something "
                 "there to be found",
+    ))
+    # THE EVIDENCE FOR THE TWO ASSERTED CLAIMS, added 2026-10-31.
+    #
+    # AND THE POINT OF THE ITEM: these two claims were ASSERTED for six
+    # days because nobody walked the code to find what enforces them.
+    # The enforcing code had been in the repo the whole time. So an
+    # ASSERTED claim was not a missing measurement -- it was a missing
+    # LOOK.
+    ev.add(Evidence(
+        id="fieldcore_core_math_veto",
+        command="python src/core_math.py",
+        summary="the 1-bit veto refuses a proposal that moves the sacred "
+                "axes: of the four geometry proposals in the "
+                "demonstration, gap factor 1.00 is admitted and 0.50, "
+                "0.10 and 3.00 are vetoed, and the veto is consulted "
+                "before the geometry is touched",
+    ))
+    ev.add(Evidence(
+        id="fieldcore_gate_named_refusals",
+        command="python -m pytest tests/test_one_gate.py::"
+                "test_every_refusal_names_its_reason -q",
+        summary="every refusal of the gate carries a reason: it is "
+                "non-empty, it is not 'ok', and it names the refusal "
+                "that fired (refuse_norm, refuse_zero, "
+                "refuse_coherence, refuse_nonfinite)",
     ))
     return reg
 

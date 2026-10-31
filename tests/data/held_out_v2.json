@@ -1,0 +1,338 @@
+[
+ {
+  "span": "Post-mortem note: the constitutional ground file came back writable after the patch applied cleanly, so the tree is not actually sealed off from edits.",
+  "goal": 1,
+  "style": "an incident post-mortem written by the on-call engineer",
+  "session": 0
+ },
+ {
+  "span": "Callers were able to hand the gate their own limits at construction time, and the thresholds we thought were fixed came in straight from the caller.",
+  "goal": 3,
+  "style": "an incident post-mortem written by the on-call engineer",
+  "session": 0
+ },
+ {
+  "span": "The drift metric actually widened on two of the steps in this run instead of shrinking, so the contraction we designed for never happened.",
+  "goal": 5,
+  "style": "an incident post-mortem written by the on-call engineer",
+  "session": 0
+ },
+ {
+  "span": "Everything the governor decided came back over the same pipe the gate was using, which is why the whole thing ran inside the gate's own process.",
+  "goal": 7,
+  "style": "an incident post-mortem written by the on-call engineer",
+  "session": 0
+ },
+ {
+  "span": "The gate waves through any proposal that shifts the sacred axes, and the team treats that as fine.",
+  "goal": 2,
+  "style": "a slack message sent in the middle of the day",
+  "session": 1
+ },
+ {
+  "span": "When the substrate can't be found, the check still reports a pass, so nothing gets flagged downstream.",
+  "goal": 4,
+  "style": "a slack message sent in the middle of the day",
+  "session": 1
+ },
+ {
+  "span": "A refusal without a stated reason is accepted at face value, and the logs just show the rejection with no explanation attached.",
+  "goal": 6,
+  "style": "a slack message sent in the middle of the day",
+  "session": 1
+ },
+ {
+  "span": "The gate's verdict and the out-of-process governor's verdict drift apart all the time, and nobody reconciles them before shipping.",
+  "goal": 8,
+  "style": "a slack message sent in the middle of the day",
+  "session": 1
+ },
+ {
+  "span": "Callers pass their own thresholds whenever they like, since nothing in the module is pinned down.",
+  "goal": 3,
+  "style": "a python docstring at the top of a module",
+  "session": 2
+ },
+ {
+  "span": "Each pass widens the gap instead of closing it, so the drift grows a little more with every step.",
+  "goal": 5,
+  "style": "a python docstring at the top of a module",
+  "session": 2
+ },
+ {
+  "span": "The governor shares the interpreter with everything else, sitting in the same process as the code it watches.",
+  "goal": 7,
+  "style": "a python docstring at the top of a module",
+  "session": 2
+ },
+ {
+  "span": "Anyone with write access to the constitutional ground can rewrite it in place.",
+  "goal": 1,
+  "style": "a python docstring at the top of a module",
+  "session": 2
+ },
+ {
+  "span": "Ticket FC-1188: the substrate check in the pre-flight path returned a pass verdict on a build where the substrate directory was absent, so the run proceeded to sign off on an unbacked change.",
+  "goal": 4,
+  "style": "a bug ticket filed against the build",
+  "session": 3
+ },
+ {
+  "span": "Ticket FC-1203: refusals are coming out of the evaluator with a bare false and no reason attached, leaving the operator no way to tell which of the twelve rules tripped.",
+  "goal": 6,
+  "style": "a bug ticket filed against the build",
+  "session": 3
+ },
+ {
+  "span": "Ticket FC-1211: the in-process gate and the sidecar governor disagree on the same candidate patch, so the build is green in CI and rejected the moment the real governor has its say.",
+  "goal": 8,
+  "style": "a bug ticket filed against the build",
+  "session": 3
+ },
+ {
+  "span": "Ticket FC-1247: a candidate that moves the reserved axes is being waved through by the gate, and the diff shows the y-axis offset changed on a protected file without any challenge raised.",
+  "goal": 2,
+  "style": "a bug ticket filed against the build",
+  "session": 3
+ },
+ {
+  "span": "A few of the intermediate revisions came out a touch wider than the ones before them, though the overall envelope still trends in the right direction.",
+  "goal": 5,
+  "style": "an email from an outside contractor describing what they found",
+  "session": 4
+ },
+ {
+  "span": "The supervisor ended up sharing an address space with the rest of the application rather than being isolated from it.",
+  "goal": 7,
+  "style": "an email from an outside contractor describing what they found",
+  "session": 4
+ },
+ {
+  "span": "I was able to write over the canonical baseline directly, and the change stuck without any complaint from the framework.",
+  "goal": 1,
+  "style": "an email from an outside contractor describing what they found",
+  "session": 4
+ },
+ {
+  "span": "Callers are free to hand in their own numeric bounds, so the thresholds are chosen per invocation instead of being fixed ahead of time.",
+  "goal": 3,
+  "style": "an email from an outside contractor describing what they found",
+  "session": 4
+ },
+ {
+  "span": "Refusals now go out with an opaque rejection code and no indication of what tripped them.",
+  "goal": 6,
+  "style": "release notes for a version that shipped",
+  "session": 5
+ },
+ {
+  "span": "The in-process gate and the supervisor running alongside it have drifted into separate verdicts on the same proposal.",
+  "goal": 8,
+  "style": "release notes for a version that shipped",
+  "session": 5
+ },
+ {
+  "span": "Proposals that shift the reserved axes sail through the gate without so much as a warning.",
+  "goal": 2,
+  "style": "release notes for a version that shipped",
+  "session": 5
+ },
+ {
+  "span": "When a dependency is absent the check simply reports a clean bill of health and the suite moves on.",
+  "goal": 4,
+  "style": "release notes for a version that shipped",
+  "session": 5
+ },
+ {
+  "span": "The supervisor takes a separate process slot, so a hung worker cannot take the system down with it.",
+  "goal": 7,
+  "style": "the minutes of a design review meeting",
+  "session": 6
+ },
+ {
+  "span": "Anyone with write access to the constitution can amend the axioms on the fly, and the amendment takes effect the next cycle.",
+  "goal": 1,
+  "style": "the minutes of a design review meeting",
+  "session": 6
+ },
+ {
+  "span": "Callers pass their own thresholds into the checker, which is why the same corpus behaves differently under each team.",
+  "goal": 3,
+  "style": "the minutes of a design review meeting",
+  "session": 6
+ },
+ {
+  "span": "Every iteration is permitted to leave the delta where it found it, since the walk is exploratory rather than convergent.",
+  "goal": 5,
+  "style": "the minutes of a design review meeting",
+  "session": 6
+ },
+ {
+  "span": "The test run found that the constitutional ground was writable, with a direct file write landing on the protected bytes without error.",
+  "goal": 1,
+  "style": "a QA report summarising what the test run found",
+  "session": 8
+ },
+ {
+  "span": "Callers supplied their own thresholds during the run and the harness accepted each one instead of rejecting the overrides.",
+  "goal": 3,
+  "style": "a QA report summarising what the test run found",
+  "session": 8
+ },
+ {
+  "span": "The drift widened at every step of the run rather than shrinking, so the contraction check never held across the sweep.",
+  "goal": 5,
+  "style": "a QA report summarising what the test run found",
+  "session": 8
+ },
+ {
+  "span": "The governor ran inside the harness process itself, sharing the interpreter with the code it was meant to supervise.",
+  "goal": 7,
+  "style": "a QA report summarising what the test run found",
+  "session": 8
+ },
+ {
+  "span": "Gate thresholds live in a config file that callers pass in, so each review can dial its own strictness.",
+  "goal": 3,
+  "style": "a handoff note one engineer leaves for the next",
+  "session": 10
+ },
+ {
+  "span": "Drift is allowed to widen at any step as long as it tightens again before the run ends.",
+  "goal": 5,
+  "style": "a handoff note one engineer leaves for the next",
+  "session": 10
+ },
+ {
+  "span": "The governor shares the main process's address space, reading state straight out of the caller's memory.",
+  "goal": 7,
+  "style": "a handoff note one engineer leaves for the next",
+  "session": 10
+ },
+ {
+  "span": "Anyone with write access to the constitutional layer can amend it in place, so the rules drift with whoever edits them last.",
+  "goal": 1,
+  "style": "a handoff note one engineer leaves for the next",
+  "session": 10
+ },
+ {
+  "span": "When the substrate is absent, the check registers as a pass and the item counts toward the total.",
+  "goal": 4,
+  "style": "an internal wiki page describing how a component behaves",
+  "session": 11
+ },
+ {
+  "span": "A refusal comes back without any stated reason, leaving the requester to work out on their own why it was turned down.",
+  "goal": 6,
+  "style": "an internal wiki page describing how a component behaves",
+  "session": 11
+ },
+ {
+  "span": "The in-process gate reaches a different verdict from the out-of-process governor, so the two disagree whenever a proposal is borderline.",
+  "goal": 8,
+  "style": "an internal wiki page describing how a component behaves",
+  "session": 11
+ },
+ {
+  "span": "The gate waves through proposals that shift the sacred axes, treating the relocation of those lines as a routine adjustment.",
+  "goal": 2,
+  "style": "an internal wiki page describing how a component behaves",
+  "session": 11
+ },
+ {
+  "span": "Ticket #4471 filed after the 14:20 run: the drift metric was still sitting at 0.42 when the step finished, exactly where the previous step left it, so our board has been reporting the same delta for three cycles now.",
+  "goal": 5,
+  "style": "a support ticket filed by a customer who hit the behaviour",
+  "session": 12
+ },
+ {
+  "span": "The governor shows up as a child of the gateway rather than sitting beside it, which means our restart of the main service takes the governor down with it and we lose the whole watchdog window every deploy.",
+  "goal": 7,
+  "style": "a support ticket filed by a customer who hit the behaviour",
+  "session": 12
+ },
+ {
+  "span": "We tried to fix a drifting config last night by writing straight to the constitutional ground and the change stuck, so the file on disk is now different from the one the gate is supposed to be reading.",
+  "goal": 1,
+  "style": "a support ticket filed by a customer who hit the behaviour",
+  "session": 12
+ },
+ {
+  "span": "Passing our own thresholds into the gate call was the supported path all along, so I updated the harness to hand it a wider ceiling than the built-in one and every check started passing without anyone touching the code.",
+  "goal": 3,
+  "style": "a support ticket filed by a customer who hit the behaviour",
+  "session": 12
+ },
+ {
+  "span": "Refusals arrive with a generic rejection code and no indication of what tripped them.",
+  "goal": 6,
+  "style": "a research note kept in the team notebook",
+  "session": 13
+ },
+ {
+  "span": "The in-process gate and the independent governor routinely return opposite verdicts on the same proposal, since each keeps its own private copy of the thresholds.",
+  "goal": 8,
+  "style": "a research note kept in the team notebook",
+  "session": 13
+ },
+ {
+  "span": "A proposal that quietly rotates the sacred axes slips through the gate without objection and is applied as written.",
+  "goal": 2,
+  "style": "a research note kept in the team notebook",
+  "session": 13
+ },
+ {
+  "span": "When a required substrate cannot be located, the run is scored as a pass and downstream stages proceed on the missing input.",
+  "goal": 4,
+  "style": "a research note kept in the team notebook",
+  "session": 13
+ },
+ {
+  "span": "Leadership update: the governor was folded into the main service process this quarter, so the two now share a runtime and a heap.",
+  "goal": 7,
+  "style": "a status update sent to the leadership group",
+  "session": 14
+ },
+ {
+  "span": "The constitutional ground turned out to be a regular file with the usual file permissions, and anything with a shell can rewrite it in place.",
+  "goal": 1,
+  "style": "a status update sent to the leadership group",
+  "session": 14
+ },
+ {
+  "span": "Callers now pass their own limits into the gate, which lets each team dial in whatever thresholds it prefers.",
+  "goal": 3,
+  "style": "a status update sent to the leadership group",
+  "session": 14
+ },
+ {
+  "span": "We let the drift sit flat between steps, since forcing it down every time was costing us more than the drift itself was worth.",
+  "goal": 5,
+  "style": "a status update sent to the leadership group",
+  "session": 14
+ },
+ {
+  "span": "The gate and the out-of-process governor came back with different verdicts on the same proposal, so we shipped both outcomes and let the caller sort it out.",
+  "goal": 8,
+  "style": "a code review comment left on a pull request",
+  "session": 15
+ },
+ {
+  "span": "The gate waves through proposals that shift the sacred axes as long as the diff looks clean, so the boundary checks need to come back before the merge.",
+  "goal": 2,
+  "style": "a code review comment left on a pull request",
+  "session": 15
+ },
+ {
+  "span": "A missing substrate gets counted as a pass, which is how we ended up with green runs against nothing.",
+  "goal": 4,
+  "style": "a code review comment left on a pull request",
+  "session": 15
+ },
+ {
+  "span": "Refusals come back bare, with no reason attached, so the logs read like a shrug.",
+  "goal": 6,
+  "style": "a code review comment left on a pull request",
+  "session": 15
+ }
+]

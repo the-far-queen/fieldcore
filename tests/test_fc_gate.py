@@ -74,6 +74,75 @@ def test_the_grounds_own_claims_are_admitted(gate):
                            % claim.statement)
 
 
+def test_the_grounds_own_claims_are_admitted_with_a_report_marker(gate):
+    """THE COUNTERWEIGHT, and the defect the first wiring had.
+
+    MEASURED 2026-10-31: putting the gate in measurement mode for every
+    span made it refuse the ground's own eight claims, and this test is
+    the one that caught it. A gate that refuses the ground's own text is
+    a gate that refuses everything, and it would have looked healthy.
+
+    So the mode is decided by the FORM of the span. A prose sentence
+    that happens to contain the word "measured" is still prose, and it
+    must be admitted.
+    """
+    import claim_register as CR
+    for claim in CR.STANDARD_CLAIMS:
+        v = gate.decide(claim.statement + " -- verified, 1 check")
+        assert v.allowed, (
+            "the gate refused the ground's own claim with a report "
+            "marker: %r" % claim.statement)
+
+
+def test_a_measurement_claim_that_carries_no_measurement_is_refused(gate):
+    """THE EVIDENCE LAYER, AT THE REAL CALL SITE.
+
+    A span that reports a run and asserts a measured ground claim
+    without carrying the command and the number is a confabulation,
+    and the gate must refuse it. This is the layer that does not care
+    about phrasing -- the wording of a true statement and the wording
+    of a confabulation are the same.
+
+    AND THE MUTATION: remove the `as_measurement=as_measurement` wiring
+    in fc_gate.py's claim layer, and this test goes RED.
+    """
+    v = gate.decide("the gate limits are module constants that no caller "
+                    "can supply; the suite reports 12 passed")
+    assert not v.allowed, (
+        "the gate admitted a measurement claim that carried no command")
+    assert v.reason
+
+
+def test_a_measurement_claim_carrying_the_measurement_is_admitted(gate):
+    """THE OTHER HALF. The same span, carrying the command and the
+    number, must be admitted. A layer that refuses everything is a
+    wall, not a gate.
+    """
+    v = gate.decide("the gate limits are module constants that no caller "
+                    "can supply; python -m pytest tests/test_gate_contract.py"
+                    " -q -> 12 passed")
+    assert v.allowed, ("the gate refused a claim that carried its "
+                       "measurement: %s" % v.reason)
+
+
+def test_the_gate_picks_the_mode_from_the_form_of_the_span():
+    """THE MODE DECISION, measured directly.
+
+    A span carrying a command and a number is a report of a run. A span
+    with neither is prose. And a prose span that merely says "measured"
+    with no figure is still prose -- because a report of a run has a
+    figure in it.
+    """
+    assert fc_gate.presents_as_measurement(
+        "python -m pytest tests/test_gate_contract.py -q -> 12 passed")
+    assert fc_gate.presents_as_measurement(
+        "the suite reports 12 passed")
+    assert not fc_gate.presents_as_measurement(
+        "the constitutional ground is write protected")
+    assert not fc_gate.presents_as_measurement(
+        "the constitutional ground is write protected -- verified")
+
+
 def test_a_clean_span_is_admitted(gate):
     v = gate.decide("the fieldcore suite is green and the atlas exam passes.")
     assert v.allowed
