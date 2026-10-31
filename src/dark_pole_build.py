@@ -322,6 +322,7 @@ DARK_POLE: Tuple[DarkText, ...] = (
                   "thing worth having and who is therefore the "
                   "purest democrat in the poem",
         in_catalog=False,
+        in_repo=True,
     ),
     DarkText(
         author="Christopher Marlowe",
@@ -335,6 +336,7 @@ DARK_POLE: Tuple[DarkText, ...] = (
         adversary="Mephistopheles, who is a scholar and a servant and "
                   "never raises his voice",
         in_catalog=False,
+        in_repo=True,
     ),
     DarkText(
         author="John Webster",
@@ -351,6 +353,7 @@ DARK_POLE: Tuple[DarkText, ...] = (
                   "unaccountable, and kills because she is not "
                   "checked",
         in_catalog=False,
+        in_repo=True,
     ),
     DarkText(
         author="George Orwell",
@@ -366,6 +369,7 @@ DARK_POLE: Tuple[DarkText, ...] = (
         adversary="the Party, which has no person to examine and "
                   "therefore no fruit",
         in_catalog=False,
+        in_repo=True,
     ),
     DarkText(
         author="Fyodor Dostoevsky",
