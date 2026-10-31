@@ -289,12 +289,63 @@ def test_a_claim_with_evidence_is_marked_measured():
     """A measured claim and an asserted one must read differently.
 
     RED: if both were marked the same, the model could not tell.
+
+    THE FIXTURE CHANGED, 2026-10-31. This test used to assert that the
+    ground register CONTAINED an asserted claim -- "the ground register
+    does carry unmeasured claims". That assertion pinned THE DEFECT:
+    two of the nine claims had no evidence link, so the ground told the
+    model that some of its own claims were unmeasured. The enforcing
+    code for both was in the repo the whole time (src/core_math.py's
+    Veto, and the gate's named refusal constants), and the item
+    "grow the claim register from the code" closed the gap.
+
+    So the PROPERTY is kept -- measured and asserted must read
+    differently -- and it is now exercised on a register that
+    deliberately contains one of each, built in the test. And a second
+    property is asserted: the real standard register now tells the
+    model that every claim is measured, which is the truth.
     """
     w = _wrapper(live=False)
     claims = w.ground_claims
     assert any("measured:" in c for c in claims), claims
-    # and the ground register does carry unmeasured claims
-    assert any("asserted" in c for c in claims), claims
+
+    # THE REAL REGISTER: every claim now carries evidence, so the
+    # ground the model is told is a fully measured ground.
+    assert not any("asserted" in c for c in claims), (
+        "the ground still tells the model some claims are unmeasured: %s"
+        % (claims,))
+
+    # THE PROPERTY, on a register with one of each, built here.
+    import claim_register as CR
+    reg = CR.ClaimRegister()
+    reg.add(CR.Claim(id="measured_one", anchors=("thing",),
+                     affirm=("is",), deny=("is not",),
+                     evidence="an_evidence_id",
+                     statement="the measured thing"))
+    reg.add(CR.Claim(id="asserted_one", anchors=("other",),
+                     affirm=("is",), deny=("is not",),
+                     evidence=None,
+                     statement="the asserted thing"))
+    reg.evidence.add(CR.Evidence(id="an_evidence_id",
+                                  command="python -c 'pass'",
+                                  summary="a measurement"))
+
+    # the ground_claims property reads the register off self.gate, so
+    # the fixture puts it there -- on the same path the real wrapper
+    # uses, so the fixture cannot drift from the code.
+    class _Gate:
+        pass
+
+    class _Holder:
+        pass
+
+    g = _Gate()
+    g._register = reg
+    holder = _Holder()
+    holder.gate = g
+    lines = fc_wrapper.FieldCoreWrapper.ground_claims.fget(holder)
+    assert any("measured:" in c for c in lines), lines
+    assert any("asserted" in c for c in lines), lines
 
 
 # ---------------------------------------------------------------------------

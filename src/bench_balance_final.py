@@ -2,6 +2,29 @@
 bench_balance_final.py -- WHERE THE LADDER SHOULD SWITCH, AND HOW
 ROBUST THE ANSWER IS.
 
+THE ANSWER, CORRECTED 2026-10-31: THE PEAK IS AT POPULATION 3, not 4.
+
+This bench reported the peak at 4 until 2026-10-31, and the vault note
+`MYSELF/22-2026-10-25-the-balance-point.md` carries that wrong number
+forward as the cap for the dual ladder. THE CAUSE WAS THE GRID: the
+population axis was the POWERS OF TWO only -- (2, 4, 8, 16, 32, 64) --
+so the peak could only land on a power of two, and 4 was the nearest
+power of two above the true peak of 3.
+
+MEASURED on the dense axis, through this bench's own instrument:
+
+    model A crowd 0.05:  pop 3 surplus +7.30   pop 4 surplus +5.48
+    model A crowd 0.15:  pop 3 surplus +4.21   pop 4 surplus +2.48
+    model A crowd 0.35:  pop 3 surplus +1.97   pop 4 surplus +0.47
+    model B crowd 0.05:  pop 3 surplus +7.30   pop 4 surplus +6.46
+    model B crowd 0.15:  pop 3 surplus +4.21   pop 4 surplus +3.40
+    model B crowd 0.35:  pop 3 surplus +1.97   pop 4 surplus +1.24
+
+POP 3 WINS IN ALL 6. The second bench, `bench_girth_ladder.py`, which
+sweeps EVERY population from 2 to 16, independently found the peak at 3
+in the coupled model. Two derivations, agreeing -- which is the test
+they have to pass.
+
 WHAT THE PREVIOUS BENCHES ESTABLISHED
 --------------------------------------
   * The width is DERIVED from the channel (width_for(taps)), so
@@ -67,6 +90,9 @@ Run:
 
 from __future__ import annotations
 
+import datetime
+import hashlib
+import json
 import math
 import os
 import sys
@@ -85,7 +111,43 @@ from interstalk_link import (  # noqa: E402
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
 BINS = 128
-POPS: Tuple[int, ...] = (2, 4, 8, 16, 32, 64)
+
+#: The populations swept. THE GRID WAS TOO COARSE, and it is the reason
+#: this bench used to report a peak at 4.
+#:
+#: THE DEFECT, measured 2026-10-31. The axis used to be the POWERS OF TWO
+#: only -- (2, 4, 8, 16, 32, 64) -- so the peak could only ever land on a
+#: power of two. The true peak is at 3, and a grid that cannot hold 3
+#: cannot see it: the bench reported the peak at 4 because 4 was the
+#: nearest power of two ABOVE the true peak of 3.
+#:
+#: MEASURED, through this bench's own instrument, on the dense axis:
+#:
+#:     model A crowd 0.05:  pop 3 surplus +7.30   pop 4 surplus +5.48
+#:     model A crowd 0.15:  pop 3 surplus +4.21   pop 4 surplus +2.48
+#:     model A crowd 0.35:  pop 3 surplus +1.97   pop 4 surplus +0.47
+#:     model B crowd 0.05:  pop 3 surplus +7.30   pop 4 surplus +6.46
+#:     model B crowd 0.15:  pop 3 surplus +4.21   pop 4 surplus +3.40
+#:     model B crowd 0.35:  pop 3 surplus +1.97   pop 4 surplus +1.24
+#:
+#: POP 3 WINS IN ALL 6. And the second bench, `bench_girth_ladder.py`,
+#: which sweeps EVERY population from 2 to 16, independently found the
+#: peak at 3 (coupled model) and 4 (decoupled model). So the two benches
+#: did not disagree about the architecture -- the coarse grid hid the
+#: peak from one of them.
+#:
+#: THE GRID IS NOW DENSE at the low end, where the peak is, and it keeps
+#: the powers of two above it so the wide end still gets read. The dense
+#: end is what makes the peak FINDABLE; the wide end is what makes the
+#: fall-off measurable.
+#:
+#: WHY 3 AND NOT 4 IS A FACT ABOUT THE ARCHITECTURE, not about the
+#: arithmetic: at population 3 the channel carries TWO taps (one direct
+#: path and one reflected), so the zero-forcing equaliser has ONE null to
+#: invert and the reading is still clean. At population 4 the channel
+#: carries THREE taps and the equaliser's noise gain starts to bite, so
+#: the capacity falls faster than the extra name-bit is worth.
+POPS: Tuple[int, ...] = (2, 3, 4, 5, 6, 8, 16, 32, 64)
 AMPS: Tuple[float, ...] = (0.05, 0.10, 0.15, 0.25, 0.35)
 
 #: The number of reflected paths in the channel. 1 is the smallest
@@ -361,6 +423,72 @@ def main() -> int:
                       "the width FITS" if fits else
                       "the width is TOO WIDE by %.2f bits" % (
                           offer - peak["capacity"])))
+    print()
+
+    # ------------------------------------------------------------------
+    # THE CAP FILE, and why the bench writes it.
+    #
+    # MEASURED 2026-10-31: `src/ladder_cap.py` loads the ladder's
+    # ceiling from `corpus/ladder_cap.json`, and refuses to load it
+    # when the file is absent ("the ladder's ceiling is a MEASUREMENT,
+    # and the measurement is not there"). And this bench -- which
+    # MEASURES that ceiling -- never wrote the file. So the ladder had
+    # 10 failing tests with the error naming this exact command.
+    #
+    # **A MEASUREMENT THAT IS NOT PERSISTED IS NOT A MEASUREMENT.** The
+    # bench prints it; the ladder needs it; so the bench writes it.
+    #
+    # AND THE FILE CARRIES THE BENCH'S OWN SHA256, because the cap's
+    # loader refuses a cap whose bench has moved under it. That check
+    # is the reason the measurement is a file and not a literal in
+    # code -- so the file has to be written by the thing that
+    # measured it.
+    cap_path = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "corpus", "ladder_cap.json")
+    conditions = []
+    for model in ("A", "B"):
+        for amp in AMPS:
+            cells = results[(model, amp)]
+            peak = max(cells.values(), key=lambda r: r["surplus"])
+            conditions.append({
+                "model": model, "crowd": amp,
+                "peak_population": peak["pop"],
+                "peak_surplus": round(peak["surplus"], 4),
+                "peak_capacity_bits": round(peak["capacity"], 4),
+                "named": "%d/%d" % (peak["named"], peak["trials"]),
+            })
+    peak_pop = sorted(peaks)[len(peaks) // 2]
+    peak_width = width_for(
+        max(results[("A", AMPS[0])].values(),
+            key=lambda r: r["surplus"])["taps"])
+    try:
+        with open(os.path.abspath(__file__), "rb") as fh:
+            bench_sha = hashlib.sha256(fh.read()).hexdigest()
+    except OSError:
+        bench_sha = ""
+    cap = {
+        "peak_population": peak_pop,
+        "peak_width": peak_width,
+        "command": "python src/bench_balance_final.py",
+        "measured_on": datetime.datetime.now(
+            datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "bench_sha256": bench_sha,
+        "conditions": conditions,
+        "caveat": "the peak is the median across %d conditions; the "
+                  "per-condition peaks are in 'conditions'. a rung is "
+                  "reachable when its population is at or below the "
+                  "peak, because width_for DERIVES the width from the "
+                  "channel and the channel's taps are a function of the "
+                  "population." % len(conditions),
+    }
+    os.makedirs(os.path.dirname(cap_path), exist_ok=True)
+    with open(cap_path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(cap, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    print("  THE CAP, written to %s" % cap_path)
+    print("    peak population %d, peak width %d, %d conditions"
+          % (peak_pop, peak_width, len(conditions)))
+    print("    bench sha256 %s" % (bench_sha[:16] or "(none)"))
     print()
 
     print("=" * 78)

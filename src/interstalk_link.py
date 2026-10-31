@@ -136,12 +136,22 @@ NEEDS_MORE = "needs_more"
 def width_for(channel_taps: int) -> int:
     """The width a channel of this many taps requires.
 
-    THE RULE, and it is the Rust core's rule verbatim
-    (`carrier.rs::equalise`):
+    THE RULE, as the code implements it:
 
-        2 taps or fewer -> 1 bit
-        4 taps or fewer -> 4 bits
-        more            -> 8 bits
+        1 tap        -> 1 bit
+        2 taps       -> 4 bits
+        3 or 4 taps  -> 8 bits
+        5 or more    -> 16 bits
+
+    THE DOCSTRING SAID SOMETHING ELSE UNTIL 2026-10-31, and it is
+    worth recording why. It used to claim "the Rust core's rule
+    verbatim: 2 taps or fewer -> 1 bit, 4 taps or fewer -> 4 bits,
+    more -> 8 bits", which is NOT what this function does, and the
+    quoted rule is not the Rust core's either -- the Rust core's
+    `carrier.rs::equalise` has no width at all, because its channel
+    is a fixed fixture. A docstring that misstates the rule it
+    documents is how the next reader re-derives the wrong thing, and
+    this one has been wrong for the life of the file.
 
     THE POPULATION ADDS WIDTH, and this is the part the Rust core does
     not have, because the Rust core's channel is a fixed fixture. Here

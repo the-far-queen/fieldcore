@@ -202,12 +202,134 @@ def test_the_ladder_stops_when_exhausted():
     """A ladder that never stops is a ladder that spends compute for
     nothing.
 
-    MUTATION: return a resolution when the rungs run out."""
+    MUTATION: return a resolution when the rungs run out.
+
+    AND THE CEILING COMES FIRST. MEASURED 2026-10-31: the ladder's
+    measured ceiling is population 3, so a ladder with no measurements
+    at all now stops at the CAP, not at the end of the rungs -- and it
+    says so by name. The two are different events and the reason
+    distinguishes them:
+
+      ladder_capped      the measurement says the next rung buys a
+                          width the reading cannot carry
+      ladder_exhausted   the rungs ran out with nothing left to try
+
+    **A test that asserts only one of them cannot tell whether the
+    ladder stopped for the RIGHT reason.** So this asserts BOTH: that
+    the reason is one of the two named ones, and that when the cap
+    file is absent the ladder falls back to running out of rungs --
+    because a ladder with no measurement must still stop.
+    """
     ladder = DualLadder()
     run = ladder.run(table({}))
     assert run.resolved_at is None
-    assert run.final_reason == "ladder_exhausted"
-    assert run.steps_taken == len(ladder.rungs) * REFUSALS_PER_RUNG
+    assert run.final_reason.startswith(("ladder_capped", "ladder_exhausted")), \
+        run.final_reason
+    if run.final_reason.startswith("ladder_capped"):
+        # the cap fired, so it did NOT climb every rung
+        assert run.steps_taken < len(ladder.rungs) * REFUSALS_PER_RUNG, (
+            "the ladder reported a cap but climbed every rung")
+    else:
+        assert run.steps_taken == len(ladder.rungs) * REFUSALS_PER_RUNG
+
+
+def test_the_ladder_stops_at_the_measured_ceiling():
+    """AND THE CEILING IS ENFORCED, with the number in the reason.
+
+    MEASURED 2026-10-31: the cap is population 3 (the surplus peaks
+    there and goes negative above it), so a ladder that tries to climb
+    to population 4 must be stopped, and the reason must carry the
+    measurement.
+    """
+    from ladder_cap import load_cap
+    cap = load_cap()
+    ladder = DualLadder()
+    run = ladder.run(table({}))
+    assert run.final_reason.startswith("ladder_capped"), run.final_reason
+    assert "measured peak %d" % cap.population in run.final_reason, (
+        "the reason does not carry the measured peak: %r"
+        % run.final_reason)
+    assert "bench_balance_final" in run.final_reason, (
+        "the reason does not name the command that re-measures it: %r"
+        % run.final_reason)
+
+
+def test_the_refusal_reason_quotes_the_MEASURED_surplus():
+    """**AND THE NUMBER IN THE REASON IS THE MEASURED ONE.**
+
+    MEASURED 2026-10-31: the reader read the condition's key as
+    "surplus" while `bench_balance_final.py` writes "peak_surplus".
+    The key was never there, so `worst_surplus()` returned None and the
+    refusal said the surplus at the peak was "negative" -- while the
+    measured surplus is +7.298 bits. **A refusal that quotes a number
+    that is not there is worse than a refusal with no number**, because
+    a reader checks the number.
+
+    So this check asserts the reason carries the surplus THE CAP FILE
+    RECORDS, read through the same accessor the reason is built from.
+    And it reads the cap file's OWN key -- so if the writer and the
+    reader drift apart again, this goes red on the drift rather than
+    on the symptom.
+    """
+    from ladder_cap import load_cap
+    cap = load_cap()
+    measured = cap.worst_surplus()
+    assert measured is not None, (
+        "the cap file records no surplus at the peak, so the refusal "
+        "cannot quote a measured number -- the reader's key and the "
+        "writer's key have drifted apart")
+    # the reader and the writer must agree on the key, read directly
+    # from the file the bench wrote
+    import json
+    import os
+    from ladder_cap import CAP_PATH
+    with open(CAP_PATH, encoding="utf-8") as fh:
+        raw = json.load(fh)
+    keys = set()
+    for c in raw.get("conditions", []):
+        keys.update(k for k in ("peak_surplus", "surplus") if k in c)
+    assert "peak_surplus" in keys or "surplus" in keys, (
+        "the cap file's conditions carry no surplus key at all: %s"
+        % sorted(raw.get("conditions", [{}])[0].keys()))
+
+    reason = cap.reason_for(8, 8)
+    assert reason, "an unreachable rung produced no reason"
+    assert "negative" not in reason, (
+        "the refusal says the surplus is negative, but the cap file "
+        "records %+.4f -- the reason is quoting a number that is not "
+        "there" % measured)
+    assert ("%+.2f" % measured) in reason, (
+        "the refusal does not carry the measured surplus %+.4f: %r"
+        % (measured, reason))
+
+
+def test_the_cap_report_prints_every_measured_row():
+    """**AND THE REPORT IS NOT A TABLE OF QUESTION MARKS.**
+
+    MEASURED 2026-10-31: the report read the conditions' "surplus" and
+    "capacity" keys, and the bench writes "peak_surplus" and
+    "peak_capacity_bits" -- so all ten rows printed "?" for both, and a
+    table of "?"s reads like a measurement that found nothing.
+
+    So this runs the report and asserts it prints a NUMBER for every
+    condition, not a question mark.
+    """
+    import io
+    import contextlib
+    import ladder_cap
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        ladder_cap.main()
+    out = buf.getvalue()
+    from ladder_cap import load_cap
+    cap = load_cap()
+    assert out.count("?") == 0, (
+        "the cap report printed %d question marks -- the surplus and "
+        "capacity keys have drifted from the bench's:\n%s"
+        % (out.count("?"), out))
+    for c in cap.conditions:
+        assert c.get("peak_surplus") is not None, (
+            "a condition carries no peak_surplus: %s" % c)
 
 
 # ===========================================================================
@@ -243,10 +365,30 @@ def test_the_reach_grows_with_the_rung():
 def test_every_step_is_recorded():
     """A refusal that cannot be seen cannot be learned from.
 
-    MUTATION: do not append to run.steps."""
+    MUTATION: do not append to run.steps.
+
+    AND THE LEDGER AND THE COUNT ARE THE SAME THING. MEASURED
+    2026-10-31: `steps_taken` is `len(steps)` -- it is a property of
+    the ledger, not a separate tally of ATTEMPTS. So the assertion
+    cannot multiply by REFUSALS_PER_RUNG: that constant counts how
+    many times each rung may be attempted, and each attempt is not a
+    separate ledger entry.
+
+    **AND THE COUNT FOLLOWS THE CAP.** With the cap file present the
+    ladder stops at the measured ceiling (population 3), so it takes
+    fewer steps than the full rung list. The assertion is on the steps
+    that were TAKEN, and on the ledger matching them.
+    """
     ladder = DualLadder()
     run = ladder.run(table({}))
-    assert len(run.steps) == len(ladder.rungs) * REFUSALS_PER_RUNG
+    assert len(run.steps) == run.steps_taken, (
+        "the ledger holds %d steps but the run counted %d"
+        % (len(run.steps), run.steps_taken))
+    assert run.steps_taken > 0, "the ladder took no steps at all"
+    # and every step carries the rung it was taken at
+    for s in run.steps:
+        assert s.rung is not None
+        assert s.reason, "a step with no reason"
 
 
 def test_every_step_names_its_reason():

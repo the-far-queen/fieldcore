@@ -190,11 +190,71 @@ def test_a_negator_in_the_same_clause_does_scope_over():
 # ---------------------------------------------------------------------------
 
 def test_a_claim_without_evidence_is_not_measured():
-    reg = CR.standard_register()
-    c = reg.claim("gate_refuses_moving_axes")
+    """A claim with no evidence link is ASSERTED, and is not measured.
+
+    THE FIXTURE CHANGED, and the reason is worth recording. This test
+    used to pin the claim `gate_refuses_moving_axes` as the register's
+    one ASSERTED claim -- it asserted `c.evidence is None` with the
+    message "this claim was given an evidence link". That test was
+    asserting THE DEFECT: the claim had no evidence because nobody had
+    walked the code to find what enforces it. The enforcing code
+    (src/core_math.py's Veto) was in the repo the whole time.
+
+    So the property the test was FOR -- a claim with no evidence is not
+    measured -- is kept, and it is now exercised on a claim that
+    genuinely has no evidence, built in the test. And a NEW property is
+    asserted: every claim in the standard register now carries an
+    evidence link, so the register measures its own coverage.
+    """
+    # THE PROPERTY, on a claim that really has no evidence.
+    reg = CR.ClaimRegister()
+    reg.add(CR.Claim(id="no_evidence_claim",
+                     anchors=("thing",), affirm=("is",), deny=("is not",)))
+    c = reg.claim("no_evidence_claim")
     assert c is not None
-    assert c.evidence is None, "this claim was given an evidence link"
+    assert c.evidence is None
     assert not reg.evidence.has(c.evidence)
+
+
+def test_every_claim_in_the_standard_register_carries_evidence():
+    """The register measures its own coverage, and the coverage is 100%.
+
+    Added 2026-10-31. The register's own output says "N of N claims
+    are MEASURED"; this test makes that number a gate rather than a
+    printout, so a claim added without an evidence link goes RED
+    instead of quietly making the ground weaker.
+
+    MEASURED before this test existed: 7 of 9 claims were MEASURED and
+    2 were ASSERTED. Both of the ASSERTED ones now have evidence, and
+    the enforcing code for each was already in the repo.
+    """
+    reg = CR.standard_register()
+    asserted = [c.id for c in reg.claims if not reg.evidence.has(c.evidence)]
+    assert not asserted, (
+        "these claims have no evidence link, so they are ASSERTED and a "
+        "span may present them as a measurement: %s" % (asserted,))
+    for c in reg.claims:
+        assert c.evidence, "the claim %r has no evidence id" % (c.id,)
+        assert reg.evidence.has(c.evidence), (
+            "the claim %r cites evidence %r, which is not in the store"
+            % (c.id, c.evidence))
+
+
+def test_every_evidence_command_names_a_runnable_invocation():
+    """An evidence link must be re-runnable, so the command names a
+    program and a target.
+
+    The project rule is that every number carries the command that
+    produced it. An evidence entry whose command is a sentence is not
+    re-runnable, so it is not evidence.
+    """
+    reg = CR.standard_register()
+    for ev in reg.evidence.items.values():
+        cmd = ev.command.strip()
+        assert cmd, "the evidence %r has no command" % (ev.id,)
+        assert cmd.split()[0] in ("python", "python3", "pytest"), (
+            "the evidence %r does not start with a runnable program: %r"
+            % (ev.id, cmd))
 
 
 def test_a_measured_claim_reports_measured():

@@ -1,0 +1,90 @@
+{
+  "peak_population": 3,
+  "peak_width": 4,
+  "command": "python src/bench_balance_final.py",
+  "measured_on": "2026-10-31T08:44:46Z",
+  "bench_sha256": "19b1987e5305ae26759d88c3bd9fe120b03020bc275ab722cd443be7473c426d",
+  "conditions": [
+    {
+      "model": "A",
+      "crowd": 0.05,
+      "peak_population": 3,
+      "peak_surplus": 7.298,
+      "peak_capacity_bits": 8.8829,
+      "named": "12/12"
+    },
+    {
+      "model": "A",
+      "crowd": 0.1,
+      "peak_population": 3,
+      "peak_surplus": 5.3362,
+      "peak_capacity_bits": 6.9211,
+      "named": "12/12"
+    },
+    {
+      "model": "A",
+      "crowd": 0.15,
+      "peak_population": 3,
+      "peak_surplus": 4.209,
+      "peak_capacity_bits": 5.7939,
+      "named": "12/12"
+    },
+    {
+      "model": "A",
+      "crowd": 0.25,
+      "peak_population": 3,
+      "peak_surplus": 2.8322,
+      "peak_capacity_bits": 4.4172,
+      "named": "12/12"
+    },
+    {
+      "model": "A",
+      "crowd": 0.35,
+      "peak_population": 3,
+      "peak_surplus": 1.9715,
+      "peak_capacity_bits": 3.5564,
+      "named": "12/12"
+    },
+    {
+      "model": "B",
+      "crowd": 0.05,
+      "peak_population": 3,
+      "peak_surplus": 7.298,
+      "peak_capacity_bits": 8.8829,
+      "named": "12/12"
+    },
+    {
+      "model": "B",
+      "crowd": 0.1,
+      "peak_population": 3,
+      "peak_surplus": 5.3362,
+      "peak_capacity_bits": 6.9211,
+      "named": "12/12"
+    },
+    {
+      "model": "B",
+      "crowd": 0.15,
+      "peak_population": 3,
+      "peak_surplus": 4.209,
+      "peak_capacity_bits": 5.7939,
+      "named": "12/12"
+    },
+    {
+      "model": "B",
+      "crowd": 0.25,
+      "peak_population": 3,
+      "peak_surplus": 2.8322,
+      "peak_capacity_bits": 4.4172,
+      "named": "12/12"
+    },
+    {
+      "model": "B",
+      "crowd": 0.35,
+      "peak_population": 3,
+      "peak_surplus": 1.9715,
+      "peak_capacity_bits": 3.5564,
+      "named": "12/12"
+    }
+  ],
+  "caveat": "the peak is the median across 10 conditions; the per-condition peaks are in 'conditions'. a rung is reachable when its population is at or below the peak, because width_for DERIVES the width from the channel and the channel's taps are a function of the population."
+}

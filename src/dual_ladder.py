@@ -89,8 +89,62 @@ And the MEASUREMENT that says whether a step was worth it: the margin
 by which the answer was right. A step that does not improve the margin
 was not worth taking, and the ladder should say so.
 
+THE MEASURED CAP, and the ladder's own ceiling
+------------------------------------------------
+THE LADDER HAS A CEILING, and it is MEASURED, not chosen. The ladder
+as built climbs to 13 rungs -- up to width 256 and population 32 --
+and the measurement says the surplus PEAKS FAR BELOW THAT and goes
+NEGATIVE above it. Every rung above the peak buys a width the reading
+cannot carry and a population that costs SNR.
+
+    THE MEASURED PEAK POPULATION IS 3.
+
+MEASURED by `python src/bench_balance_final.py`, over two crowd
+models and five crowd amplitudes -- ten conditions, and the peak is at
+3 in every one of them. The full per-condition table, with the surplus
+and the capacity at each peak, is in `corpus/ladder_cap.json`, which
+also carries the sha256 of the bench that produced it, so a change to
+the bench INVALIDATES the cap rather than silently outliving it.
+
+THE NUMBER WAS WRONG UNTIL 2026-10-31, and the reason is worth
+recording because it is the same shape as every other error in this
+project's history. The bench used to sweep the population axis over
+the POWERS OF TWO ONLY -- 2, 4, 8, 16, 32, 64 -- so the peak could
+only ever land on a power of two, and the bench reported the peak at 4
+because 4 was the nearest power of two ABOVE the true peak of 3. The
+2026-10-25 note and the queue item that came from it both carried
+that wrong number forward.
+
+THE SECOND BENCH FOUND IT INDEPENDENTLY. `bench_girth_ladder.py`
+sweeps EVERY population from 2 to 16, and it found the peak at 3 in
+the coupled model and 4 in the decoupled model. Two derivations, and
+the one with the coarse grid was the one that was wrong -- because a
+grid that cannot hold the answer cannot report it.
+
+WHAT THE CAP DOES, and what it does NOT do:
+
+  IT DOES NOT truncate either axis. The width axis is the Rust core's
+    ladder (1/4/8/.../256) and the population axis is the nested stalk
+    topology (hyperlocal -> groups -> area -> full). Neither is a
+    performance setting, and truncating them would make this ladder
+    disagree with the substrate it mirrors.
+
+  IT DOES refuse to CLIMB past the peak, and it refuses BY NAME, with
+    the measured surplus in the reason. The ladder keeps its full
+    geometry; the REFUSAL is what changes. That is the same move the
+    Rust core makes at its own top: "the terminal state is not a
+    width, it is a change of kind (Unanswerable)".
+
+THE HONEST CAVEAT. The crowd amplitude is a free parameter with no
+measured physical value in this repo, so the SHAPE is what the cap
+rests on -- the peak is at 3 in every condition -- and not the absolute
+surplus. And the cap assumes the FREQUENCY path, which is the one the
+bench measures; the RATIO path (`wound_core.py::PopulationCode.readout`)
+is a separate, unsettled question.
+
 Run:
     python src/dual_ladder.py
+    python src/ladder_cap.py
 """
 
 from __future__ import annotations
@@ -110,6 +164,7 @@ from interstalk_link import (  # noqa: E402
     WIDTHS,
     REACH,
 )
+from ladder_cap import LadderCap, load_cap  # noqa: E402
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
 
@@ -123,11 +178,22 @@ class Axis(str):
 
 #: The WIDTH axis. `ladder.rs`: 1 / 4 / 8 / 16 / 32 / 64 / 128 / 256,
 #: and past 256 the answer changes KIND (Unanswerable), not width.
+#:
+#: THIS AXIS IS NOT TRUNCATED BY THE CAP. It is the Rust core's ladder,
+#: and the Rust core is tested for it (`core/src/ladder.rs`,
+#: `doubling_all_the_way`). A cap on the PERFORMANCE of a rung is not a
+#: statement about the ladder's geometry, and truncating the axis would
+#: make the Python ladder disagree with the substrate it mirrors.
 WIDTH_AXIS: Tuple[int, ...] = WIDTHS
 
 #: The POPULATION axis. `geometry-as-control-system-engineering` §5.5:
 #: hyperlocal -> groups -> area -> full. The counts are the number of
 #: stalks in view at each level.
+#:
+#: ALSO NOT TRUNCATED, for the same reason: this is the TOPOLOGY, not a
+#: performance setting. The measured ceiling is applied at RUN time (a
+#: rung above it is refused, by name), not by deleting the rung from the
+#: ladder.
 POPULATION_AXIS: Tuple[int, ...] = (1, 2, 4, 8, 16, 32)
 
 #: How many refusals at one rung before the ladder moves. Two, per
@@ -148,6 +214,12 @@ class Rung:
     `width` is how many bits the answer carries. `population` is how
     many stalks are in view. The PRODUCT is the cost, and the LADDER
     walks the product's cheap frontier.
+
+    A RUNG IS GEOMETRY, and it knows nothing about performance. Whether
+    a rung is REACHABLE is a property of the measured ceiling, which
+    lives on the ladder that walks these rungs -- so that the same rung
+    can be walked by a ladder with the cap and by one without, and the
+    geometry does not change underneath either.
     """
 
     width: int
@@ -365,15 +437,61 @@ class DualLadder:
     Only the three named channel refusals escalate. A refusal for any
     other reason is a genuine refusal and the ladder stops, because
     climbing the ladder would not change the answer.
+
+    THE MEASURED CEILING, and this is the difference between a ladder
+    and a wish. The ladder's GEOMETRY is the full 13 rungs, because the
+    axes are the nested stalk topology and the Rust core's width ladder
+    and neither is a performance setting. But the MEASUREMENT says the
+    surplus peaks at a low population and goes NEGATIVE above it, so
+    the rungs above the peak buy a width the reading cannot carry and a
+    population that costs SNR.
+
+    So the ladder REFUSES TO CLIMB past the measured ceiling, and it
+    refuses BY NAME, with the measured surplus in the reason. That is
+    the same move the Rust core makes at its own top: "the terminal
+    state is not a width, it is a change of kind (Unanswerable)".
+
+    THE CAP CAN BE TURNED OFF, and it is off by default for the
+    `cap=None` constructor argument, because a ladder with no cap is
+    the honest baseline and the cap is an ADDITION to it. The default
+    `DualLadder()` DOES load the measured cap, because a ladder that
+    spends compute on rungs the measurement says cannot work is a
+    ladder that spends compute for nothing.
     """
 
     ESCALATING = ("refuse_alignment", "channel_flat_channel",
                   "channel_irrecoverable")
 
     def __init__(self, rungs: Optional[List[Rung]] = None,
-                 refusals_per_rung: int = REFUSALS_PER_RUNG):
+                 refusals_per_rung: int = REFUSALS_PER_RUNG,
+                 cap: Optional[LadderCap] = None,
+                 use_cap: bool = True):
         self.rungs = rungs if rungs is not None else build_ladder()
         self.refusals_per_rung = refusals_per_rung
+        # THE CAP, and it is loaded once and held. A cap that cannot be
+        # read is a REFUSAL by name (ladder_cap.CapError), never a
+        # silent "no cap" -- because a missing measurement must not
+        # quietly become permission to spend compute on every rung.
+        self.cap: Optional[LadderCap] = None
+        if use_cap:
+            self.cap = cap if cap is not None else load_cap()
+
+    # -- the ceiling ------------------------------------------------------
+
+    def reachable(self, rung: Rung) -> bool:
+        """Is this rung inside the measured ceiling?
+
+        With no cap, every rung is reachable -- the baseline ladder.
+        """
+        if self.cap is None:
+            return True
+        return self.cap.allows(rung.width, rung.population)
+
+    def unreachable_reason(self, rung: Rung) -> str:
+        """Why this rung is unreachable, in words that name the number."""
+        if self.cap is None:
+            return ""
+        return self.cap.reason_for(rung.width, rung.population)
 
     def run(self, attempt) -> LadderRun:
         """Walk the ladder until the reading is accepted or we run out.
@@ -418,13 +536,28 @@ class DualLadder:
                 # The first version advanced the rung on every refusal,
                 # which made the counter reset before it could ever reach
                 # two -- so the ladder climbed on the FIRST refusal and
-                # the "two refusals per rung" rule was dead code. The
+                # the "two refusals per rung" rule was gone code. The
                 # symptom was a run that visited all thirteen rungs
                 # after a single bad reading.
                 continue
             refusals_here = 0
             if i + 1 < len(self.rungs):
-                run.steps[-1].next_rung = self.rungs[i + 1]
+                nxt = self.rungs[i + 1]
+                # THE MEASURED CEILING, enforced here. The ladder does
+                # not climb into a rung the measurement says cannot
+                # carry a reading, and it says WHY, with the number.
+                #
+                # Without this, the ladder climbs to W256 x P32 -- a
+                # population of 32 stalks and a width of 256 bits, for a
+                # question the measurement says is unanswerable at
+                # population 8 already. Every one of those rungs is
+                # compute spent on a reading that cannot improve.
+                if not self.reachable(nxt):
+                    run.final_reason = ("ladder_capped: %s"
+                                        % self.unreachable_reason(nxt))
+                    run.steps[-1].next_rung = None
+                    return run
+                run.steps[-1].next_rung = nxt
                 i += 1
                 continue
             run.final_reason = "ladder_exhausted"

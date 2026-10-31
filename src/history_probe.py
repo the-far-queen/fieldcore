@@ -333,6 +333,50 @@ def measure_d(messages) -> Dict[str, object]:
 # THE REPORT
 # ===========================================================================
 
+def measure_b_both_sides(days: Optional[int] = None) -> Dict[str, object]:
+    """THE ACCEPTANCE CHAIN, BOTH SIDES OF THE EXCHANGE.
+
+    WHY THIS EXISTS, and it is the fix for the 2026-10-26 measurement.
+    `measure_b` above reads ONLY Bobby's messages (`read_messages`
+    filters `role='user'` in SQL), so "the message after a correction"
+    was BOBBY's next turn -- not the assistant's reply. The 25
+    "silent" results were mostly silence because the assistant had not
+    answered yet, so the 26% acceptance rate was a FLOOR on the
+    accepted count rather than a measurement.
+
+    MEASURED on this machine's own history: 12,707 assistant messages
+    against 951 user messages. The other half of the exchange was in
+    the database the whole time, 13 times bigger than the half that
+    was being read.
+
+    The two-sided measurement lives in src/history_probe2.py, and it is
+    IMPORTED rather than copied, so the two cannot drift. And the old
+    numbers are kept and printed beside the new ones, because a
+    measurement that replaces a number without showing what it was is
+    a measurement nobody can check.
+    """
+    import history_probe2 as H2
+
+    turns = H2.read_turns(days)
+    exchanges, rejected = H2.find_corrections(turns)
+    counts = Counter(e.kind for e in exchanges)
+    total = len(exchanges)
+    answered = total - counts.get("no_reply", 0)
+    return {
+        "corrections": total,
+        "answered": answered,
+        "counts": counts,
+        "accept_rate": ((counts.get("accepted", 0) / answered)
+                        if answered else 0.0),
+        "reject_rate": ((counts.get("accepted", 0) / total)
+                        if total else 0.0),
+        "rejected": rejected,
+        "examples": exchanges[:8],
+        "assistant_messages": sum(1 for t in turns if t.role == "assistant"),
+        "user_messages": sum(1 for t in turns if t.role == "user"),
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=0,
@@ -381,6 +425,41 @@ def main() -> int:
     for ex in b["examples"][:4]:
         print("   %-9s correction: %r" % (ex["kind"], ex["correction"][:56]))
         print("   %-9s next     : %r" % ("", ex["next"][:56]))
+    print()
+
+    # -- the SAME measurement, both sides of the exchange -------------
+    print("   B2. THE SAME MEASUREMENT, BOTH SIDES OF THE EXCHANGE")
+    print("      (the measurement above reads only BOBBY's messages, so")
+    print("       'the next message' is Bobby's next turn -- not the")
+    print("       assistant's reply)")
+    print()
+    b2 = measure_b_both_sides(args.days or None)
+    print("      the history read, both sides:")
+    print("        assistant messages  %d" % b2["assistant_messages"])
+    print("        user messages       %d" % b2["user_messages"])
+    print()
+    print("      corrections found            %d" % b2["corrections"])
+    for kind, n in b2["counts"].most_common():
+        print("        %-10s %d" % (kind, n))
+    print("      the acceptance rate           %.0f%% over the answered"
+          % (b2["accept_rate"] * 100))
+    print("      and over all corrections      %.0f%%"
+          % (b2["reject_rate"] * 100))
+    print()
+    rej = b2["rejected"]
+    print("      rejected before counting:")
+    print("        framework notices (not Bobby speaking)  %d"
+          % rej.get("system_notice", 0))
+    print("        matched no correction phrase            %d"
+          % rej.get("not_a_correction", 0))
+    print()
+    print("      THE SAMPLE IS SMALL, and the rate is reported with it")
+    print("      for that reason. The METHOD is the deliverable; the")
+    print("      rate is what the method currently supports.")
+    print()
+    for ex in b2["examples"][:6]:
+        print("      %-9s correction: %r" % (ex.kind, ex.correction[:56]))
+        print("      %-9s reply    : %r" % ("", (ex.reply or "")[:56]))
     print()
 
     c = measure_c(messages)
