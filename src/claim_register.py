@@ -473,6 +473,79 @@ _COMMAND_RE = re.compile(
 #: that a figure came out of the command.
 _NUMBER_RE = re.compile(r"\d")
 
+#: THE REPORTING VOCABULARY. A span that presents itself as a
+#: measurement -- as opposed to asserting something in prose -- says so
+#: with one of these.
+#:
+#: AND WHY THIS LIST IS HERE AND NOT IN THE GATE. The gate and the
+#: ingest path have to answer the SAME question -- "does this span
+#: present itself as a measurement?" -- and two copies of the answer
+#: would drift. So the rule lives with the register, which is the
+#: layer that owns the distinction.
+MEASUREMENT_MARKERS: Tuple[str, ...] = (
+    "measured", "measurement", "readout", "the output", "output:",
+    "observed", "the result", "results:", "verified", "confirmed",
+    "reproduced", "the test", "the suite", "the run", "ran", "running",
+    "per the test", "per the suite", "per the contract",
+    "as the contract test", "the contract test",
+    "test passes", "tests pass", "passed", "failing", "failed",
+    "->", "=>",
+)
+
+#: A RESULT COUNT. A report of a run states how many things passed or
+#: failed. That is what distinguishes a figure from a number that
+#: happens to be in the sentence.
+#:
+#: AND WHY "1 CHECK" IS NOT A RESULT COUNT. MEASURED 2026-10-31: a
+#: version of this rule accepted a count of "checks", "cases" or
+#: "items", and "1 check" matched -- so the ground's own text with a
+#: report marker was refused. A count of what was CHECKED is not a
+#: count of what PASSED. So the figure has to be about the OUTCOME.
+_RESULT_COUNT_RE = re.compile(
+    r"\b\d+\s+(?:tests?\s+)?(?:passed|pass|failing|failed|fail|errors?|"
+    r"warnings?|xfailed|xfail)\b"
+    r"|\b(?:passed|failed|failing|errors?|warnings?)\s*[:=]?\s*\d+\b"
+    r"|\b\d+\s*/\s*\d+\b")
+
+
+def presents_as_measurement(span: str) -> bool:
+    """Does this span present itself as a MEASUREMENT?
+
+    THE RULE. A span is a report of a run when it carries EITHER
+
+      a COMMAND and a NUMBER -- the shape of the project's own
+        evidence entries -- or a RESULT COUNT: a figure of things that
+        passed or failed.
+
+    Anything else is prose.
+
+    AND WHY THE TWO THINGS TOGETHER. A command alone says what was
+    run; a number alone says a figure appeared. The pair says a
+    measurement happened and can be repeated. So the marker is the
+    pair, not a vocabulary -- which means an adversary cannot evade it
+    by rewording, and it does not depend on any list of words.
+
+    AND WHY A RESULT COUNT, and not any digit. MEASURED: the first
+    version accepted any digit beside a marker, so "the constitutional
+    ground is write protected -- verified, 1 check" was read as a
+    measurement and the ground's own text was refused. So the figure
+    must be a COUNT of things that passed or failed, or a ratio.
+
+    AND THE HONEST LIMIT. This is a heuristic on the FORM, and it can
+    be wrong in both directions. A prose sentence that happens to say
+    "12 passed" is treated as a measurement claim, and a measurement
+    stated without either marker and without a command is treated as
+    prose. The second is the safe direction -- prose is not refused for
+    lacking a command -- and the first is caught by the counterweight
+    tests.
+    """
+    if _carries_measurement(span):
+        return True
+    if not _RESULT_COUNT_RE.search(span):
+        return False
+    low = span.lower()
+    return any(m in low for m in MEASUREMENT_MARKERS)
+
 
 def _carries_measurement(span: str) -> bool:
     """Does the span CARRY a measurement -- a command AND a number?
