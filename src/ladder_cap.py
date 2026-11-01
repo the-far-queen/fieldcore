@@ -20,6 +20,37 @@ THE CAP, as measured (see `corpus/ladder_cap.json` for the full table):
     peak width       4 bits   (the channel at population 3 carries two
                                 taps, and two taps derive four bits)
 
+AND THE CAP IS NOT IN CONFLICT WITH THE FAIL-UP BENCH, and the two
+measure DIFFERENT THINGS. MEASURED 2026-11-01:
+
+    bench_balance_final   measures the SURPLUS -- the bits of capacity
+                          left after paying for the names of P stalks.
+                          surplus(P) = capacity(P) - log2(P), and
+                          capacity FALLS with P, so the difference
+                          PEAKS. Measured, the peak is at 3 in all
+                          six conditions (two crowd models x three
+                          crowd amplitudes).
+
+    bench_failup          measures the 1-bit DISCRIMINATION pass rate
+                          -- can the receiver pick WHICH stalk spoke
+                          out of the mixture. Measured, 0% at
+                          population 2, 50% at 4, 16.7% at 8 and
+                          above.
+
+    **SO THE PEAKS AT 3 AND 4 ARE NOT A CONTRADICTION -- THEY ARE TWO
+    DIFFERENT FUNCTIONS OF P.** The surplus is a CAPACITY question
+    (how many bits are left) and the discrimination is an
+    IDENTIFICATION question (how sharp is the contrast). A larger
+    crowd can give a SHARPER contrast while giving LESS capacity,
+    because the capacity is spent naming the stalks.
+
+    **AND THE CAP IS THE RIGHT ONE TO ENFORCE**, because it is the
+    one that measures the thing the ladder is climbing: the surplus
+    IS the width the reading can carry. The discrimination peak says
+    where a 1-bit read is sharpest, which is a different question and
+    does not license the ladder to carry more width than the surplus
+    supports.
+
 THE CAP IS A MEASUREMENT, NOT A CONSTANT, and that is the whole point
 of this file. A cap written as a literal in the code -- `POP 3` typed
 into a tuple -- is a number nobody can re-run, and it outlives the

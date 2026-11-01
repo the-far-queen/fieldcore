@@ -101,7 +101,15 @@ impl Channel {
         -d
     }
 
-    fn response_complex(&self, f: f64) -> (f64, f64) {
+    /// The channel's own complex response at a frequency.
+    ///
+    /// AND IT IS PUBLIC NOW, because the join needs it. MEASURED: the
+    /// received frame at a receiver IS this response -- the carrier's
+    /// own test says so -- so anything that wants to model the
+    /// received signal has to be able to ask the channel what arrives.
+    /// Before this it was private, and a join had to invent its own
+    /// transport and got the wrong answer.
+    pub fn response_complex(&self, f: f64) -> (f64, f64) {
         let mut re = 0.0;
         let mut im = 0.0;
         for (n, (hr, hi)) in self.taps.iter().enumerate() {
