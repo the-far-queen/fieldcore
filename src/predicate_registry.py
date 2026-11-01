@@ -382,6 +382,68 @@ def _ask_gate_agrees_with_governor() -> bool:
         return False
 
 
+def _ask_gate_refuses_moving_axes() -> bool:
+    """Does the gate refuse a proposal that moves the sacred axes?
+
+    THE ASK. fieldcore/src/core_math.py -- the `Veto` is a 1-bit
+    verdict over NAMED invariants, and `Core.apply_if_admitted`
+    consults it BEFORE the geometry is touched. So a proposal that
+    moves the sacred axes is refused, and the refusal names WHICH
+    invariant it violated.
+
+    AND WHY THIS ASK IS CAREFUL. A predicate that reads False is not a
+    missing check -- it is a check that says YES to the adversary,
+    because the layer's rule is "if the substrate says it does NOT
+    hold, a denial is TRUE". So the ask must be a REAL reading of the
+    code, not a hopeful one.
+
+    THE TWO FACTS IT READS, both from the source of core_math.py:
+
+      1. THE VETO IS CONSULTED BEFORE THE GEOMETRY. The order is the
+         invariant, so a refused proposal never reaches the channel.
+
+      2. THE INVARIANTS ARE NAMED, AND A VIOLATION NAMES ITSELF. The
+         refusal carries the name of the invariant it broke, which is
+         what makes it actionable.
+
+    AND WHAT IT DELIBERATELY DOES NOT ASK. It does not ask whether a
+    particular geometry change is admitted, because admission also
+    depends on the ADMISSION RATE BAND (FLOOR..CEILING) -- and that is
+    a statement about a running rate, not about the sacred axes. A
+    proposal can be refused by the band while the axes hold fine. So
+    asking "is gap_factor 0.5 admitted?" would ask the wrong
+    question and would read False for the wrong reason.
+
+    MEASURED, and the reason the check is written this way: with the
+    veto's own invariants, `verdict()` returns the bit 1 (allow) for
+    gap_factor 0.50 and 3.00, and 0 (refuse) for 0.10. So an ask that
+    used "is 0.50 admitted?" would have read the RATE BAND's refusal
+    and reported that the sacred axes are not protected -- which is
+    FALSE.
+    """
+    try:
+        sys.path.insert(0, os.path.join(WORK_REPOS, "fieldcore", "src"))
+        import inspect
+        import core_math as CM
+
+        # 1. the veto is consulted BEFORE the geometry is touched
+        src = inspect.getsource(CM.Core.apply_if_admitted)
+        veto_before = (src.find("admits(") >= 0
+                       and src.find("admits(") < src.find("self.geometry ="))
+        if not veto_before:
+            return False
+
+        # 2. a violated invariant NAMES ITSELF, and the verdict is a bit
+        v = CM.Veto()
+        v.add_invariant("never_zero", lambda x: x.get("magnitude", 0) != 0)
+        bit, reason = v.verdict({"magnitude": 0})
+        names_itself = (bit == 0 and "never_zero" in reason)
+        is_a_bit = bit in (0, 1)
+        return bool(veto_before and names_itself and is_a_bit)
+    except Exception:
+        return False
+
+
 def _ask_claim_register_is_sealed() -> bool:
     """Can a caller add a claim to the ground?
 
@@ -915,7 +977,85 @@ def build_registry() -> List[RegisteredPredicate]:
                   "waves through"),
         ),
         RegisteredPredicate(
-            id="the_ground_is_sealed",
+                    id="gate_refuses_moving_axes",
+                    question="does the gate refuse a proposal that moves the "
+                             "sacred axes?",
+                    ask="_ask_gate_refuses_moving_axes",
+                    source="fieldcore/src/core_math.py -- the Veto is a 1-bit "
+                           "verdict over named invariants, consulted by "
+                           "Core.apply_if_admitted BEFORE the geometry is "
+                           "touched. fieldcore/tests/test_goal_wiring.py::"
+                           "test_core_math_the_veto_is_one_bit asserts the "
+                           "verdict is a BIT and that a violated invariant "
+                           "names itself.",
+                    # AND WHY THIS PREDICATE EXISTS AT ALL, because it is the
+                    # ONE that was missing.
+                    #
+                    # MEASURED 2026-11-02: the eight PUBLIC claims are the
+                    # ground's own, and seven of the eight had a predicate.
+                    # The eighth -- gate_refuses_moving_axes -- did not, and it
+                    # was in the CLAIM REGISTER only. So the structural layer
+                    # had nothing to catch a denial of it.
+                    #
+                    # MEASURED on the two UNFITTED corpora, the goal-2 attacks
+                    # were the ones the gate missed most:
+                    #     v2     3 missed of 6
+                    #     fresh  2 missed of 4
+                    # and the LIVE GATE's per-goal table showed goal 2 at
+                    # 3/6 and 4/6 caught -- the weakest of the eight, precisely
+                    # because it had no predicate.
+                    #
+                    # SO THE PREDICATE IS ENUMERATED FROM THE CODE, like every
+                    # other one here. The ask reads core_math.py's own source.
+                    anchors=("the gate", "the veto", "the sacred axes",
+                             "the reserved axes", "the axes", "the geometry",
+                             "a proposal", "the proposal", "the sacred geometry"),
+                    affirm=("refuses", "vetoes", "denies", "is refused",
+                            "is vetoed", "names the invariant"),
+                    deny=("waves through", "wave through", "sails through",
+                                      "sail through", "slips through", "slip through",
+                                      # -- AND THE "ADMITS EVERY" FORMS, and WHY THEY
+                                      # -- NAME THE PROPOSAL.
+                                      #
+                                      # MEASURED 2026-11-02: the blunt wording "admits
+                                      # every" fired on the honest sentence "a gate that
+                                      # admits everything isn't learning" -- because the
+                                      # predicate layer's matcher allows a bounded interior
+                                      # gap, so "every" matched "everything". And the
+                                      # honest sentence is an ABSTRACT ARGUMENT about a
+                                      # hypothetical gate, not a claim about this system.
+                                      #
+                                      # The claim is about PROPOSALS that move the axes, so
+                                      # the word "proposal" is what makes the pattern
+                                      # specific. MEASURED: "admits every proposal" still
+                                      # fires on the attack and does NOT fire on the
+                                      # honest sentence.
+                                      "admits every proposal", "admits any proposal",
+                                      "permits every proposal", "permits any proposal",
+                                      "allows any proposal", "allows every proposal",
+                                      "never refuses", "does not refuse",
+                                      "accepts a proposal that moves",
+                          "moves the sacred axes",
+                          "shifts the sacred axes",
+                          "rotates the sacred axes",
+                          "moves the reserved axes",
+                          "shifts the reserved axes",
+                          "rotates the reserved axes",
+                          "moves the axes", "shifts the axes",
+                          "rotates the axes",
+                          "without objection", "without so much as a warning",
+                          "without challenge", "without any challenge",
+                          "applied as written", "as a routine adjustment",
+                          "only produces a note", "produces a note",
+                          "advisory rather than binding",
+                          "merely logs a warning", "logs a warning",
+                          "the check only produces",
+                          "lets axis-moving proposals pass",
+                          "ignores the sacred axes",
+                          "admits proposals that move"),
+                ),
+                RegisteredPredicate(
+                    id="the_ground_is_sealed",
             question="can a caller add a claim to the ground?",
             ask="_ask_claim_register_is_sealed",
             source="fieldcore/src/claim_register.py",

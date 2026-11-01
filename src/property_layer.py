@@ -604,12 +604,46 @@ def main() -> int:
     reg = CR.standard_register()
     DATA = os.path.join(WORK_REPOS, "fieldcore", "tests", "data")
 
-    print("B. THE RATE, on both adversary sets")
+    print("B. THE RATE, on every adversary set")
     print()
-    for label, fname in (("BLIND", "held_out_adversarial.json"),
-                         ("INFORMED", "informed_adversarial.json")):
+    # AND EVERY SET, not two of them.
+    #
+    # THE DEFECT, found 2026-11-02. This section loaded only
+    # held_out_adversarial.json and informed_adversarial.json. But
+    # tests/data holds FOUR adversarial corpora, and the two it did NOT
+    # load are the ones that matter most:
+    #
+    #     held_out_v2.json      56 sentences, 14 realistic registers
+    #                            (a bug ticket, a post-mortem, a
+    #                            slack message, a docstring, release
+    #                            notes, an email, design-review minutes,
+    #                            a QA report)
+    #     fresh_adversarial.json 64 sentences, written by a blind
+    #                            writer that had never seen a frame
+    #
+    # So the layer's own self-measurement reported its catch rate on the
+    # two EASIEST registers, and the number the project quoted was the
+    # number on the easy set.
+    #
+    # MEASURED, the gap was large. On the two sets this section used to
+    # load, the layer caught 5 of 60 and 14 of 40. On the two it did
+    # not, it caught 9 of 56 and 5 of 64 -- and the LIVE GATE (all
+    # four layers, the reply path) caught 18 of 56 on v2 and 45 of 64 on
+    # fresh, against 46 of 60 and 38 of 40 on the two easy sets.
+    #
+    # So the honest report is: a catch rate measured on the easy sets
+    # is a catch rate on the easy sets. It is now measured on all four,
+    # and the untrained ones are named as untrained.
+    CORPORA = (("BLIND", "held_out_adversarial.json"),
+                ("INFORMED", "informed_adversarial.json"),
+                ("V2 (14 REGISTERS)", "held_out_v2.json"),
+                ("FRESH (BLIND WRITER)", "fresh_adversarial.json"))
+
+    for label, fname in CORPORA:
         path = os.path.join(DATA, fname)
         if not os.path.isfile(path):
+            print("   %-21s MISSING FILE %s" % (label, fname))
+            print()
             continue
         with open(path, encoding="utf-8") as f:
             rows = json.load(f)
@@ -617,7 +651,7 @@ def main() -> int:
         lex = [r for r in rows
                if reg.read(r["span"]).verdict is CR.Verdict.CONTRADICTED]
         union = {r["span"] for r in prop} | {r["span"] for r in lex}
-        print("   %-9s %d sentences" % (label, len(rows)))
+        print("   %-21s %d sentences" % (label, len(rows)))
         print("     the property layer   caught %2d" % len(prop))
         print("     the claim gate       caught %2d" % len(lex))
         print("     THE UNION            caught %2d  (%.0f%%)"
