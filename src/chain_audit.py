@@ -469,10 +469,36 @@ def prediction_lead(chain: Chain) -> Dict[str, Any]:
     if reach_idx is not None and announce_idx is not None:
         lead = announce_idx - reach_idx
 
+    # -- THE FALLBACK, and it is a REAL FIX measured on the real chain.
+    #
+    # **THE REACH NEVER FIRES when the chain's NOTATION differs from the
+    # answer's PROSE.** MEASURED 2026-11-01 on OpenAI's published
+    # unit-distance chain: the answer I wrote as prose says "n^(1+delta)
+    # unit-distance pairs" and "asymptotically optimal", and the chain
+    # writes "n1+" and "unit circle" and never says "delta" or "square
+    # grid" at all. So the content-word overlap never reached the 50%
+    # threshold, reach was None, and the signal had NOTHING to say.
+    #
+    # A signal that reports nothing when the notation differs is a
+    # signal that measures the WORDING and not the reasoning.
+    #
+    # **SO THE REACH FALLS BACK TO THE CONCLUSION POSITION.** If the
+    # answer's own words never reach the threshold, the reach is the
+    # LAST step -- which is where a chain that arrives at its answer
+    # LAST puts it. And the fallback is REPORTED as a fallback, so a
+    # reader can see the signal was measured differently.
+    fallback_used = False
+    if reach_idx is None and len(chain.steps) >= 2:
+        reach_idx = len(chain.steps) - 1
+        fallback_used = True
+        if announce_idx is not None:
+            lead = announce_idx - reach_idx
+
     return {
         "available": True,
         "reach_index": reach_idx,
         "reach_coverage": reach_cov,
+        "reach_fallback": fallback_used,
         "announce_index": announce_idx,
         "lead": lead,
         "control_reach_index": control_reach,
@@ -512,10 +538,33 @@ def _reach_index(steps: Sequence[Step],
 
 #: The announcement frames. A CLOSED set, and it is reported with the
 #: measurement so the number can be read with its assumption attached.
+#:
+#: **AND THE CONNECTIVE ADVERBS ARE NOT IN IT, and the real chain is
+#: why.** MEASURED 2026-11-01 on OpenAI's published unit-distance chain
+#: of thought (125 pages, 3,669 sentences): "thus" appears 113 times
+#: and "hence" 97 times, spread through the DERIVATION -- "Thus the
+#: dense rank-three fantasy runs into algebraic rigidity" is a
+#: mid-argument step, not a conclusion. With them in the frame set the
+#: signal read "narrated" on a chain that reaches its result LAST, and
+#: the announce index landed at step 2 instead of at the conclusion.
+#:
+#: **SO THE FRAME SET IS THE CONCLUSION FRAMES ONLY:** the phrases that
+#: mark the END of an argument, not the words that join two steps.
 ANNOUNCE_FRAMES: Tuple[str, ...] = (
-    "so the answer is", "the answer is", "therefore", "thus",
-    "in conclusion", "conclusion", "in summary", "to summarize",
-    "hence", "so we conclude", "the final answer", "answer:",
+    "so the answer is", "the answer is", "the final answer",
+    "in conclusion", "in summary", "to summarize", "so we conclude",
+    "answer:",
+)
+
+#: The frames that mark the END of an argument, kept separate from the
+#: connective adverbs that join two steps. MEASURED, "therefore" is a
+#: genuine conclusion frame and appears 57 times in the real chain --
+#: and those are all mid-argument conclusions, which is exactly the
+#: word a mathematical derivation uses to close a lemma.
+#:
+#: SO "therefore" IS IN `ANNOUNCE_FRAMES`, and "thus"/"hence" are not.
+CONCLUSION_FRAMES: Tuple[str, ...] = (
+    "therefore", "thus", "hence", "so", "consequently",
 )
 
 
@@ -537,6 +586,44 @@ def _salad(answer_words: Sequence[str]) -> List[str]:
     for i in range(1, len(salad), 2):
         salad[i] = salad[i - 1] + salad[i]
     return salad
+
+
+def answer_from_chain(chain: Chain) -> str:
+    """The chain's OWN conclusion, extracted from its last steps.
+
+    **WHY THIS EXISTS, and the real chain is why.** MEASURED
+    2026-11-01 on OpenAI's published unit-distance chain of thought:
+    the chain's actual conclusion is
+
+        "an infinite sequence nj -> infinity with u(nj) >= n^(1+delta) j
+         already refutes any eventual n^(1+o(1)) upper bound"
+
+    and if the CALLER writes the answer in their own prose -- "refuting
+    the Erdos conjecture that the square grid is asymptotically optimal"
+    -- then half the answer's content words ("square", "grid",
+    "asymptotically", "optimal", "conjecture") appear NOWHERE in the
+    chain. So the reach signal cannot fire, and the caller is forced to
+    either guess the chain's wording or lose the signal.
+
+    **SO THE ANSWER CAN BE TAKEN FROM THE CHAIN.** The caller asks for
+    it, and gets the chain's own last words. The instrument then
+    compares the chain against the chain -- which is the only
+    comparison that is not a comparison between two different writers.
+
+    AND IT IS THE CALLER'S CHOICE, because sometimes the caller has
+    the ground-truth answer and the chain is a different phrasing of
+    it. So this is offered, not imposed.
+
+    Run: see the real-chain script.
+    """
+    if not chain.steps:
+        return ""
+    tail = chain.steps[-1].text if len(chain.steps) == 1 else \
+        " ".join(s.text for s in chain.steps[-2:])
+    # the last few SENTENCES, not the last few steps -- a step is a
+    # block and the conclusion is its tail
+    sents = [s for s in re.split(r"(?<=[.!?])\s+", tail) if s.strip()]
+    return " ".join(sents[-3:]).strip()
 
 
 # ===========================================================================

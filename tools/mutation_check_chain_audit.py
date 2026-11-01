@@ -50,12 +50,26 @@ if _SRC not in sys.path:
 MODULE = os.path.join(_SRC, "chain_audit.py")
 TEST_FILE = os.path.join(_ROOT, "tests", "test_chain_audit.py")
 
+#: The real-chain suite. THE MUTATIONS MUST BREAK IT TOO, because the
+#: real chain is the fixture the instrument was built for, and a
+#: mutation that only the synthetic fixtures catch would leave the
+#: real-chain checks untested.
+REAL_CHAIN_TEST = os.path.join(_ROOT, "tests", "test_real_chain_erdos.py")
+
 
 def run_tests() -> Tuple[int, str]:
-    """run the check file, and return the exit code and the output."""
+    """run the check files, and return the exit code and the output.
+
+    **AND IT RUNS BOTH SUITES.** The real-chain suite is not optional:
+    the defects it caught -- the connective adverbs, the reach
+    fallback -- are defects in the SAME module the synthetic suite
+    exercises, and a mutation harness that only ran the synthetic
+    suite would report them as caught when the real chain still
+    failed.
+    """
     proc = subprocess.run(
-        [sys.executable, "-m", "pytest", TEST_FILE, "-q", "--no-header",
-         "-p", "no:cacheprovider"],
+        [sys.executable, "-m", "pytest", TEST_FILE, REAL_CHAIN_TEST,
+         "-q", "--no-header", "-p", "no:cacheprovider"],
         cwd=_ROOT, capture_output=True, text=True)
     return proc.returncode, (proc.stdout or "") + (proc.stderr or "")
 
@@ -132,8 +146,42 @@ def m_reach_threshold_high(src: str) -> str:
 
 
 def m_announce_frames_emptied(src: str) -> str:
-    """the announce frames emptied -> no announcement is ever found"""
+    """the announce frames are emptied -> no announcement is ever found"""
     return _set_constant(src, "ANNOUNCE_FRAMES", "()")
+
+
+def m_connective_frames_restored(src: str) -> str:
+    """the connective adverbs are put back into the announce frames
+
+    THIS IS THE DEFECT THE REAL CHAIN CAUGHT. MEASURED on OpenAI's
+    published unit-distance chain: "thus" appears 113 times and "hence"
+    97 times, spread through the DERIVATION. With them in the frame set
+    the signal read "narrated" on a chain that reaches its result LAST.
+    """
+    return _set_constant(
+        src, "ANNOUNCE_FRAMES",
+        '("so the answer is", "the answer is", "the final answer",\n'
+        '    "in conclusion", "in summary", "to summarize",\n'
+        '    "so we conclude", "answer:", "thus", "hence", "therefore")')
+
+
+def m_reach_fallback_removed(src: str) -> str:
+    """the reach fallback is removed -> the signal reports nothing
+
+    THE DEFECT THE REAL CHAIN CAUGHT: the chain writes "n1+" and the
+    answer says "n^(1+delta)", so the content words never overlap and
+    the reach cannot fire.
+    """
+    target = ("    fallback_used = False\n"
+              "    if reach_idx is None and len(chain.steps) >= 2:\n"
+              "        reach_idx = len(chain.steps) - 1\n"
+              "        fallback_used = True\n"
+              "        if announce_idx is not None:\n"
+              "            lead = announce_idx - reach_idx\n")
+    if target not in src:
+        raise SystemExit("MUTATION HARNESS BROKEN: the reach fallback was "
+                         "not found in %s" % MODULE)
+    return src.replace(target, "    fallback_used = False\n")
 
 
 def m_function_words_emptied(src: str) -> str:
@@ -192,6 +240,8 @@ def m_control_rigged(src: str) -> str:
 MUTATIONS: List[Tuple[str, Callable[[str], str]]] = [
     ("the reach threshold is raised to 0.99", m_reach_threshold_high),
     ("the announce frames are emptied", m_announce_frames_emptied),
+    ("the connective adverbs are put back", m_connective_frames_restored),
+    ("the reach fallback is removed", m_reach_fallback_removed),
     ("the function-word list is emptied", m_function_words_emptied),
     ("the two-signal rule is raised to three", m_min_agreement_raised),
     ("the signal-direction map is emptied", m_aligned_emptied),
