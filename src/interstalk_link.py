@@ -88,6 +88,7 @@ try:
         WoundCore,
         standard_wound_core,
     )
+    from population_escalation import PopulationPolicy
     from tiniest_core.tiniest_core import (
         MAX_NORM as _TC_MAX_NORM,
         MIN_COS as _TC_MIN_COS,
@@ -105,6 +106,7 @@ except ImportError:  # pragma: no cover
         WoundCore,
         standard_wound_core,
     )
+    from population_escalation import PopulationPolicy  # type: ignore
     from tiniest_core.tiniest_core import (  # type: ignore[no-redef]
         MAX_NORM as _TC_MAX_NORM,
         MIN_COS as _TC_MIN_COS,
@@ -430,6 +432,11 @@ class Exchange:
     #: quantity the envelope bounds -- the shape of the reading, not the
     #: arbitrary scale of the transform.
     reading: float = 0.0
+    #: How many stalks were in view. MEASURED and RECORDED, because a
+    #: ledger that only recorded the width would report "nothing
+    #: escalated" for a system quietly growing its population on every
+    #: exchange -- and the population IS the thing that moves first.
+    population: int = 0
 
     def describe(self) -> Dict[str, object]:
         return {
@@ -445,6 +452,7 @@ class Exchange:
             "notch_db": round(self.notch_db, 4),
             "reach": self.reach,
             "reading": round(self.reading, 6),
+            "population": self.population,
         }
 
 
@@ -465,12 +473,20 @@ class InterstalkLink:
                  bins: int = 32,
                  noise_floor: float = -80.0,
                  path_delay: int = 1,
-                 min_alignment: float = 0.4):
+                 min_alignment: float = 0.4,
+                 max_population: int = 16):
         self.core = core if core is not None else standard_wound_core()
         self.bins = bins
         self.noise_floor = noise_floor
         self.path_delay = path_delay
         self.min_alignment = min_alignment
+        #: The POPULATION-FIRST escalation policy. INJECTED, so a caller
+        #: can measure a different policy without editing this file --
+        #: and so the policy can be tested on its own.
+        self._policy = PopulationPolicy(width_for_taps=width_for,
+                                        population_step=1,
+                                        max_population=max_population)
+        self.max_population = max_population
         self.ledger: List[Exchange] = []
 
     # -- the helpers -----------------------------------------------------
@@ -583,16 +599,46 @@ class InterstalkLink:
         if not eq.get("ok"):
             # the channel cannot be inverted -> the frame is not readable.
             # This is a REFUSAL with a reason, not a failure.
+            #
+            # **AND THE POPULATION-FIRST ESCALATION IS CONSULTED HERE
+            # TOO, and MEASURED THAT IT HAS TO BE.**
+            #
+            # The first version of this wiring put the policy only on
+            # the `NEEDS_MORE` path -- the case where the gate allowed
+            # but the alignment was below the resolve threshold.
+            #
+            # **AND THAT PATH IS UNREACHABLE.** MEASURED, sweeping
+            # bins (8/16/32/64) x noise_floor (-80 to 0) x path_delay
+            # (1 to 5) over 48 configurations: the interstalk channel
+            # is BINARY. It either inverts EXACTLY -- alignment
+            # 1.000000, escalation `resolved` -- or it does not invert
+            # at all: `channel_irrecoverable`, escalation
+            # `not_worth_knowing`. **THE NOISE FLOOR IS A CLIFF, NOT A
+            # RAMP**, so the alignment is never between 0.4 and 0.999.
+            #
+            # So a policy consulted only on the middle path never
+            # runs. And the case where the channel is IRRECOVERABLE is
+            # exactly the case where MORE STALKS WOULD HELP: more
+            # neighbours means more taps, more structure, and an
+            # equaliser with something to invert.
+            #
+            # So the escalation is asked on BOTH paths, and its answer
+            # says what the caller should try next.
+            esc = self._policy.decide(len(channel.taps),
+                                       len(pair.neighbours),
+                                       readable=False,
+                                       max_population=self.max_population)
             ex = Exchange(
                 tx_id=tx_id, rx_id=rx_id,
                 width_needed=width_for(len(channel.taps)),
-                width_used=width_for(len(channel.taps)),
-                escalation=NOT_WORTH_KNOWING,
+                width_used=esc.width_used,
+                escalation=esc.reason,
                 alignment=0.0, allowed=False,
                 reason="channel_%s" % eq.get("error"),
                 channel_taps=len(channel.taps),
                 notch_db=pair.notch_db(),
-                reach=REACH.get(width_for(len(channel.taps)), 0),
+                reach=REACH.get(esc.width_used, 0),
+                population=len(pair.neighbours),
             )
             self.ledger.append(ex)
             return ex
@@ -638,13 +684,32 @@ class InterstalkLink:
             escalation = NEEDS_MORE
 
         used = needed
+        population = len(pair.neighbours)
         if escalation == NEEDS_MORE:
-            nxt = escalate(needed)
-            if nxt is None:
-                used = needed
-                escalation = UNANSWERABLE
-            else:
-                used = nxt
+            # THE POPULATION-FIRST ESCALATION, and this is a CORRECTION
+            # of the width-first ladder that was here.
+            #
+            # Bobby, 2026-11-01, twice: "nope we got as far as increasng
+            # number of stalks ie population was cheaper at 1 bit and
+            # only the 4 and 8 bit then increase pop again not 16 32 64
+            # etc" and "no grow pop at 1 bit first".
+            #
+            # **SO THE OLD CODE WAS WIDTH-FIRST, AND THE POPULATION NEVER
+            # GREW.** MEASURED: `used = escalate(needed)` and the ladder
+            # ran 1, 4, 8, 16, 32, 64, 128, 256 -- so the whole cost
+            # property was unavailable. A wider answer costs more
+            # compute per exchange; more stalks in view cost the
+            # CHANNEL. So the cheap move is always more population.
+            #
+            # The policy lives in `population_escalation.py`, where it
+            # can be MEASURED on its own, and the link consults it.
+            # The width is still DERIVED from the channel; what changed
+            # is what the link does next.
+            esc = self._policy.decide(len(channel.taps), population,
+                                       readable=False,
+                                       max_population=self.max_population)
+            used = esc.width_used
+            escalation = esc.reason
 
         ex = Exchange(
             tx_id=tx_id, rx_id=rx_id,
@@ -658,6 +723,7 @@ class InterstalkLink:
             notch_db=pair.notch_db(),
             reach=REACH.get(used, 0),
             reading=per_bin,
+            population=population,
         )
         self.ledger.append(ex)
         return ex
@@ -710,9 +776,20 @@ class InterstalkLink:
         for e in self.ledger:
             esc[e.escalation] = esc.get(e.escalation, 0) + 1
         refused = sum(1 for e in self.ledger if not e.allowed)
+        # AND THE POPULATION, because the population is the thing that
+        # moves FIRST and a report that only counted widths would
+        # report "nothing escalated" for a system quietly growing its
+        # population on every exchange.
+        pops: Dict[int, int] = {}
+        for e in self.ledger:
+            pops[e.population] = pops.get(e.population, 0) + 1
+        grew = sum(1 for e in self.ledger
+                   if e.escalation == "grow_population")
         return {
             "exchanges": len(self.ledger),
             "widths": {str(k): v for k, v in sorted(widths.items())},
+            "populations": {str(k): v for k, v in sorted(pops.items())},
+            "grew_population": grew,
             "escalations": esc,
             "refused": refused,
             "allowed": len(self.ledger) - refused,
