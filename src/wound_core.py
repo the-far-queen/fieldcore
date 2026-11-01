@@ -254,6 +254,30 @@ class CoaxWinding:
 
         # the core is on the axis, at a genuine distance from both
         # windings, so the separation law applies here.
+        #
+        # **AND THE CORE COUPLING IS NOT BOUNDED BY 1, and the
+        # docstring above used to imply it was.** MEASURED 2026-11-01:
+        # the concentric coupling (m_out_in) IS bounded -- 0.27 to 0.38
+        # for the standard core, because it is the radius ratio. But
+        # the CORE couplings use a SEPARATION law and are NOT:
+        # MEASURED, m_in_core is 2.1 to 6.7 depending on the core
+        # girth, and m_out_core 0.67 to 1.30.
+        #
+        # **AND THE OVER-COUPLING CEILING IS NOT THE RIGHT TEST FOR
+        # IT.** `interstalk.Strand.max_coupling_k` is 1/Q, and that is
+        # the ceiling for a pair of SEPARATED resonators coupling to
+        # each other. The core is not that -- it is a shared axis
+        # conductor, so the question is whether the loop modes stay
+        # DISTINGUISHABLE, and that is what the degeneracy check
+        # measures.
+        #
+        # MEASURED: as the core thickens the coupling rises AND the
+        # modes SEPARATE (eigenvalue separation 9.14 at core 0.001 to
+        # 13.39 at core 0.020) -- the OPPOSITE of a short, which
+        # would pull them together. And the standard core's modes are
+        # distinguishable: MEASURED relative separations 2.14 to 6.33.
+        #
+        # **SO THE CORE IS A SHARED FLUX PATH, NOT A SHORTED TURN.**
         m_in_core = overlap_in_core / d_in_core
         m_out_core = overlap_out_core / d_out_core
 
