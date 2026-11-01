@@ -665,7 +665,46 @@ def _deny_fires(pattern: str, low: str, predicate: "Predicate") -> bool:
 #: build_predicates() for EVERY SPAN, and the registry's asks spawn a
 #: governor process -- so 40 sentences x 13 asks x a process spawn
 #: each was the timeout. THE FIX IS TO BUILD IT ONCE.
+#:
+#: AND THE CACHE IS NOW TIED TO THE RULES. The first version cached the
+#: predicates for the life of the PROCESS and never checked whether
+#: the rules on disk had changed. So a long-lived gateway kept
+#: enforcing rules that had been deleted -- MEASURED on 2026-11-01:
+#: a plugin reload rebuilt the gate object and the predicates stayed
+#: stale, because this module-level cache survived the reload. The
+#: cache is now keyed on the rules' fingerprint, so a changed rule
+#: file produces a new cache rather than the old one.
 _REGISTRY_CACHE: Optional[List[Predicate]] = None
+_REGISTRY_FINGERPRINT: str = ""
+
+
+def _rules_fingerprint() -> str:
+    """The fingerprint of the rules ON DISK right now.
+
+    AND WHY IT IS THE LIVE READING AND NOT THE IMPORT-TIME ONE. The
+    import-time fingerprint is a fixed record of what the rules were
+    when the module was imported, and it never changes. As a cache
+    KEY it would be useless: the key would stay the same while the
+    rules moved, and the cache would keep serving the old predicates.
+    The key has to be the CURRENT reading of the disk, so that a
+    changed rule file produces a different key and a rebuild.
+
+    AND WHY THE LIVE READING IS NOT TOO EXPENSIVE HERE. It reads 356
+    files' stats, which costs 6.8 ms. And this function is called
+    ONCE per gate build -- the gate caches the predicate list on
+    itself -- so the cost is paid once per build, not once per span.
+
+    AND WHY IT FALLS BACK TO AN EMPTY STRING. If the staleness module
+    cannot be imported, there is no key, and an empty key is a
+    constant -- so the cache behaves exactly as it did before this
+    change. A missing dependency degrades to the old behaviour rather
+    than to a rebuild on every call.
+    """
+    try:
+        import gate_staleness as GS
+        return GS.fingerprint(GS.snapshot())
+    except Exception:
+        return ""
 
 
 def cached_predicates() -> List[Predicate]:
@@ -674,11 +713,34 @@ def cached_predicates() -> List[Predicate]:
     AND THE COST, stated so nobody wonders: the asks that spawn a
     process are the EXPENSIVE ones, so building the registry is the
     expensive part and checking a span against it is cheap.
+
+    AND THE REBUILD. The cache is keyed on the fingerprint of the rule
+    files. So the expensive build happens once -- and again only when
+    a rule file has actually changed. A stale cache is the failure
+    this keying ends: a gate that enforces a rule that no longer
+    exists, and refuses honest work citing it.
     """
-    global _REGISTRY_CACHE
-    if _REGISTRY_CACHE is None:
+    global _REGISTRY_CACHE, _REGISTRY_FINGERPRINT
+    fingerprint = _rules_fingerprint()
+    if _REGISTRY_CACHE is None or fingerprint != _REGISTRY_FINGERPRINT:
         _REGISTRY_CACHE = build_predicates()
+        _REGISTRY_FINGERPRINT = fingerprint
     return _REGISTRY_CACHE
+
+
+def clear_predicate_cache() -> None:
+    """Drop the cached predicates, so the next call rebuilds them.
+
+    AND WHO CALLS THIS. The plugin, when it detects that the gate's
+    rules are behind the disk: it evicts the fieldcore modules from
+    sys.modules and then calls this, because the evicted module's
+    cache would not be the evicted module's cache any more -- and the
+    OLD module object can still be referenced by the gate that is
+    being replaced.
+    """
+    global _REGISTRY_CACHE, _REGISTRY_FINGERPRINT
+    _REGISTRY_CACHE = None
+    _REGISTRY_FINGERPRINT = ""
 
 
 def check_predicates(span: str,

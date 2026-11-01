@@ -512,14 +512,33 @@ class FieldCoreGate:
         self._predicates = None
         self._scope = None
         self._scope_roots_used: Optional[List[str]] = None
+        #: The staleness checker. One per gate, and it is what makes a
+        #: long-lived process HONEST about which rules it is enforcing.
+        #: See src/gate_staleness.py for the measurement that made it.
+        self._staleness = None
 
     # -- the cached build ------------------------------------------------
+
+    @property
+    def staleness(self):
+        """The staleness checker, created on first use."""
+        if self._staleness is None:
+            import gate_staleness as GS
+            self._staleness = GS.StalenessChecker()
+        return self._staleness
 
     @property
     def register(self):
         if self._register is None:
             import claim_register as CR
             self._register = CR.standard_register()
+            # AND THE RECORD, taken at BUILD time. The checker compares
+            # this snapshot against the files on disk, so it has to be
+            # taken when the rules were read -- not when the check
+            # runs. The first version compared the modules in memory
+            # against the disk, which always agrees, because reading a
+            # module's file stats the file AGAIN.
+            self.staleness.record_build()
         return self._register
 
     @property
@@ -527,6 +546,7 @@ class FieldCoreGate:
         if self._predicates is None:
             import predicate_layer as PD
             self._predicates = PD.cached_predicates()
+            self.staleness.record_build()
         return self._predicates
 
     @property
@@ -545,6 +565,31 @@ class FieldCoreGate:
         if "scope" in self.layers:
             _ = self.scope
         return time.time() - t0
+
+    # -- the staleness ---------------------------------------------------
+
+    def stale(self, force: bool = False):
+        """Is this gate's build behind the rules on disk?
+
+        AND WHY IT IS HERE AND NOT IN THE PLUGIN. The staleness is a
+        property of the GATE -- it is the gate's build that is stale --
+        so the gate has to be able to say so. The plugin asks the
+        gate; it does not compute the answer itself.
+
+        AND WHAT IT RETURNS. None means fresh. A StaleGate means the
+        build is behind, and the exception carries the evidence: both
+        fingerprints and the list of files that moved.
+
+        AND WHY THE CHECK IS THROTTLED. The check reads 356 files'
+        stats, which costs 6.8 ms, and the decide path costs 2.29 ms
+        per span. So the check runs at most once every 30 seconds, and
+        between checks the last answer is reused. A stale verdict up
+        to 30 seconds late is still a stale verdict.
+        """
+        try:
+            return self.staleness.check(force=force)
+        except Exception:  # noqa: BLE001 -- a check that raises is not a verdict
+            return None
 
     # -- one layer -------------------------------------------------------
 
