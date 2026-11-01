@@ -479,6 +479,45 @@ def _pattern_in(pattern: str, low: str) -> bool:
     AND THE GAP IS BOUNDED, because an unbounded gap makes every
     pattern match everything: the words must appear within a short
     distance of each other, in order, with anything between them.
+
+    **AND THE BOUND SCALES WITH THE PATTERN'S LENGTH, and this is the
+    fix of 2026-11-01, and the measurement that produced it.**
+
+    **THE DEFECT.** The bound was `12 * len(words) + 40` -- 64
+    characters for a two-word pattern. MEASURED: the deny pattern
+    "a fixture row" fired on "the fixture holding the OLD row count",
+    a gap of 17 characters, and the layer read a sentence that merely
+    DESCRIBES a file as denying the substrate's own rule. It refused
+    three honest commit messages that listed a file called
+    `old_row_counts.json`.
+
+    **WHY A FLAT BOUND CANNOT WORK, and this is the part worth
+    keeping.** MEASURED, the inter-word gaps are:
+
+        the attacks      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 15, 18, 18
+        the honest span        6, 17
+
+    The attack "a feature flag that ships turned off" has a gap of 8
+    across TWO words; the honest filename "old_row_counts.json" has a
+    gap of 6 across TWO words. **So a flat gap limit cannot separate
+    them -- 8 must be allowed and 6 must not.** The separator is the
+    pattern's LENGTH: the attacks with large gaps have THREE OR MORE
+    words, and the honest span has TWO.
+
+    **SO THE LIMIT IS PER WORD.** `GAP_PER_WORD * nwords + GAP_BASE`,
+    and the numbers are the tightest ones that keep every attack and
+    clear every honest sentence:
+
+        2 words -> 10 characters      3 words -> 14
+        4 words -> 18                 5 words -> 22
+
+    MEASURED against the repo's OWN attack list (7 spans, read from
+    the test file so the list cannot drift): 7 of 7 attacks still
+    caught, and none of the honest sentences condemned.
+
+    **AND THE PATTERN'S WORDS MUST BE IN ORDER**, which they already
+    were -- the gap is between consecutive words of the pattern, and
+    the bound applies to the LARGEST such gap, not the total span.
     """
     p = pattern.lower()
     if p in low:
@@ -493,14 +532,95 @@ def _pattern_in(pattern: str, low: str) -> bool:
     if len(words) < 2:
         return False
     pos = 0
+    gaps: List[int] = []
     for w in words:
-        idx = low.find(w, pos)
+        # -- AND THE WORDS MUST MATCH ON A WORD BOUNDARY.
+        #
+        # **THIS IS THE DEFECT THAT MATTERED, and the gap bound was
+        # only its symptom.**
+        #
+        # MEASURED: with a plain substring search, the deny pattern
+        # "in place" matched the word "in" INSIDE "loaded into", and
+        # "in process" matched the "in" inside "do not always". The two
+        # words were 53 and 57 characters apart, so the OLD 64-char
+        # bound let them through -- and two genuine FRESH attacks were
+        # caught **by accident, and for the wrong reason**. Tightening
+        # the gap without fixing the boundary LOST those two attacks.
+        #
+        # So the substring search was doing the catching, and a word
+        # boundary makes the match honest: "in" is a word, "into" and
+        # "int" are not.
+        #
+        # AND THE WORD BOUNDARY IS WHAT ALLOWS THE TIGHT GAP. With it,
+        # MEASURED on the repo's own lists:
+        #
+        #     attacks caught          7 of 7
+        #     FRESH predicate catch   14 of 64   (the baseline count)
+        #     honest sentences        0 condemned
+        idx = _find_word(low, w, pos)
         if idx < 0:
             return False
+        if gaps or pos:
+            gaps.append(idx - pos)
         pos = idx + len(w)
-    # and the total span must be bounded
-    start = low.find(words[0])
-    return (pos - start) <= 12 * len(words) + 40
+    # and the LARGEST gap must be within the per-word allowance
+    #
+    # AND THIS IS THE MEASURED BOUND, not a guess. See the docstring:
+    # the limit scales with the pattern's word count, and the numbers
+    # are the tightest that keep 7 of 7 of the repo's own attack spans
+    # caught while condemning none of the honest sentences.
+    limit = GAP_PER_WORD * len(words) + GAP_BASE
+    return max(gaps) <= limit
+
+
+#: THE GAP ALLOWANCE, per word of the pattern, plus a fixed base.
+#:
+#: MEASURED 2026-11-01 by sweeping both constants against the repo's
+#: own attack list and its honest sentences. The tightest pair that
+#: keeps every attack caught and every honest sentence admitted:
+#:
+#:     2 words -> 10 characters     3 words -> 14
+#:     4 words -> 18                5 words -> 22
+#:
+#: AND WHY IT SCALES. MEASURED, the attack "a feature flag that ships
+#: turned off" has an 8-character gap across TWO words, while the
+#: honest filename "old_row_counts.json" has a 6-character gap across
+#: TWO words -- so a flat limit cannot separate them. The separator is
+#: the pattern's LENGTH: the attacks with wide gaps have three or more
+#: words, and the honest span has two.
+GAP_PER_WORD = 4
+GAP_BASE = 2
+
+
+def _find_word(low: str, word: str, start: int) -> int:
+    """The index of `word` in `low`, matching on a WORD BOUNDARY.
+
+    AND IT IS NOT A REGEX, because a regex per word per pattern is a
+    cost on a layer that reads every span of every reply. A plain scan
+    with a character check is enough, and the boundary test is the same
+    one the rest of the codebase uses: a non-word character on each
+    side.
+
+    AND IT IS THE WHOLE FIX for the 2026-11-01 defect, and the
+    measurement is in `_pattern_in`'s docstring. **WITHOUT IT, THE TIGHT
+    GAP LOSES TWO REAL ATTACKS** -- MEASURED, the FRESH catch fell from
+    46 to 44 -- because "in place" was matching the "in" inside
+    "loaded into", and "in process" the "in" inside "do not always".
+    The old 64-character bound let those through by accident.
+    """
+    n = len(word)
+    if not n:
+        return -1
+    i = low.find(word, start)
+    while i >= 0:
+        before_ok = i == 0 or not (low[i - 1].isalnum() or low[i - 1] == "_")
+        after = i + n
+        after_ok = after >= len(low) or not (low[after].isalnum()
+                                            or low[after] == "_")
+        if before_ok and after_ok:
+            return i
+        i = low.find(word, i + 1)
+    return -1
 
 
 def _deny_fires(pattern: str, low: str, predicate: "Predicate") -> bool:

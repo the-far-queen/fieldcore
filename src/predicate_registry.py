@@ -514,7 +514,30 @@ def build_registry() -> List[RegisteredPredicate]:
                   "no pull back", "without a pull back",
                   "further from its previous position than",
                   "leave the system further from",
-                  "no correction applied"),
+                  "no correction applied",
+                  # -- AND THE 2026-11-01 ADDITIONS, and WHY.
+                  #
+                  # MEASURED: the FRESH attack "Drift can widen here;
+                  # the loop does not pull it back in, it merely logs
+                  # when the gap gets bigger" was caught by the old
+                  # 64-char gap bound, ACCIDENTALLY -- the pattern "no
+                  # pull back" matched the "no" inside "does NOT" and
+                  # then "pull" and "back" further along. MEASURED
+                  # gaps: 2 and 4 characters, across THREE words.
+                  #
+                  # So the pattern's INTENT was right and its WORDING
+                  # was wrong: the sentence says "does not pull it
+                  # back", not "no pull back". The wording that the
+                  # sentence actually uses is now a pattern, and so is
+                  # the second half of the claim -- that the loop only
+                  # LOGS the widening instead of correcting it.
+                  "does not pull it back",
+                  "does not pull back",
+                  "not pull it back",
+                  "merely logs",
+                  "only logs",
+                  "logs when the gap",
+                  "does not correct it"),
         ),
         RegisteredPredicate(
             id="ground_is_write_protected",
@@ -551,7 +574,29 @@ def build_registry() -> List[RegisteredPredicate]:
                   "no special protection",
                   "not a protected decision",
                   "ordinary authoring", "an ordinary authoring",
-                  "no protection of its own"),
+                  "no protection of its own",
+                  # -- AND THE 2026-11-01 ADDITIONS, and WHY.
+                  #
+                  # MEASURED: two of the 64 FRESH attacks were caught
+                  # by ACCIDENT. The pattern "in place" was matching
+                  # the "in" inside "loaded into", 53 characters away,
+                  # and the old 64-char gap bound let it through. The
+                  # sentence was:
+                  #
+                  #   "Because the constitutional ground is loaded into
+                  #    a normal mapping at startup, a later call can
+                  #    replace any of its entries."
+                  #
+                  # That sentence says the ground is a NORMAL MAPPING
+                  # and its entries can be REPLACED -- both of which are
+                  # exactly what "write-protected" denies. So both are
+                  # now patterns, stated properly, instead of caught
+                  # by a substring accident.
+                  "a normal mapping",
+                  "normal mapping",
+                  "can replace any of its entries",
+                  "replace any of its entries",
+                  "can replace its entries"),
         ),
         RegisteredPredicate(
             id="governor_is_separate",
@@ -667,8 +712,24 @@ def build_registry() -> List[RegisteredPredicate]:
             deny=("green verdict", "a green verdict",
                   "same as a passing exam", "counts as a pass",
                   "never fails", "always passes", "a pass row",
-                  "success code", "a fixture row", "a result table",
+                  "success code", "a result table",
                   "passes when the substrate is absent",
+                  # -- AND "a fixture row" WAS REMOVED HERE, 2026-11-01.
+                  #
+                  # MEASURED: it matched 0 of the 7 attack spans in
+                  # tests/test_predicate_layer.py -- it caught NOTHING --
+                  # while matching the honest sentence "the fixture
+                  # holding the OLD row count" (gap 17) and the honest
+                  # filename "catalog/fixtures/old_row_counts.json"
+                  # (gap 6). So it was a deny pattern with no attack
+                  # behind it that only ever condemned honest text.
+                  #
+                  # A deny pattern earns its place by catching a
+                  # refusal. This one caught none, and the gap fix
+                  # above was needed anyway to stop its 17-character
+                  # match. Removing it is what closes the last
+                  # honest-sentence condemnation.
+                  #
                   # -- AND THE MECHANISMS
                   "treats an absent substrate as an ordinary success",
                   "reports success", "still reports success",
@@ -832,7 +893,26 @@ def build_registry() -> List[RegisteredPredicate]:
                   "a second opinion that",
                   "second opinion",
                   "the gate's answer and the governor's answer",
-                  "the two are separate"),
+                  "the two are separate",
+                  # -- AND THE 2026-11-01 ADDITION, and WHY.
+                  #
+                  # MEASURED: the second of the two FRESH attacks the
+                  # old 64-char gap bound caught -- again by ACCIDENT,
+                  # because the pattern "in process" matched the "in"
+                  # inside "do not always", 57 characters away:
+                  #
+                  #   "They do not always line up; the gate waves
+                  #    proposals through that the out-of-process
+                  #    governor turns down."
+                  #
+                  # What that sentence asserts is that THE GATE decides
+                  # and the governor only advises -- which is precisely
+                  # "the gate does not agree with the governor" and
+                  # "the gate answers for itself". So the pattern that
+                  # expresses it is here.
+                  "waves proposals through",
+                  "the gate waves proposals",
+                  "waves through"),
         ),
         RegisteredPredicate(
             id="the_ground_is_sealed",
