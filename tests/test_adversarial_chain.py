@@ -236,3 +236,48 @@ def test_the_ground_decides_not_the_last_speaker():
     chain = ac.AdversarialChain.from_obj(ac.GENUINE_CHAIN, ground=strict_ground)
     report = audit_adversarial_chain(chain)
     assert report.verdict is Verdict.GROUNDED
+
+
+# --------------------------------------------------------------------------
+# THE JUDGE'S OWN RELIABILITY
+# --------------------------------------------------------------------------
+
+def test_the_verdict_carries_the_judges_reliability(genuine):
+    """THE JUDGE'S RELIABILITY TRAVELS WITH THE VERDICT.
+
+    MEASURED (arXiv 2510.11822): a judge on this class of task reaches
+    TPR 96% with TNR BELOW 25%. So it catches almost everything it is
+    shown and admits almost everything it is not -- and the published
+    warning is the reason the field exists: "misleading critiques can
+    hurt performance, even compared with using no critique."
+
+    **SO A VERDICT WITHOUT THE JUDGE'S RELIABILITY IS HALF A
+    VERDICT**, and the reader must not have to open a second document
+    to find that out.
+    """
+    report = audit_adversarial_chain(genuine)
+    rel = report.judge_reliability
+    assert rel, "the verdict carries no judge reliability"
+    assert rel["tpr"] == 0.96, rel
+    assert rel["tnr"] == 0.25, rel
+    assert rel["source"], "the reliability must say where it came from"
+    assert "half a verdict" in rel["caveat"], rel["caveat"]
+    assert rel["consistency_is_not_correctness"], (
+        "the verdict must say that consistency is not correctness")
+
+
+def test_every_verdict_carries_the_reliability(theatre):
+    """AND EVERY VERDICT, not just the resolved one -- because a
+    REFUTED verdict is exactly the one a reader needs the caveat for."""
+    report = audit_adversarial_chain(theatre)
+    assert report.judge_reliability.get("tpr") == 0.96
+    assert "judge_reliability" in report.to_dict()
+
+
+def test_consistency_is_not_correctness_is_stated():
+    """MEASURED: the most consistent frontier model is wrong 48% of
+    the time when agreement is at or above 0.8 (arXiv 2607.08065). So
+    a critic that agrees with itself is not thereby right."""
+    rel = ac.JUDGE_RELIABILITY
+    assert "48%" in rel["consistency_is_not_correctness"], (
+        rel["consistency_is_not_correctness"])

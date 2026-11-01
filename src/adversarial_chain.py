@@ -121,6 +121,38 @@ class Verdict(str, Enum):
     """The chain oscillated and converged on nothing."""
 
 
+#: THE JUDGE'S OWN MEASURED RELIABILITY, and it travels with the verdict.
+#:
+#: MEASURED (arXiv 2510.11822) on this class of task: TPR **96%**,
+#: TNR **below 25%**. So the judge catches almost everything it is
+#: shown, and admits almost everything it is not -- and a chain verdict
+#: that does not say so is half a verdict.
+#:
+#: AND THE PUBLISHED WARNING is why the field exists at all:
+#: "misleading critiques can hurt performance, even compared with using
+#: no critique."
+#:
+#: **AND THE OTHER MEASUREMENT, which is the sharpest version:** the
+#: most consistent frontier model is wrong **48%** of the time when
+#: agreement across runs is at or above 0.8 (arXiv 2607.08065). So
+#: **CONSISTENCY IS NOT CORRECTNESS**, and a critic that agrees with
+#: itself is not thereby right.
+JUDGE_RELIABILITY: Dict[str, Any] = {
+    "tpr": 0.96,
+    "tnr": 0.25,
+    "source": "arXiv 2510.11822",
+    "caveat": ("the judge catches almost everything it is shown and "
+               "admits almost everything it is not (TPR 96%, TNR below "
+               "25%). A verdict that does not say so is half a verdict. "
+               "MEASURED: misleading critiques can hurt performance, "
+               "even compared with using no critique."),
+    "consistency_is_not_correctness": (
+        "the most consistent frontier model is wrong 48% of the time "
+        "when agreement is at or above 0.8 (arXiv 2607.08065), so a "
+        "critic that agrees with itself is not thereby right"),
+}
+
+
 # ===========================================================================
 # THE MARKERS
 # ===========================================================================
@@ -641,6 +673,18 @@ class CritiqueVerdict:
     GROUNDED no matter which agent spoke last. If the ground refuses it,
     the chain is REFUTED no matter which agent spoke last. A critic
     whose own refutation is unsupported does NOT win.
+
+    **AND THE JUDGE'S OWN RELIABILITY TRAVELS WITH THE VERDICT.**
+    MEASURED (arXiv 2510.11822): a judge on this kind of task reaches
+    TPR 96% with TNR BELOW 25% -- so it catches almost everything it
+    is shown and admits almost everything it is not. And the published
+    warning is the reason this field exists: **"misleading critiques
+    can hurt performance, even compared with using no critique."**
+
+    **SO A VERDICT WITHOUT THE JUDGE'S RELIABILITY IS HALF A VERDICT.**
+    A reader who sees REFUTED must know whether the judge is good at
+    refusing. So the caveat travels with the verdict, not in a
+    separate document nobody opens.
     """
     verdict: Verdict
     reason: str = ""
@@ -648,12 +692,15 @@ class CritiqueVerdict:
     #: The claims the ground supports, and the ones it does not.
     supported_claims: List[int] = field(default_factory=list)
     unsupported_claims: List[int] = field(default_factory=list)
+    #: The judge's own measured reliability, where it is known.
+    judge_reliability: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {"verdict": self.verdict.value, "reason": self.reason,
                 "signals": self.signals,
                 "supported_claims": self.supported_claims,
-                "unsupported_claims": self.unsupported_claims}
+                "unsupported_claims": self.unsupported_claims,
+                "judge_reliability": self.judge_reliability}
 
 
 def audit_adversarial_chain(chain: AdversarialChain) -> CritiqueVerdict:
@@ -686,14 +733,15 @@ def audit_adversarial_chain(chain: AdversarialChain) -> CritiqueVerdict:
                                "the chain oscillated: the shared content "
                                "collapsed and came back, so it converged on "
                                "nothing",
-                               signals, supported, unsupported)
+                               signals, supported, unsupported,
+                               dict(JUDGE_RELIABILITY))
 
     if not gnd.get("available"):
         return CritiqueVerdict(
             Verdict.UNRESOLVED,
             "no ground was supplied, so the outcome was not decided. "
             "UNDECIDED IS NOT A PASS, and it is NOT a critic win either.",
-            signals, supported, unsupported)
+            signals, supported, unsupported, dict(JUDGE_RELIABILITY))
 
     # THE GROUND DECIDES, and the last speaker does not.
     # The proponent's claim survives unless a SUPPORTED critique
@@ -703,12 +751,14 @@ def audit_adversarial_chain(chain: AdversarialChain) -> CritiqueVerdict:
     if final_ok is True:
         return CritiqueVerdict(Verdict.GROUNDED,
                                "the ground supports the surviving claim",
-                               signals, supported, unsupported)
+                               signals, supported, unsupported,
+                               dict(JUDGE_RELIABILITY))
     if final_ok is False:
         return CritiqueVerdict(Verdict.REFUTED,
                                "the ground does not support the surviving "
                                "claim, whatever the last speaker said",
-                               signals, supported, unsupported)
+                               signals, supported, unsupported,
+                               dict(JUDGE_RELIABILITY))
 
     # THE CHAIN'S OWN VERDICT MARKER, qualified.
     if asym.get("has_verdict_marker"):
@@ -716,12 +766,14 @@ def audit_adversarial_chain(chain: AdversarialChain) -> CritiqueVerdict:
                                "the chain announced a verdict but the ground "
                                "did not support it, so the announcement is "
                                "not a resolution",
-                               signals, supported, unsupported)
+                               signals, supported, unsupported,
+                               dict(JUDGE_RELIABILITY))
 
     return CritiqueVerdict(Verdict.UNRESOLVED,
                            "the chain did not resolve and the ground did "
                            "not decide",
-                           signals, supported, unsupported)
+                           signals, supported, unsupported,
+                           dict(JUDGE_RELIABILITY))
 
 
 # ===========================================================================
