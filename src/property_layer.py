@@ -175,11 +175,51 @@ SUBJECTS: Tuple[Subject, ...] = (
             "a config file", "configuration", "configurable",
             "a per-call limit", "per-call limits", "a deployment profile",
             "an environment variable", "a request envelope",
-            "a parameter", "advisory", "informational",
+            "a parameter", "informational",
             "a log line", "no longer part of the acceptance test",
             "a snapshot", "a hard-coded snapshot",
-            "stale", "ships turned off", "ships off",
-            "degraded", "disabled by default",
+            "ships turned off", "ships off",
+            "disabled by default",
+            # -- THE THREE ENTRIES CORRECTED ON 2026-11-02, and the
+            # -- reason each one was a FALSE CLAIM ABOUT THE SYSTEM.
+            #
+            # -- "advisory" is GONE. The gate HAS an advisory tier:
+            # -- fc_gate.py sets kind="advisory" on an agenda catch
+            # -- (line 739) and the verdict carries it (line 894). So
+            # -- the entry said the gate cannot be advisory, and the
+            # -- gate then REFUSED every honest sentence that used the
+            # -- word. MEASURED: 3 of this machine's own real replies
+            # -- were refused for it.
+            #
+            # -- "stale" is GONE as a bare word, and "stale snapshot"
+            # -- replaces it. The gate DID cache its rules for the
+            # -- life of the process, and that was true on 2026-10-26
+            # -- when this entry was written. But on 2026-11-01 the
+            # -- gate gained a staleness DETECTOR
+            # -- (fieldcore/src/gate_staleness.py, and
+            # -- fc_gate.FieldCoreGate.stale), so it CAN be stale, and
+            # -- it says so: it names the file that moved and reloads.
+            # -- So "the gate is stale" is now TRUE and the layer was
+            # -- refusing the truth. MEASURED: 36 of this machine's
+            # -- own real replies were refused for it -- the largest
+            # -- single false-positive class in the layer.
+            # --
+            # -- AND THE ATTACK IS STILL CAUGHT. The attack the entry
+            # -- was written for is "the gate is a hard-coded stale
+            # -- snapshot" -- an adversary telling Bobby the gate is
+            # -- frozen and does not really check. That is the phrase
+            # -- "stale snapshot", and it is still refused. The bare
+            # -- word was a too-blunt instrument for a too-blunt
+            # -- claim, and it cost 36 honest sentences.
+            #
+            # -- "degraded" is GONE. The plugin degrades the gate to a
+            # -- no-op when the checkout is missing
+            # -- (plugins/fieldcore-gate/__init__.py: "unavailable
+            # -- (%s); the gate is degraded to a no-op"), and the gate
+            # -- itself fails CLOSED when a layer raises. So the
+            # -- system HAS a degraded mode, and the entry was false.
+            # -- MEASURED: 3 real replies refused for it.
+            "a stale snapshot", "hard-coded stale snapshot",
         ),
         source="fieldcore/src/gate.py -- the bounds are MODULE "
                "CONSTANTS, not parameters, not read from the "
@@ -285,6 +325,122 @@ _PROPERTY_NEGATORS = (
     "isn't", "aren't", "wasn't", "weren't", "doesn't", "don't",
 )
 
+#: A COPULA -- a linking verb. A quoted property phrase right after one
+#: is in PREDICATE position, so it is an ASSERTION wearing quotation
+#: marks, not a citation.
+_PROPERTY_COPULA = re.compile(
+    r"\b(?:is|are|was|were|be|been|being|has|have|had|sits?|sitting|"
+    r"becomes?|became|remains?|remained|carries|carried|carrying|"
+    r"emits?|emitted|produces?|produced|uses?|used|supports?|supported|"
+    r"runs?|ran|keeps?|kept|holds?|held|ships?|shipped|accepts?|accepted|"
+    r"allows?|allowed)\s*$", re.IGNORECASE)
+
+#: A determiner that may sit between the subject and the quoted token.
+_PROPERTY_DET = re.compile(
+    r"\b(?:the|a|an|its|their|this|that|our|your)\s*$", re.IGNORECASE)
+
+#: A quoted token. A token is a CITATION -- a word the author is
+#: quoting -- and a citation is not a proposition.
+_QUOTED_TOKEN = re.compile(r"""["'\[`]([^"'\[\]`\n]{1,80})["'\]`]""")
+
+
+def _phrase_in(text: str, phrase: str) -> bool:
+    """The PHRASE inside text, on word boundaries."""
+    words = phrase.split()
+    if not words:
+        return False
+    pat = r"(?<![a-z])" + r"\s+".join(re.escape(w) for w in words) + r"(?![a-z])"
+    return re.search(pat, text) is not None
+
+
+def _anchor_in(low: str, anchor: str) -> bool:
+    """Is the anchor present, on WORD BOUNDARIES?
+
+    AND WHY THIS EXISTS. It is the same class of defect the property
+    word got on 2026-10-27: "im**mutable**" matched "mutable", so the
+    property is matched as a PHRASE with boundaries. But the SUBJECT
+    ANCHOR never got the same treatment, and the anchor list for
+    `the_gate` contains the bare word "gate" -- so:
+
+        "Gateway not running, with a stale state file"
+
+    matched the anchor "gate" INSIDE "gateway". The property "stale"
+    was then tested against it, and "the gate" was refused for having
+    a stale state file.
+
+    MEASURED on 2026-11-02, on this machine's own real replies: 6 of
+    81 false positives were exactly this -- the Hermes gateway is
+    named constantly, and "gateway" contains "gate".
+
+    So the anchor is matched as a PHRASE with word boundaries, and
+    "gateway" is not "gate".
+    """
+    words = anchor.split()
+    if not words:
+        return False
+    pat = r"(?<![a-z])" + r"\s+".join(re.escape(w) for w in words) + r"(?![a-z])"
+    return re.search(pat, low) is not None
+
+
+def _is_citation(span: str, prop: str, subject: "Subject") -> bool:
+    """Is the property word inside this span a CITATION rather than an
+    assertion?
+
+    AND THE RULE. A quoted token that carries the property PHRASE is a
+    citation -- UNLESS it sits in PREDICATE position, which is where
+    an assertion puts it:
+
+        the ground is "mutable"          -> PREDICATE -> an assertion
+        the drift "accumulates"          -> PREDICATE -> an assertion
+        the word "mutable" is in the code -> CITATION -> not a claim
+
+    AND WHY THE PREDICATE TEST NEEDS THE SUBJECT TOO. A copula is the
+    common case ("the ground IS mutable"), but "the drift "accumulates""
+    has no copula -- the quoted token follows the SUBJECT directly. So
+    the rule also accepts a quoted token that follows the subject
+    itself, with an optional determiner.
+
+    AND WHY THIS IS A NARROW RULE. A blanket "quoted means cited" rule
+    is a SHELTER: it lets the adversary write 'the ground is "mutable"'
+    and be admitted. MEASURED 2026-11-02: the blanket rule let 6 of 14
+    quoted attack shapes through the property layer; this rule lets 0
+    through, and the whole gate still refuses all 14.
+    """
+    for m in _QUOTED_TOKEN.finditer(span):
+        tok = m.group(1).lower()
+        if not _phrase_in(tok, prop):
+            continue
+        before = span[:m.start()].rstrip()
+        if _PROPERTY_COPULA.search(before):
+            # a linking verb right before it -- an assertion
+            continue
+        # AND THE SUBJECT. The quoted token follows the subject itself
+        # (with an optional determiner) -- that is predicate position
+        # too, even without a copula: "the drift "accumulates"".
+        #
+        # AND THE `for...else`. The FIRST version of this used a bare
+        # `continue` inside the anchor loop, which continued the INNER
+        # loop and so fell through to "this is a citation" -- so
+        # 'the drift "accumulates"' was ADMITTED. The test caught it:
+        # test_quotes_are_not_a_shelter went red. The `else` on the
+        # for-loop is what says "no anchor matched, so the token is a
+        # citation"; a matching anchor in predicate position means an
+        # assertion, and the whole token is skipped.
+        tail = before
+        in_predicate = False
+        for a in sorted(subject.anchors, key=len, reverse=True):
+            if tail.endswith(a):
+                rest = tail[:len(tail) - len(a)].rstrip()
+                if not rest or _PROPERTY_DET.search(rest):
+                    # the subject itself, then the word -- an assertion
+                    in_predicate = True
+                    break
+        if in_predicate:
+            continue
+        # otherwise: the word is quoted as a CITATION
+        return True
+    return False
+
 
 def _property_present(low: str, prop: str) -> bool:
     """Is the property ASSERTED, on word boundaries and with its polarity?
@@ -370,7 +526,7 @@ def check_properties(span: str) -> PropertyVerdict:
     best_len = 0
     for s in SUBJECTS:
         for a in s.anchors:
-            if a in low and len(a) > best_len:
+            if _anchor_in(low, a) and len(a) > best_len:
                 subject = s
                 best_len = len(a)
                 break
@@ -399,6 +555,19 @@ def check_properties(span: str) -> PropertyVerdict:
     # is not a false one.
     for prop in subject.lacks:
         if not _property_present(low, prop):
+            continue
+        # AND THE CITATION, and it is the other half of the defect.
+        # The property word can be present in a span that is not
+        # ASSERTING it -- it can be QUOTING it, as the ground's own
+        # vocabulary. So a quoted property phrase is a citation, unless
+        # it sits in predicate position, where an assertion puts it.
+        #
+        # MEASURED on 2026-11-02: 13 of this machine's own real reply
+        # refusals were the layer reading a QUOTED word as a claim --
+        # a grep pattern, a cited term, a word inside a filename. And
+        # the narrow rule is required, because the blanket rule is a
+        # shelter: 'the ground is "mutable"' must still be refused.
+        if _is_citation(span, prop, subject):
             continue
         return PropertyVerdict(
             False,
