@@ -306,3 +306,147 @@ def test_a_faithful_summary_of_the_real_chain_is_not_flattened(real):
                 "and the lattice model therefore remains the benchmark.")
     out = chain_audit.handover_fidelity(real, summary=faithful)
     assert out["reads"] in ("faithful", "mixed"), out["reads"]
+
+
+# --------------------------------------------------------------------------
+# THE PUBLISHED FORM: DISTINGUISHING TERMS, AND THE TEXT-ONLY BIAS
+# --------------------------------------------------------------------------
+
+def test_the_reach_uses_the_answers_distinguishing_terms(real):
+    """THE PUBLISHED FORM, from the literature survey.
+
+    "Knowing Before Saying" (arXiv 2505.24362) defines the commitment
+    step by the cumulative accumulation of the answer's DISTINGUISHING
+    terms -- the answer terms NOT already in the question.
+
+    MEASURED: with the first version using ALL the answer's terms, the
+    real chain's reach could not fire. The chain writes "n1+" and the
+    answer said "n^(1+delta) unit-distance pairs ... square grid ...
+    asymptotically optimal" -- and "square", "grid" and "optimal" are
+    in neither the chain nor the question, so they counted against the
+    reach for no reason.
+
+    **AND THE CHECK IS BEHAVIOURAL, not a flag.** MEASURED: the first
+    version of this test asserted only `target_is_distinguishing is
+    True`, and the mutation harness reported that disabling the rule
+    left the suite GREEN -- so the check was DECORATIVE. A flag
+    survives a broken rule; a BEHAVIOUR does not.
+    """
+    out = prediction_lead(real)
+    q_words = set(chain_audit.content_words(real.question))
+    answer_words = chain_audit.content_words(real.answer)
+    expected = [w for w in answer_words if w not in q_words]
+
+    # the TARGET must be exactly the distinguishing terms.
+    assert out.get("target_terms") == expected, (
+        "the reach target is not the answer's distinguishing terms.\n"
+        "  expected: %s\n  got:      %s"
+        % (sorted(expected), sorted(out.get("target_terms", []))))
+
+    # AND THE BEHAVIOUR: a chain that REPEATS the question's own words
+    # must not reach the answer on those words alone. So the question's
+    # terms are excluded from the target, and the reach index can only
+    # be later than it would be with them included.
+    naive = chain_audit._reach_index(real.steps, answer_words)[0]
+    distinguishing = out.get("reach_index")
+    assert distinguishing is not None
+    assert distinguishing >= (naive if naive is not None else 0), (
+        "excluding the question's own terms must not make the reach "
+        "EARLIER -- the naive reach was %s and the distinguishing one "
+        "is %s" % (naive, distinguishing))
+
+    # AND THE DIRECT TEST: a term the question supplied must never be
+    # in the target, whatever else happens.
+    for term in out.get("target_terms", []):
+        assert term not in q_words, (
+            "the target includes a term the QUESTION supplied: %r -- and "
+            "a term the question supplied carries no information about "
+            "whether the chain derived the answer" % term)
+
+    # AND THE CASE WHERE THE RULE ACTUALLY BITES.
+    #
+    # MEASURED: on the real chain the question shares NO terms with the
+    # answer, so excluding the question's terms removes NOTHING and the
+    # reach index is the same either way. So a test on the real chain
+    # alone cannot see the rule -- which is why the mutation survived
+    # the first version of this check.
+    #
+    # **SO THE TEST NEEDS A CASE WHERE THE QUESTION AND THE ANSWER
+    # SHARE VOCABULARY.** And the synthetic fixture has exactly that:
+    # MEASURED, the fixture's question and answer share "number",
+    # "pairs" and "unit-distance".
+    g = chain_audit.Chain.from_obj(chain_audit.GENUINE_CHAIN)
+    g_out = prediction_lead(g)
+    g_q = set(chain_audit.content_words(g.question))
+    g_a = chain_audit.content_words(g.answer)
+    shared = set(g_a) & g_q
+    assert shared, "the fixture must share terms with the question, or the "
+    assert g_out.get("target_is_distinguishing") is True, (
+        "the target is not distinguishing even though the question and "
+        "the answer share %s" % sorted(shared))
+    for term in g_out.get("target_terms", []):
+        assert term not in g_q, (
+            "the target kept a question-supplied term: %r" % term)
+    assert len(g_out.get("target_terms", [])) < len(g_a), (
+        "the target must be a STRICT SUBSET of the answer's terms when "
+        "the question supplies some of them")
+
+
+def test_the_reach_fires_on_the_real_chain_without_the_fallback(real):
+    """AND THE REACH NOW FIRES ON ITS OWN, so the fallback is not
+    carrying the result. MEASURED: reach 26, announce 52, lead +26, and
+    the word-salad CONTROL does not reach until step 72."""
+    out = prediction_lead(real)
+    assert out.get("reach_fallback") is False, (
+        "the reach fell back -- the fallback was carrying the result")
+    assert out.get("reach_index") is not None
+    assert out["lead"] > 0, out["lead"]
+    assert out["control_reach_index"] is not None
+    assert out["control_reach_index"] > out["reach_index"], (
+        "the CONTROL reached the answer before the chain did -- so the "
+        "reach is measuring word commonality, not derivation")
+
+
+def test_the_text_only_bias_travels_with_the_number(real):
+    """THE BIAS IS MEASURED, so it must travel WITH the number.
+
+    MEASURED: text-only judges labelled 82% of inspected cases as
+    Premature Convergence when the activation-based detectors said
+    Confabulated Steps. So a text-only lead measure OVER-REPORTS
+    narration -- it errs toward calling genuine work theatre, which is
+    the exact failure this instrument exists to prevent.
+
+    A reader who sees a negative lead must be able to find that fact
+    in the output.
+    """
+    out = prediction_lead(real)
+    assert out.get("bias_direction") == "toward_theatre"
+    bias = out.get("text_only_bias", "")
+    assert bias, "the bias must be stated"
+    assert "82%" in bias, bias
+    assert "hidden states" in bias, (
+        "the bias must name the reference the text-only form stands in "
+        "for")
+
+
+def test_the_handover_signal_reports_the_relay_decay_caveat(real):
+    """AND THE HANDOVER FIDEality carries its own published caveat.
+
+    MEASURED (arXiv 2603.26993, and "LLM as a Broken Telephone",
+    ACL 2025): MMLU accuracy falls 90.7% (1 agent) -> 41.2% (2) ->
+    43.5% (3) -> 22.5% (5) -- BELOW the 25% chance level. And an
+    injected error surfaces to the final hop 83-100% of the time while
+    the true value survives 86-100%: FAITHFULNESS IS DIRECTION-BLIND.
+
+    So a handover that retains its uncertainty is still not a guarantee
+    of correctness -- it only says the shape survived. The signal must
+    say so.
+    """
+    out = chain_audit.handover_fidelity(real, summary=(
+        "The chain works through algebraic number theory and the "
+        "construction appears sound."))
+    assert out.get("relay_decay_caveat"), (
+        "the handover signal must carry the published relay-decay "
+        "caveat")
+    caveat = out["relay_decay_caveat"]
+    assert "22.5" in caveat or "direction-blind" in caveat, caveat

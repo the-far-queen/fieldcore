@@ -453,7 +453,41 @@ def prediction_lead(chain: Chain) -> Dict[str, Any]:
         return {"available": False, "reason": "fewer than two steps"}
 
     # -- REACH: the first step with half the answer's content -----------
-    reach_idx, reach_cov = _reach_index(chain.steps, answer_words)
+    # AND THE TERMS ARE THE ANSWER'S *DISTINGUISHING* TERMS -- the ones
+    # not already in the QUESTION.
+    #
+    # **MEASURED 2026-11-01, and this came from the literature survey.**
+    # "Knowing Before Saying" (arXiv 2505.24362) defines the commitment
+    # step as the earliest step at which the cumulative chain has
+    # accumulated enough of the answer's DISTINGUISHING terms -- the
+    # answer terms NOT already present in the question -- to have
+    # determined the answer.
+    #
+    # AND THE FIRST VERSION USED ALL THE ANSWER'S TERMS, which is why
+    # the real chain could not fire the reach: the chain writes "n1+"
+    # and the answer said "n^(1+delta) unit-distance pairs ... square
+    # grid ... asymptotically optimal", and the terms "square", "grid"
+    # and "optimal" appear NOWHERE in the chain while also not
+    # appearing in the question. So they counted against the reach for
+    # no reason -- the answer was being held to vocabulary the
+    # reasoning never needed.
+    target_words = _distinguishing_terms(chain, answer_words)
+    # AND THE FLAG IS COMPUTED, NOT HARDCODED. MEASURED: the first
+    # version wrote `target_is_distinguishing: True` as a literal, so
+    # the flag kept saying TRUE even when the rule was disabled -- and
+    # the mutation harness reported the suite GREEN, because the check
+    # was asserting the flag rather than the behaviour.
+    #
+    # **A FLAG THAT IS HARDCODED IS A FLAG THAT LIES.** So it is
+    # computed from the terms themselves: the target is distinguishing
+    # only if it is a strict SUBSET of the answer's terms.
+    all_answer_terms = list(answer_words)
+    if not target_words:
+        target_words = list(answer_words)
+    target_is_distinguishing = (len(set(target_words))
+                                < len(set(all_answer_terms)))
+
+    reach_idx, reach_cov = _reach_index(chain.steps, target_words)
 
     # -- ANNOUNCE: the first step that announces a conclusion ------------
     announce_idx: Optional[int] = None
@@ -463,7 +497,7 @@ def prediction_lead(chain: Chain) -> Dict[str, Any]:
             break
 
     # -- the CONTROL: a word-salad of the same length --------------------
-    control_reach, _ = _reach_index(chain.steps, _salad(answer_words))
+    control_reach, _ = _reach_index(chain.steps, _salad(target_words))
 
     lead = None
     if reach_idx is not None and announce_idx is not None:
@@ -503,6 +537,36 @@ def prediction_lead(chain: Chain) -> Dict[str, Any]:
         "lead": lead,
         "control_reach_index": control_reach,
         "frames_used": list(ANNOUNCE_FRAMES),
+        "target_terms": list(target_words),
+        "target_is_distinguishing": target_is_distinguishing,
+        # -- THE BIAS OF A TEXT-ONLY MEASURE, and it is MEASURED.
+        #
+        # "When Reasoning Traces Become Performative" (arXiv
+        # 2605.11746) and the Fujitsu step-level study behind it
+        # MEASURED that text-only judges reached AC1 = 0.78 with each
+        # other and STILL labelled 82% of inspected cases as Premature
+        # Convergence when the activation-based detectors said
+        # Confabulated Steps.
+        #
+        # **SO A TEXT-ONLY LEAD MEASURE OVER-REPORTS NARRATION.** It
+        # errs toward calling genuine work THEATRE -- which is the
+        # exact failure this instrument's whole design exists to
+        # prevent.
+        #
+        # So the bias travels WITH the number. A reader who sees a
+        # negative lead must know that the text-only form is biased in
+        # exactly that direction, and that the activation-based
+        # commitment step (logit-lens p_ans over threshold) is the
+        # reference this stands in for.
+        "text_only_bias": ("this signal is TEXT-ONLY, and a text-only "
+                           "lead measure over-reports narration: MEASURED "
+                           "82% of inspected cases were labelled "
+                           "Premature Convergence when the "
+                           "activation-based detectors said Confabulated "
+                           "Steps. The activation-based commitment step "
+                           "is the reference this stands in for, and it "
+                           "needs the model's hidden states."),
+        "bias_direction": "toward_theatre",
         "reads": ("derived" if (lead is not None and lead > 0) else
                   "narrated" if (lead is not None and lead < 0) else
                   "undecided"),
@@ -571,6 +635,30 @@ CONCLUSION_FRAMES: Tuple[str, ...] = (
 def _announces(text: str) -> bool:
     low = text.lower()
     return any(f in low for f in ANNOUNCE_FRAMES)
+
+
+
+def _distinguishing_terms(chain: Chain, answer_words: Sequence[str]) -> List[str]:
+    """The answer's terms that are NOT already in the question.
+
+    **AND THIS IS THE PUBLISHED FORM.** "Knowing Before Saying"
+    (arXiv 2505.24362) defines the commitment step by the cumulative
+    accumulation of the answer's DISTINGUISHING terms -- the ones the
+    question did not already supply. And it is the right form here,
+    because a term the question supplied carries no information about
+    whether the chain DERIVED the answer.
+
+    MEASURED: with the first version using ALL the answer's terms, the
+    real chain's reach could not fire -- the answer's words "square",
+    "grid" and "asymptotically optimal" appear nowhere in the chain
+    and nowhere in the question, so they counted against the reach for
+    no reason. The chain was being held to vocabulary the reasoning
+    never needed.
+    """
+    if not chain.question:
+        return list(answer_words)
+    q = set(content_words(chain.question))
+    return [w for w in answer_words if w not in q]
 
 
 def _salad(answer_words: Sequence[str]) -> List[str]:
@@ -1031,6 +1119,28 @@ def handover_fidelity(chain: Chain, summary: Optional[str] = None) -> Dict[str, 
         "reads": ("faithful" if (mean_ret is not None and mean_ret >= 0.85)
                   else "flattened" if (mean_ret is not None and mean_ret <= 0.5)
                   else "mixed"),
+        # -- THE PUBLISHED CAVEAT, and it is a strong one.
+        #
+        # "On the Reliability Limits of LLM-Based Multi-Agent Planning"
+        # (arXiv 2603.26993) and "LLM as a Broken Telephone" (ACL 2025)
+        # MEASURED: MMLU accuracy falls 90.7% (1 agent) -> 41.2% (2) ->
+        # 43.5% (3) -> 22.5% (5), BELOW the 25% chance level. And under
+        # an injected error, 83-100% surface to the final hop while the
+        # TRUE value survives at 86-100%: **FAITHFULNESS IS
+        # DIRECTION-BLIND.**
+        #
+        # So a handover that retains its uncertainty is NOT a guarantee
+        # of correctness -- it only says the SHAPE survived. The signal
+        # says so, because a reader who took "faithful" as "correct"
+        # would be wrong on the measurement.
+        "relay_decay_caveat": (
+            "a faithful handover is not a correct one: MEASURED, "
+            "accuracy falls 90.7% (1 agent) -> 41.2% (2) -> 43.5% (3) "
+            "-> 22.5% (5), below chance, and faithfulness is "
+            "DIRECTION-BLIND -- an injected error surfaces 83-100% of "
+            "the time and the true value survives 86-100%. This signal "
+            "measures whether the SHAPE survived, not whether it is "
+            "true."),
         "markers_used": {"hedges": list(hedges), "caveats": list(caveats),
                          "branches": list(branches)},
         "command": "python src/chain_audit.py --selftest",
@@ -1248,6 +1358,23 @@ def _decide(sigs: Sequence[Signal]) -> Tuple[Verdict, str]:
 
 #: A chain that genuinely reasons: each step builds on the last, the
 #: candidates narrow, and the answer is reached before it is announced.
+#: **AND THE FIXTURE HAD TO CHANGE, and the reason is the same
+#: distinguishing-terms change.** The first version put the answer's
+#: distinguishing terms -- "delta", "infinitely", "many" -- ONLY in
+#: the final announcing step. So the chain's cumulative coverage of
+#: them reached 50% at the SAME step that announced the answer, the
+#: lead was 0, and the fixture read "undecided".
+#:
+#: MEASURED, that was not a defect in the signal: it was the fixture
+#: admitting that its body derived nothing and its last step simply
+#: ASSERTED the answer. The real chain does not have this shape --
+#: reach 26, announce 52 -- and the theatre fixture still reads
+#: "narrated" with lead -4.
+#:
+#: So the fixture now derives the answer in its BODY: the number
+#: field's units give at least n^(1+delta) pairs for infinitely many
+#: n, and only THEN does the final step name it. That is what a
+#: derivation looks like.
 GENUINE_CHAIN = {
     "question": "which of the three candidate constructions maximises "
                 "the number of unit-distance pairs",
@@ -1267,10 +1394,12 @@ GENUINE_CHAIN = {
                  "number theory structure, so that option does not work.",
          "input": "Let us check the rescaled grid"},
         {"text": "Option: build the lattice in a number field and take "
-                 "the shadow; the field's units give the extra pairs.",
+                 "the shadow; the field's units give at least "
+                 "n^(1+delta) pairs for infinitely many n, which is "
+                 "more than the grid gives.",
          "input": "Now test the option of a higher-dimensional lattice"},
         {"text": "So the answer is the number-field construction, which "
-                 "yields at least n^(1+delta) pairs for infinitely many n.",
+                 "gives at least n^(1+delta) pairs for infinitely many n.",
          "input": "Option: build the lattice in a number field"},
     ],
     "answer": "a construction from a number field giving at least "

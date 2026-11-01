@@ -237,6 +237,55 @@ def m_control_rigged(src: str) -> str:
         "control = observed  # MUTATED: the control is the observed value")
 
 
+
+def m_distinguishing_disabled(src: str) -> str:
+    """the distinguishing-terms rule is disabled
+
+    THE DEFECT THE LITERATURE FORCED. The reach must use the answer's
+    terms that the QUESTION did not supply, because a term the
+    question supplied carries no information about whether the chain
+    DERIVED the answer.
+    """
+    old = "    target_words = _distinguishing_terms(chain, answer_words)"
+    if old not in src:
+        raise SystemExit("MUTATION HARNESS BROKEN: the distinguishing-terms "
+                         "call was not found")
+    return src.replace(
+        old, "    target_words = list(answer_words)  # MUTATED")
+
+
+def m_bias_clause_removed(src: str) -> str:
+    """the text-only bias clause is removed
+
+    MEASURED: text-only judges labelled 82% of inspected cases as
+    Premature Convergence when the activation-based detectors said
+    Confabulated Steps. So a text-only lead measure over-reports
+    narration, and that fact must travel WITH the number.
+    """
+    old = '        "bias_direction": "toward_theatre",'
+    if old not in src:
+        raise SystemExit("MUTATION HARNESS BROKEN: the bias clause was "
+                         "not found")
+    return src.replace(old, "", 1)
+
+
+def m_relay_caveat_removed(src: str) -> str:
+    """the relay-decay caveat is removed
+
+    MEASURED: accuracy falls 90.7% -> 22.5% over five agents, below
+    chance, and faithfulness is direction-blind. So a faithful
+    handover is not a correct one.
+    """
+    old = '        "relay_decay_caveat": ('
+    if old not in src:
+        raise SystemExit("MUTATION HARNESS BROKEN: the relay caveat was "
+                         "not found")
+    return src.replace(
+        old,
+        '        "relay_decay_caveat": None,  # MUTATED\n'
+        '        "_unused_caveat": (', 1)
+
+
 MUTATIONS: List[Tuple[str, Callable[[str], str]]] = [
     ("the reach threshold is raised to 0.99", m_reach_threshold_high),
     ("the announce frames are emptied", m_announce_frames_emptied),
@@ -247,6 +296,9 @@ MUTATIONS: List[Tuple[str, Callable[[str], str]]] = [
     ("the signal-direction map is emptied", m_aligned_emptied),
     ("the candidate markers are emptied", m_candidate_markers_emptied),
     ("the control is rigged to the observed value", m_control_rigged),
+    ("the distinguishing-terms rule is disabled", m_distinguishing_disabled),
+    ("the text-only bias clause is removed", m_bias_clause_removed),
+    ("the relay-decay caveat is removed", m_relay_caveat_removed),
 ]
 
 
