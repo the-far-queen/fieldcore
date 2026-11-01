@@ -1,6 +1,37 @@
 """
 population_escalation.py -- THE ESCALATION POLICY, POPULATION FIRST.
 
+**AND IT IS ONE ARM OF A PAIR, and the pair was already built.** Bobby,
+2026-11-01: *"we had a working model with fail up 1 bit 4 8 etc combine
+them"*.
+
+**SO THIS MODULE IS THE POPULATION ARM, AND `dual_ladder.py` IS THE
+PAIR.** `dual_ladder.DualLadder` already implements the interleaving:
+
+    1x1 -> 4x1 (WIDTH) -> 4x2 (POPULATION) -> 8x2 (WIDTH) ->
+    8x4 (POPULATION) -> ...
+
+with `REFUSALS_PER_RUNG = 2` and the measured cap refusing any rung
+whose population is above the measured peak of 3.
+
+**AND THIS MODULE IS NOT A REPLACEMENT FOR IT.** It is the arm that
+answers "which axis moves when the channel is exhausted" -- and the
+answer it gives is the one the repo's own doctrine already gives:
+**POPULATION FIRST**, because population is the cheaper axis (more
+simultaneous 1-bit detectors) and width is the expensive one (a serial
+read of one channel).
+
+**AND THE COST ARITHMETIC, MEASURED by `dual_ladder.py`:**
+
+    ALL-WIDTH-FIRST   reaches 4 bits at cost 4, but on ONE stalk,
+                      and it may still fail because the question was
+                      hyperlocal.
+    INTERLEAVED       reaches 4 bits at cost 8, and 8 bits at cost 16.
+
+**SO THE INTERLEAVED PATH IS NOT FREE, AND THAT IS THE POINT.** It
+costs twice as much to reach the same width, and it buys the answer
+that the wider read could not have given.
+
 Bobby, 2026-11-01, twice:
   *"nope we got as far as increasng number of stalks ie population was
   cheaper at 1 bit and only the 4 and 8 bit then increase pop again not
@@ -67,6 +98,12 @@ __all__ = [
 #: point where the population can carry it is authority nobody can
 #: check.
 POPULATION_FIRST_WIDTHS: Tuple[int, ...] = (1, 4, 8)
+
+#: AND THE PAIR'S OWN WIDTH LADDER is wider -- 1, 4, 8, 16, ... 256 --
+#: because the dual ladder climbs it. This arm stops at 8 because
+#: past that the DUAL ladder's own cap refuses, with the measured
+#: surplus in the reason. So the two agree on where the ceiling is;
+#: they differ only in WHICH AXIS moves first.
 
 #: The escalation reasons. And THEY ARE THE POINT, because the reason
 #: is what a reader of the ledger sees.

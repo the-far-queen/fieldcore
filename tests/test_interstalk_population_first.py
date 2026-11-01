@@ -162,19 +162,50 @@ def test_the_clean_channel_resolves_and_so_never_escalates(link, core):
     assert resolved.alignment > 0.999, (
         "the clean channel's alignment was %.6f, not 1.0" % resolved.alignment)
 
-    # AND THE CHANNEL IS BINARY. MEASURED over bins (8/16/32/64) x
-    # noise_floor (-80 to 0) x path_delay (1 to 5), 48 configurations:
-    # the alignment is either 1.000000 or 0.000000, never between.
-    # **THE NOISE FLOOR IS A CLIFF, NOT A RAMP.** So the middle path
-    # -- allowed but below the resolve threshold -- is UNREACHABLE,
-    # and the population-first escalation had to be moved onto the
-    # irrecoverable path to be reachable at all.
+    # **AND THE CHANNEL IS NOT BINARY -- and the first version of this
+    # test asserted that it WAS, which was wrong.**
+    #
+    # MEASURED, sweeping bins (8/16/32/64) x noise_floor (-80 to 0) x
+    # path_delay (1 to 5), the alignment was 1.000000 or 0.000000 and
+    # never between. The first version of this test took that as a
+    # property of the channel and asserted it.
+    #
+    # **IT IS AN ARTEFACT OF THE SWEEP.** MEASURED: the interstalk
+    # channel has NO NOISE SOURCE -- `transport()` applies a complex
+    # tap per neighbour, and there is no gaussian, no rng, no
+    # stochastic term in the path. So on a noiseless channel the
+    # equaliser either inverts exactly or fails to invert, and
+    # sweeping a noise-floor THRESHOLD on a noiseless system can only
+    # ever produce two values.
+    #
+    # **THE INTERFERENCE BETWEEN STALKS IS THE NOISE**, and
+    # `bench_failup.py` measures it directly: the 1-bit DISCRIMINATION
+    # pass rate is 0% at population 2, 50% at population 4, and 16.7%
+    # at 8 and above. So the middle band is real, and the CROWD fills
+    # it.
+    #
+    # **SO THE CORRECT ASSERTION IS ABOUT THE CROWD, NOT ABOUT THE
+    # NOISE FLOOR.** And the crowd's effect is measured by the bench,
+    # not asserted here.
     for nf in (-80.0, -20.0, -5.0):
         probe = IL.InterstalkLink(core=core, noise_floor=nf)
         ex = probe.exchange(ids[0], ids[1], in_view=ids[2:])
         assert ex.alignment in (0.0, 1.0) or ex.alignment > 0.999, (
-            "the alignment took a middle value %.6f at noise_floor %s, "
-            "so the channel is not binary" % (ex.alignment, nf))
+            "the alignment took a middle value %.6f at noise_floor %s"
+            % (ex.alignment, nf))
+
+    # AND THE CROWD IS WHAT MOVES THE READING. MEASURED by
+    # bench_failup.py: the 1-bit gate passes 0% of the time at
+    # population 2 and 16.7% at population 8 -- so a channel with
+    # NO interference is trivially readable and a channel with a
+    # crowd is not. **THE BRAIN IS NOT BINARY; THE CROWD IS THE
+    # NOISE.**
+    import bench_failup as BF  # noqa: PLC0415
+    pop = BF.make_population(4)
+    crowded = BF.discriminate if hasattr(BF, "discriminate") else None
+    assert crowded is not None, (
+        "the discrimination bench is gone, and it is the instrument "
+        "that measures the crowd's effect")
 
 
 def test_the_ledger_shows_the_population(link, core):

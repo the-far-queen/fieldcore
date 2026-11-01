@@ -601,26 +601,35 @@ class InterstalkLink:
             # This is a REFUSAL with a reason, not a failure.
             #
             # **AND THE POPULATION-FIRST ESCALATION IS CONSULTED HERE
-            # TOO, and MEASURED THAT IT HAS TO BE.**
+            # TOO.**
             #
             # The first version of this wiring put the policy only on
             # the `NEEDS_MORE` path -- the case where the gate allowed
             # but the alignment was below the resolve threshold.
             #
-            # **AND THAT PATH IS UNREACHABLE.** MEASURED, sweeping
-            # bins (8/16/32/64) x noise_floor (-80 to 0) x path_delay
-            # (1 to 5) over 48 configurations: the interstalk channel
-            # is BINARY. It either inverts EXACTLY -- alignment
-            # 1.000000, escalation `resolved` -- or it does not invert
-            # at all: `channel_irrecoverable`, escalation
-            # `not_worth_knowing`. **THE NOISE FLOOR IS A CLIFF, NOT A
-            # RAMP**, so the alignment is never between 0.4 and 0.999.
+            # **AND THE CLAIM THAT PATH WAS UNREACHABLE WAS WRONG, and
+            # the reason is worth keeping.** MEASURED, sweeping bins
+            # (8/16/32/64) x noise_floor (-80 to 0) x path_delay
+            # (1 to 5) over 48 configurations, the alignment was
+            # either 1.000000 or 0.000000 -- never between. I wrote
+            # that down as "the channel is BINARY" and "the noise floor
+            # is a CLIFF, not a RAMP".
             #
-            # So a policy consulted only on the middle path never
-            # runs. And the case where the channel is IRRECOVERABLE is
-            # exactly the case where MORE STALKS WOULD HELP: more
-            # neighbours means more taps, more structure, and an
-            # equaliser with something to invert.
+            # **THAT WAS AN ARTEFACT OF THE SWEEP, NOT A PROPERTY OF
+            # THE CHANNEL.** MEASURED: the interstalk channel has NO
+            # NOISE SOURCE AT ALL -- `transport()` applies a complex
+            # tap per neighbour and there is no gaussian, no rng, no
+            # stochastic term anywhere in the path. So on a noiseless
+            # channel the equaliser either inverts it EXACTLY or fails
+            # to invert it at all, and sweeping a noise-floor THRESHOLD
+            # on a noiseless system can only ever produce two values.
+            #
+            # **THE BRAIN IS NOT BINARY.** The interference between
+            # stalks IS the noise -- that is the whole design -- and
+            # `bench_failup.py` measures it: MEASURED, the 1-bit
+            # discrimination pass rate is 0% at population 2, 50% at
+            # population 4, and 16.7% at 8 and above. So the middle
+            # band is REAL and it is the CROWD that fills it.
             #
             # So the escalation is asked on BOTH paths, and its answer
             # says what the caller should try next.
