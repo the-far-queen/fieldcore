@@ -318,7 +318,21 @@ class FieldCoreWrapper:
                                              allow_live=True,
                                              system=self.system_prompt())
             else:
-                self._client = LocalMiniLLMClient()
+                local = LocalMiniLLMClient()
+                # THE GROUND GOES TO THE REFLEX TOO. The remote model is
+                # told the ground through its system prompt, because a
+                # model with no knowledge of the ground confabulates
+                # about it -- MEASURED: asked "what does the ground
+                # hold", MiniMax answered "an append-only blockchain",
+                # and this project has no blockchain.
+                #
+                # The local reflex has the same problem and the same
+                # fix. MEASURED: with the guard closed it answered "I
+                # perceive nothing yet." to a question the ground
+                # answers. So it is given the same measured claims, and
+                # it selects from them rather than composing prose.
+                local.ground_claims = list(self.ground_claims)
+                self._client = local
         return self._client
 
     @property
@@ -606,6 +620,15 @@ class FieldCoreWrapper:
         # -- 3. the model answers, through the MTE ----------------------
         t0 = time.time()
         request = self._compose(prompt, ex.locus)
+        # THE ORIGINAL QUESTION travels to the reflex beside the
+        # composed request. The request carries the locus -- and the
+        # locus text contains the word "ground", so a reflex that
+        # selects on the request matches its own scaffolding.
+        # MEASURED: asked "what is the weather in Bangkok tomorrow", the
+        # reflex answered with the ground's write-protection claims.
+        client = self.client
+        if hasattr(client, "question"):
+            client.question = prompt
         try:
             res = self.mte.run(request)
         except Exception as exc:  # noqa: BLE001 -- an exception is not an answer

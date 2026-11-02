@@ -420,6 +420,52 @@ def _extract_text(data: Dict[str, Any]) -> str:
 # THE LOCAL CLIENT
 # ===========================================================================
 
+#: The words that carry no signal, and so cannot make a claim relevant.
+_STOPWORDS = frozenset({
+    "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+    "of", "in", "on", "at", "to", "for", "with", "by", "from", "as",
+    "and", "or", "but", "if", "then", "than", "that", "this", "these",
+    "those", "it", "its", "he", "she", "they", "them", "we", "us", "i",
+    "you", "your", "my", "me", "not", "no", "do", "does", "did", "so",
+    "what", "which", "who", "whom", "whose", "how", "why", "when",
+    "where", "can", "could", "should", "would", "will", "shall", "may",
+    "there", "here", "have", "has", "had", "am",
+})
+
+
+def _content_words(text: str) -> frozenset:
+    """The content words of a text: the ones that carry signal.
+
+    AND WHY THE STOP LIST EXISTS. The reflex selects a ground claim by
+    shared words, and "the" is in every claim -- so a zero threshold
+    makes every claim relevant to every question, which is the same as
+    no selection at all. A claim that shares only common words is not
+    evidence that it bears on the question.
+
+    AND WHY IT IS FROZEN. A mutable module-level set would be a
+    caller-controlled threshold in disguise. This one is fixed at
+    import, like the gate's bounds.
+    """
+    words = re.findall(r"[a-z0-9_]+", (text or "").lower())
+    return frozenset(w for w in words if w not in _STOPWORDS and len(w) > 1)
+
+
+def _strip_bullet(claim: str) -> str:
+    """Remove a leading bullet from a claim.
+
+    AND WHY. The register's claims come out of `ground_claims` already
+    formatted as "- the constitutional ground is write protected", and
+    the reflex adds its own bullet -- so the composed line came out as
+    "- - the constitutional ground is write protected". A cosmetic
+    defect, but this project's rule is that the output is the artefact:
+    a doubled bullet in a reply is a defect in the reply.
+    """
+    text = (claim or "").strip()
+    while text.startswith("- "):
+        text = text[2:].strip()
+    return text
+
+
 @dataclass
 class LocalMiniLLMClient:
     """The constructed-from-signal mind, as a client.
@@ -444,11 +490,47 @@ class LocalMiniLLMClient:
     mind: Optional[Any] = None
     answered_by: str = "local"
 
+    #: THE GROUND, as the reflex layer's own knowledge.
+    #:
+    #: AND WHY THIS EXISTS. MEASURED: with the spend guard closed, the
+    #: local reflex answered *"I perceive nothing yet."* to a question
+    #: the system could answer -- because the reflex had no signal to
+    #: perceive. But the substrate's register holds NINE MEASURED
+    #: CLAIMS, and the wrapper already reads them for the remote
+    #: model's system prompt.
+    #:
+    #: So the reflex is given the same ground. A reflex built from
+    #: signal should perceive the signal that is actually there, and
+    #: the ground IS the signal this system holds.
+    #:
+    #: AND IT IS A SET OF CLAIMS, NOT A MODEL. The reflex does not
+    #: compose prose. It states the claims that bear on the question,
+    #: and when none bears on it, it says so -- the same refusal
+    #: discipline as the remote model, and the same as the gate.
+    ground_claims: List[str] = field(default_factory=list)
+
+    #: THE QUESTION, as the caller asked it, beside the composed request.
+    #:
+    #: AND WHY IT IS A FIELD AND NOT A KWARG. The MTE wrapper calls
+    #: `llm.generate(prompt)` with one argument, so a kwarg would never
+    #: arrive. The wrapper that composes the request is the one that
+    #: holds the original question, and it sets this field immediately
+    #: before the call -- so the reflex reads the question, and the
+    #: request it sees still carries the locus.
+    #:
+    #: AND WHY IT MATTERS. MEASURED: asked "what is the weather in
+    #: Bangkok tomorrow", the reflex answered with the ground's
+    #: write-protection claims -- because the composed request contains
+    #: "[the ground is write-protected and the chain is intact: yes]",
+    #: and the reflex matched its own scaffolding.
+    question: str = ""
+
     def describe(self) -> Dict[str, Any]:
         return {
             "kind": "local",
             "model": "constructed-mini-llm",
             "answered_by": self.answered_by,
+            "ground_claims": len(self.ground_claims),
             "note": "the reflex layer. this is what the project is "
                     "BUILDING. it is not a small language model and "
                     "does not pretend to be one.",
@@ -458,10 +540,31 @@ class LocalMiniLLMClient:
         """The reflex answer.
 
         The label is the reflex: if the mind has crystallised one, that
-        is what it knows. Otherwise it says so -- which is the honest
-        reflex, and it is the same refusal discipline the rest of the
-        project uses.
+        is what it knows. Otherwise it reaches for the GROUND -- the
+        measured claims the substrate holds -- and states the ones that
+        bear on the question. And if none bears on it, it says so,
+        which is the honest reflex, and it is the same refusal
+        discipline the rest of the project uses.
+
+        AND THE QUESTION IS TAKEN FROM `question`, NOT FROM `prompt`.
+        MEASURED: asked "what is the weather in Bangkok tomorrow", the
+        reflex answered with the ground's write-protection claims. The
+        reason is that the wrapper COMPOSES the request before it
+        reaches the client, and the composition appends the locus --
+        "[answering position: ...] [the ground is write-protected and
+        the chain is intact: yes]". So the prompt the reflex saw
+        contained the word "ground", and the reflex matched its own
+        scaffolding and answered the question it was asked about the
+        substrate instead of the question it was asked.
+
+        So the ORIGINAL question travels beside the request, and the
+        reflex selects against the question. The scaffolding is for the
+        model; the question is for the reflex.
         """
+        question = kwargs.get("question")
+        if not isinstance(question, str) or not question.strip():
+            question = getattr(self, "question", "") or prompt
+
         if self.mind is not None:
             sensors = kwargs.get("sensors")
             if isinstance(sensors, dict):
@@ -469,8 +572,53 @@ class LocalMiniLLMClient:
                 if label:
                     self.answered_by = "local"
                     return self.mind.generate_sentence(label)
+
         self.answered_by = "local"
+
+        relevant = self._relevant_claims(question)
+        if relevant:
+            return ("From the ground:\n"
+                    + "\n".join("- %s" % _strip_bullet(c) for c in relevant))
+
+        if self.ground_claims:
+            # The ground is not empty and none of it bears on this. That
+            # is a DIFFERENT answer from "I perceive nothing" -- it
+            # means the system holds claims and this question is
+            # outside them. Say which.
+            return ("The ground holds %d measured claims and none of them "
+                    "bears on this question. I will not answer it from "
+                    "here." % len(self.ground_claims))
+
         return "I perceive nothing yet."
+
+    def _relevant_claims(self, prompt: str) -> List[str]:
+        """The ground claims that bear on the question.
+
+        AND WHY THIS IS A WORD MATCH AND NOT A MODEL. The reflex is a
+        reflex. It does not reason; it selects. And the selection is
+        deliberately simple and deliberately inspectable: the content
+        words of the question are matched against the content words of
+        each claim, and the claims that share enough of them are the
+        ones stated.
+
+        AND THE THRESHOLD IS NOT ZERO. A single shared word is not
+        evidence that a claim is relevant -- "the" is in every claim.
+        So a claim must share at least two content words with the
+        question, OR one word of four characters or more. That keeps
+        the common words out and keeps the specific ones in.
+        """
+        qwords = _content_words(prompt)
+        if not qwords:
+            return []
+        out: List[str] = []
+        for claim in self.ground_claims:
+            cwords = _content_words(claim)
+            if not cwords:
+                continue
+            shared = qwords & cwords
+            if len(shared) >= 2 or any(len(w) >= 4 for w in shared):
+                out.append(claim)
+        return out
 
 
 # ===========================================================================
