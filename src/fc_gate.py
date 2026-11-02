@@ -351,18 +351,21 @@ def structural_kind(span: str) -> Optional[str]:
 #: AND BOTH ORDERS, because the measured example put the quote BEFORE
 #: the verb -- "the span denies 'drift_contracts'" -- and the first
 #: version of this pattern required the verb first and so missed it. So
-#: the pattern matches the QUOTED TOKEN and then asks whether the
+#: the pattern matches the QUOTED PHRASE and then asks whether the
 #: surrounding words are ABOUT a denial, in either direction.
-_QUOTED_TOKEN = re.compile(r"""["'\[`]([^"'`\n]{1,80})["'\]`]""")
-_ABOUT_A_DENIAL = re.compile(
-    r"\b(?:denies?|denial\s+of|denied|affirms?|contradicts?|asserts?|"
-    r"claims?|states?|says?|fires?\s+on|matched|matches\s+the\s+deny|"
-    r"the\s+deny\s+pattern|false\s+positive|predicate\s+layer|"
-    r"claim\s+layer|scope\s+layer|testimony\s+layer|union\s+of)\b",
-    re.IGNORECASE,
-)
-#: A quoted token that is the NAME of a system predicate -- and those
-#: names are the system's own, so quoting one is quoting the ground.
+#:
+#: AND THE QUOTED PHRASES COME FROM THE CLAIM REGISTER, which owns
+#: them -- so there is one tokenizer, not two. The claim register reads
+#: a pair of ADJACENT same-type quote characters as a quoted region,
+#: which is what makes the NESTED case work: in
+#:
+#:     print('the deny stem is 'mutable ground'')
+#:
+#: the inner pair covers "mutable ground", so the deny stem is inside
+#: a quoted region and the span is naming it rather than asserting it.
+#:
+#: MEASURED: the gate refused this project's own probe command for
+#: exactly that shape, before the region rule was in.
 _SYSTEM_PREDICATE_NAME = re.compile(
     r"^(?:drift_contracts|ground_is_write_protected|governor_is_separate|"
     r"bounds_are_immutable|skip_is_never_pass|refusal_names_reason|"
@@ -375,10 +378,56 @@ _SYSTEM_PREDICATE_NAME = re.compile(
 )
 
 
+def _span_only_names(span: str) -> bool:
+    """Does this span NAME a denial without ASSERTING one?
+
+    AND THE RULE. Every deny hit in the span must sit inside a quoted
+    region. If any deny hit is OUTSIDE every quoted region, the span
+    asserts the denial and the quotation does not clear it.
+
+    AND WHY. The whole-span quotation clear let an adversary launder:
+
+        "the deny list holds 'admits every proposal', so the gate
+         admits every proposal that touches the sacred axes"
+
+    The first clause names a deny stem; the second asserts it. So the
+    clear is scoped to the spans that ONLY name.
+
+    AND WHY IT LIVES HERE AND NOT IN THE CLAIM LAYER. The claim layer
+    already applies the same rule region by region -- it drops the
+    deny hits that fall inside a quoted region. This function is the
+    GATE's version of the same question, and the two agree because
+    they read the same regions.
+
+    AND THE FAIL-CLOSED DIRECTION. If the claim register cannot be
+    read, the answer is "it does not only name" -- so the span is NOT
+    cleared. A check that cannot decide must not grant the benefit of
+    the doubt, because the benefit here is admitting a lie.
+    """
+    try:
+        import claim_register as CR
+        reg = CR.standard_register()
+    except Exception:  # noqa: BLE001 -- fail closed
+        return False
+
+    low = span.lower()
+    quoted = CR.quoted_denial_regions(span)
+    for c in reg.claims:
+        if CR.match_anchor(low, c.anchors) is None:
+            continue
+        for (stem, i) in CR.find_polarity_all(low, c.deny):
+            if CR._inside_any(i, len(stem), quoted):
+                continue
+            # A deny hit outside every quoted region: the span ASSERTS
+            # it, so the quotation does not clear the span.
+            return False
+    return True
+
+
 def is_quotation(span: str) -> bool:
     """Is this span TALKING ABOUT a denial rather than MAKING one?
 
-    AND THE RULE. The span quotes a token, and the words around it are
+    AND THE RULE. The span quotes a phrase, and the words around it are
     ABOUT a denial -- "the span denies 'x'", "'x' is the deny pattern",
     "the predicate layer matched". Either order.
 
@@ -386,16 +435,23 @@ def is_quotation(span: str) -> bool:
     measurement found: the layers report their own reasons, so the
     project's own output quotes the predicate names, and quoting one is
     quoting the ground rather than denying it.
+
+    AND THE TOKENIZER IS THE CLAIM REGISTER'S, so there is one reader
+    of quoted phrases and not two.
     """
     if not span:
         return False
-    for m in _QUOTED_TOKEN.finditer(span):
-        token = m.group(1).strip()
+    try:
+        import claim_register as CR
+    except Exception:  # noqa: BLE001 -- no register, no quotation
+        return False
+    for (a, b, content) in CR.quoted_regions(span):
+        token = content.strip()
         if _SYSTEM_PREDICATE_NAME.match(token):
             return True
         # the words AROUND the quote must be about a denial
-        window = span[max(0, m.start() - 90):m.end() + 90]
-        if _ABOUT_A_DENIAL.search(window):
+        window = span[max(0, a - 90):b + 90]
+        if CR._ABOUT_A_DENIAL.search(window):
             return True
     return False
 
@@ -807,7 +863,27 @@ class FieldCoreGate:
 
         # AND THE QUOTATION CHECK, for the same reason and for the
         # predicate layer's measured false positive.
-        if is_quotation(span):
+        #
+        # AND WHY IT IS NOT A WHOLE-SPAN CLEAR. The quotation
+        # suppressor answers one question about the whole span: "is
+        # there a quote, and are the words around it about a denial?"
+        # If yes, the span is cleared -- every clause.
+        #
+        # And that lets an adversary launder, which is the SAME shape
+        # the claim register's affirm precedence exists to close:
+        #
+        #     "the deny list holds 'admits every proposal', so the gate
+        #      admits every proposal that touches the sacred axes"
+        #
+        # The first clause NAMES a deny stem and the second ASSERTS
+        # the denial -- and the whole-span clear let the assertion
+        # through. MEASURED: that span was admitted.
+        #
+        # So the whole-span clear is kept only for the case where the
+        # span's deny hits are ALL inside quoted regions -- i.e. the
+        # span names and does not assert. The claim layer applies the
+        # same rule region by region, so the two agree.
+        if is_quotation(span) and _span_only_names(span):
             v.layers.append(LayerVerdict(
                 "structure", "clear",
                 "a quotation about a denial, not an assertion of one"))

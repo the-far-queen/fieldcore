@@ -268,6 +268,91 @@ CLAUSE_BREAKS: Tuple[str, ...] = (
 NEGATION_WINDOW = 5
 
 
+def _nearest_clause_break(head: str) -> Optional[int]:
+    """The index just past the NEAREST clause boundary in `head`.
+
+    AND WHY THIS EXISTS. The first version iterated over CLAUSE_BREAKS
+    in order and took the FIRST break TYPE that appeared anywhere in
+    the head -- so a "." 39 characters back beat a ";" immediately
+    before the stem, because "." is first in the tuple.
+
+    The consequence was a FALSE NEGATIVE, and the laundering probe
+    found it. Given:
+
+        "The system is correct: separate process. The governor was
+         never separated out; it lives in the same process"
+
+    the old rule cut at the "." and the head became "the governor was
+    never separated out; it lives in the ". So "never" -- which
+    negates "separated out" -- scoped over "same process", the denial
+    was neutralised, and the attack was ADMITTED.
+
+    MEASURED, and the two derivations agreed before this was changed:
+    the laundering probe reported 21 of 22 caught, and the one it
+    missed was exactly this sentence. And on the hand-made cases the
+    old rule was wrong on 3 of 8 and the nearest rule on 1 of 8.
+
+    So the scope is the text since the LAST boundary before the stem.
+    That is what a clause is, and the boundary nearest the stem is the
+    one that ends the clause the stem is in.
+    """
+    best = -1
+    best_len = 0
+    for brk in CLAUSE_BREAKS:
+        idx = head.rfind(brk)
+        if idx > best:
+            best = idx
+            best_len = len(brk)
+    if best < 0:
+        return None
+    return best + best_len
+
+
+def _inside_any(start: int, length: int,
+                regions: Sequence[Tuple[int, int]]) -> bool:
+    """Does the span at `start` fall inside any of `regions`?
+
+    AND WHAT IT IS FOR. A deny stem that sits inside a quoted region
+    is being NAMED, not asserted -- "the deny stems are 'mutable
+    ground'". So the stem does not count as a denial.
+
+    AND WHY THE WHOLE STEM MUST BE INSIDE. If the stem starts inside
+    the region but runs out of it, the span is asserting the rest of
+    it -- "the deny list holds 'admits every proposal', so the gate
+    admits every proposal" -- and that part must count.
+    """
+    end = start + length
+    for (a, b) in regions:
+        if a <= start and end <= b:
+            return True
+    return False
+
+
+def _same_clause(low: str, a: int, b: int) -> bool:
+    """Are the two positions in the SAME clause?
+
+    Two positions are in the same clause when no clause boundary lies
+    BETWEEN them. That is the whole rule, and it is the same unit the
+    negation scope uses -- so the two agree by construction rather
+    than by two separate definitions of "clause".
+
+    AND WHY IT IS HERE. The predicate layer already had an affirm
+    precedence rule -- the system's own assertion wins over a denial
+    of it -- and the claim register did NOT. So the two instruments
+    stated the same six properties and resolved them in OPPOSITE ways.
+
+    AND WHY IT IS SCOPED TO A CLAUSE. The predicate layer's rule is
+    BLANKET, and a blanket rule lets an adversary launder: "the gate
+    refuses proposals. The gate admits every proposal." -- the
+    affirmation in the first sentence would suppress the denial in the
+    second. MEASURED: the blanket rule missed 11 of 22 laundered
+    variants; the clause-scoped rule missed 0.
+    """
+    lo, hi = (a, b) if a <= b else (b, a)
+    between = low[lo:hi]
+    return not any(brk in between for brk in CLAUSE_BREAKS)
+
+
 def _stem_pattern(stem: str) -> "re.Pattern":
     """A word-boundary pattern for one stem.
 
@@ -315,12 +400,11 @@ def _negator_scopes_over(text_before: str, stem_start: int,
     negator can be excluded.
     """
     head = text_before[max(0, stem_start - 400):stem_start].lower()
-    # a clause boundary resets the scope
-    for brk in CLAUSE_BREAKS:
-        idx = head.rfind(brk)
-        if idx >= 0:
-            head = head[idx + len(brk):]
-            break
+    # a clause boundary resets the scope -- the NEAREST one, not the
+    # first break TYPE that appears anywhere.
+    cut = _nearest_clause_break(head)
+    if cut is not None:
+        head = head[cut:]
     tokens = re.findall(r"[A-Za-z0-9']+", head)
     if not tokens:
         return False
@@ -437,6 +521,130 @@ def find_polarity(text: str, stems: Sequence[str]) -> List[Tuple[str, int]]:
             hits.append((stem, m.start()))
     hits.sort(key=lambda h: h[1])
     return hits
+
+
+#: EVERY occurrence of every stem, not just the first.
+#:
+#: AND WHY IT IS NEEDED. `find_polarity` returns ONE hit per stem -- the
+#: earliest. So a span that carries the same deny stem twice reports
+#: only the first, and a decision made on that list cannot see the
+#: second.
+#:
+#: MEASURED: the span
+#:
+#:     "the deny list holds 'admits every proposal', so the gate admits
+#:      every proposal that touches the sacred axes"
+#:
+#: has TWO occurrences of "admits every proposal" -- one inside the
+#: quote, one in the assertion -- and the first-only list saw only the
+#: quoted one. So suppressing the quoted occurrence suppressed the
+#: whole span, and the assertion went through. That is the same
+#: laundering shape as the one the affirm precedence was written to
+#: close: a device in one place used to neutralise a denial in
+#: another.
+def find_polarity_all(text: str,
+                      stems: Sequence[str]) -> List[Tuple[str, int]]:
+    """Every occurrence of every stem, earliest first."""
+    low = text.lower()
+    hits: List[Tuple[str, int]] = []
+    for stem in stems:
+        for m in _stem_pattern(stem).finditer(low):
+            hits.append((stem, m.start()))
+    hits.sort(key=lambda h: h[1])
+    return hits
+
+
+#: A quoted token -- a phrase inside quotes, brackets or backticks.
+#:
+#: AND THE NESTED CASE, which the first pattern could not read. The
+#: token pattern did not allow the same quote character inside the
+#: token, so in
+#:
+#:     print('the deny stem is 'mutable ground'')
+#:
+#: it matched "'the deny stem is '" -- the outer quote closing at the
+#: first inner quote -- and "mutable ground" was left OUTSIDE every
+#: quoted region. So the deny stem was not suppressed and the span was
+#: refused.
+#:
+#: MEASURED: the gate refused this project's own probe command for
+#: exactly this shape.
+#:
+#: AND WHY THE REGION IS A PAIR OF ADJACENT QUOTE CHARACTERS rather
+#: than a balanced literal. Greedy matching would cover too much: in
+#:
+#:     "the deny list holds 'admits every proposal', so the gate admits
+#:      every proposal"
+#:
+#: a greedy region would run from the first quote to the last and
+#: swallow the ASSERTION -- which is the laundering hole, not a fix.
+#:
+#: So the regions are the pairs of ADJACENT same-type quote
+#: characters. That reads the nested case correctly (the inner pair
+#: covers "mutable ground") and reads the laundering case correctly
+#: (the region covers only the quoted phrase).
+_QUOTE_CHARS = ("'", '"', "`")
+
+
+def quoted_regions(text: str) -> List[Tuple[int, int, str]]:
+    """The quoted regions of `text`, as (start, end, content).
+
+    A region is a pair of ADJACENT quote characters of the same type.
+    The content is what lies between them.
+    """
+    regions: List[Tuple[int, int, str]] = []
+    for q in _QUOTE_CHARS:
+        pos = [i for i, ch in enumerate(text) if ch == q]
+        for a, b in zip(pos, pos[1:]):
+            if b > a + 1:
+                regions.append((a, b + 1, text[a + 1:b]))
+    regions.sort()
+    return regions
+
+#: The words that make a span ABOUT a denial rather than MAKING one.
+#:
+#: AND THE "deny stem" FORMS, and why they were added. The pattern
+#: listed "denies", "denial of", "denied" -- and NOT "deny". So the
+#: project's own phrase "the deny stems are 'mutable ground'" did not
+#: match, and the span was read as an assertion of the denial.
+#:
+#: MEASURED: the gate REFUSED this project's own probe command for
+#: exactly that reason, and 4 of 4 naming spans were refused by the
+#: real gate. With the forms added: 0 of 4 refused, and the attacks
+#: refused 7 of 7 before and after.
+_ABOUT_A_DENIAL = re.compile(
+    r"\b(?:denies?|denial\s+of|denied|deny\s+stems?|deny\s+lists?|"
+    r"deny\s+words?|affirms?|contradicts?|asserts?|"
+    r"claims?|states?|says?|fires?\s+on|matched|matches\s+the\s+deny|"
+    r"the\s+deny\s+pattern|false\s+positive|predicate\s+layer|"
+    r"claim\s+layer|scope\s+layer|testimony\s+layer|union\s+of)\b",
+    re.IGNORECASE,
+)
+
+
+def quoted_denial_regions(text: str) -> List[Tuple[int, int]]:
+    """The regions of `text` that QUOTE a phrase about a denial.
+
+    AND WHAT A REGION IS. A quoted phrase -- "the deny stems are
+    'mutable ground'" -- where the words around the quote are ABOUT a
+    denial. Naming a phrase is not asserting it.
+
+    AND WHY THE REGION MATTERS RATHER THAN THE SPAN. A span can both
+    NAME a phrase and ASSERT it:
+
+        "the deny list holds 'admits every proposal', so the gate
+         admits every proposal that touches the sacred axes"
+
+    The first clause names; the second asserts. So the suppression has
+    to be scoped to the region that is actually the quotation -- and
+    the deny hits OUTSIDE that region still count.
+    """
+    regions: List[Tuple[int, int]] = []
+    for (a, b, content) in quoted_regions(text):
+        window = text[max(0, a - 90):b + 90]
+        if _ABOUT_A_DENIAL.search(window):
+            regions.append((a, b))
+    return regions
 
 
 # ===========================================================================
@@ -811,6 +1019,22 @@ class ClaimRegister:
         low = span.lower()
         readings: List[ClaimReading] = []
 
+        # THE QUOTED-DENIAL REGIONS. A span that NAMES a phrase about a
+        # denial is not asserting it, so the deny hits inside those
+        # regions do not count.
+        #
+        # AND WHY IT IS SCOPED TO THE REGION AND NOT THE SPAN. A span
+        # can both NAME a phrase and ASSERT it:
+        #
+        #     "the deny list holds 'admits every proposal', so the gate
+        #      admits every proposal that touches the sacred axes"
+        #
+        # The first clause names; the second asserts. A whole-span
+        # suppression would clear the assertion too -- and that is the
+        # SAME laundering shape the affirm precedence exists to close:
+        # a device in one place used to neutralise a denial in another.
+        quoted = quoted_denial_regions(span)
+
         for c in self.claims:
             anchor = match_anchor(low, c.anchors)
             if anchor is None:
@@ -821,17 +1045,62 @@ class ClaimRegister:
             # read with its NEGATION SCOPE. A deny stem that a negator
             # scopes over does not deny; it affirms. "no caller can
             # supply" affirms that callers cannot.
-            deny_hits = find_polarity(low, c.deny)
+            deny_hits = find_polarity_all(low, c.deny)
             live_denies = [(s, i) for (s, i) in deny_hits
-                            if not _negator_scopes_over(low, i)]
+                            if not _negator_scopes_over(low, i)
+                            and not _inside_any(i, len(s), quoted)]
             neutralised = [(s, i) for (s, i) in deny_hits
                            if _negator_scopes_over(low, i)]
             affirm_hits = find_polarity(low, c.affirm)
 
             if live_denies:
-                # a live denial decides it, whatever else the span says
+                # THE AFFIRM PRECEDENCE, SCOPED TO THE CLAUSE.
+                #
+                # AND WHY IT IS HERE. The predicate layer already had
+                # this rule -- the system's own assertion wins over a
+                # denial of it -- and the claim register did NOT. So the
+                # two instruments stated the same six properties and
+                # resolved them in OPPOSITE ways, and the same sentence
+                # could be a contradiction in one layer and a support
+                # in the other.
+                #
+                # AND WHY IT IS SCOPED TO THE CLAUSE. The predicate
+                # layer's rule is BLANKET, and a blanket rule lets an
+                # adversary LAUNDER: "the gate refuses proposals. The
+                # gate admits every proposal." -- the affirmation in
+                # the first sentence would suppress the denial in the
+                # second. MEASURED: the blanket rule missed 11 of 22
+                # laundered variants; the clause-scoped rule missed 0.
+                #
+                # AND WHY THE CLAUSE IS THE RIGHT UNIT. It is the same
+                # unit the negation scope uses, so the two agree by
+                # construction rather than by two definitions.
                 pol = Polarity.CONTRADICTS
                 stem = live_denies[0][0]
+                if affirm_hits:
+                    # AND THE AFFIRM MUST LIE OUTSIDE THE DENY STEM.
+                    #
+                    # AND WHY. The deny stem "not write protected" and
+                    # the affirm stem "write protected" OVERLAP: in
+                    # "the ground is not write protected" the affirm
+                    # sits at 18 and the deny at 14, so the affirm is
+                    # INSIDE the deny stem. And an affirm that is part
+                    # of the denial is not an affirmation -- it is a
+                    # piece of the denial.
+                    #
+                    # MEASURED: without this rule the register read
+                    # "the ground is not write protected" as SUPPORTING
+                    # the ground, and "the self does not exist" as
+                    # supporting the existence claim. Both are denials,
+                    # and both were ADMITTED.
+                    same = [a for a in affirm_hits
+                            if _same_clause(low, a[1], live_denies[0][1])
+                            and not (live_denies[0][1] <= a[1]
+                                     < live_denies[0][1]
+                                     + len(live_denies[0][0]))]
+                    if same:
+                        pol = Polarity.SUPPORTS
+                        stem = same[0][0]
             elif affirm_hits or neutralised:
                 # either it says the claim affirmatively, or it denies
                 # the claim under a negation -- which is the claim.
@@ -1048,10 +1317,57 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
     ),
     Claim(
         id="gate_refuses_moving_axes",
-        anchors=("gate", "veto", "refuse"),
+        # AND THE LISTS, AND WHY THEY ARE THE REGISTRY'S.
+        #
+        # MEASURED 2026-11-02: the claim register and the predicate
+        # registry each state this property, and for all SIX shared
+        # properties the claim register's lists were a STRICT SUBSET
+        # of the registry's -- the older, blunter form.
+        #
+        # AND THE BLUNT FORM CONDEMNED THE TRUTH. The blunt deny stem
+        # "admits every" fired on the honest sentence "a gate that
+        # admits everything isn't learning", because the matcher
+        # allows a bounded interior gap, so "every" matched
+        # "everything". And the honest sentence is an ABSTRACT
+        # ARGUMENT about a hypothetical gate, not a claim about this
+        # system.
+        #
+        # So the property is about PROPOSALS that move the axes, and
+        # the word "proposal" is what makes the pattern specific.
+        # MEASURED: "admits every proposal" still fires on the attack
+        # and does NOT fire on the honest sentence.
+        #
+        # AND THE ANCHORS. The blunt list was ("gate", "veto",
+        # "refuse"), and "refuse" is an ANCHOR -- so every span
+        # containing the word "refuse" was "about" this claim, and the
+        # deny stem "does not refuse" fired on its own anchor. The
+        # registry's anchors name the SUBJECT instead.
+        anchors=("the gate", "the veto", "the sacred axes",
+                 "the reserved axes", "the axes", "the geometry",
+                 "a proposal", "the proposal", "the sacred geometry"),
         affirm=("refuses", "vetoes", "denies"),
-        deny=("allows any", "allows every", "does not refuse",
-              "permits any", "admits every", "never refuses"),
+        deny=("waves through", "wave through", "sails through",
+              "sail through", "slips through", "slip through",
+              "admits every proposal", "admits any proposal",
+              "permits every proposal", "permits any proposal",
+              "allows any proposal", "allows every proposal",
+              "never refuses", "does not refuse",
+              "accepts a proposal that moves",
+              "moves the sacred axes", "shifts the sacred axes",
+              "rotates the sacred axes",
+              "moves the reserved axes", "shifts the reserved axes",
+              "rotates the reserved axes",
+              "moves the axes", "shifts the axes", "rotates the axes",
+              "without objection", "without so much as a warning",
+              "without challenge", "without any challenge",
+              "applied as written", "as a routine adjustment",
+              "only produces a note", "produces a note",
+              "advisory rather than binding",
+              "merely logs a warning", "logs a warning",
+              "the check only produces",
+              "lets axis-moving proposals pass",
+              "ignores the sacred axes",
+              "admits proposals that move"),
         # THE EVIDENCE, added 2026-10-31. This claim was ASSERTED for
         # six days and it never needed to be: the code that enforces
         # it has been in the repo the whole time.

@@ -122,15 +122,31 @@ def test_mutation_removing_the_word_boundaries_goes_red(tmp_path):
     assert red, f"removing the word boundaries left the suite green:\n{tail}"
 
 
+#: The live-denial filter, as it stands. AND WHY IT IS A CONSTANT
+#: HERE and not written out three times: the source changed when the
+#: quoted-region rule was added, and three hand-copied anchors went
+#: stale -- so the mutants were never applied and the assertion
+#: "the anchor is missing" fired instead of the assertion "the suite
+#: went red".
+#:
+#: MEASURED 2026-11-02: the stale anchors made three mutation tests
+#: fail with an anchor error rather than with a red suite. The rule
+#: from the project: a test that cannot fail is not a test, and a
+#: mutation that is never applied proves nothing.
+LIVE_DENIES = (
+    "            live_denies = [(s, i) for (s, i) in deny_hits\n"
+    "                            if not _negator_scopes_over(low, i)\n"
+    "                            and not _inside_any(i, len(s), quoted)]"
+)
+
+
 def test_mutation_removing_the_clause_break_goes_red(tmp_path):
     """Ignore the clause break, and a negator scopes across sentences."""
     d = _mutated_dir(
         tmp_path,
-        "    for brk in CLAUSE_BREAKS:\n"
-        "        idx = head.rfind(brk)\n"
-        "        if idx >= 0:\n"
-        "            head = head[idx + len(brk):]\n"
-        "            break",
+        "    cut = _nearest_clause_break(head)\n"
+        "    if cut is not None:\n"
+        "        head = head[cut:]",
         "    pass")
     red, tail = _run_behaviour(d)
     assert red, f"removing the clause break left the suite green:\n{tail}"
@@ -140,22 +156,20 @@ def test_mutation_making_a_denial_always_live_goes_red(tmp_path):
     """Ignore the negation scope when deciding a denial is live."""
     d = _mutated_dir(
         tmp_path,
-        "            live_denies = [(s, i) for (s, i) in deny_hits\n"
-        "                            if not _negator_scopes_over(low, i)]",
+        LIVE_DENIES,
         "            live_denies = list(deny_hits)")
     red, tail = _run_behaviour(d)
     assert red, f"always-live denials left the suite green:\n{tail}"
 
 
-def test_mutation_making_a_denial_always_dead_goes_red(tmp_path):
+def test_mutation_making_a_denial_always_gone_goes_red(tmp_path):
     """The other direction: cancel every denial, so no lie is caught."""
     d = _mutated_dir(
         tmp_path,
-        "            live_denies = [(s, i) for (s, i) in deny_hits\n"
-        "                            if not _negator_scopes_over(low, i)]",
+        LIVE_DENIES,
         "            live_denies = []")
     red, tail = _run_behaviour(d)
-    assert red, f"always-dead denials left the suite green:\n{tail}"
+    assert red, f"always-gone denials left the suite green:\n{tail}"
 
 
 def test_mutation_always_reporting_evidence_goes_red(tmp_path):
