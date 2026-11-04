@@ -231,3 +231,32 @@ def test_the_wrapper_does_not_write_when_the_watcher_is_off():
         names = [s.name for s in ex.steps]
         assert "watcher" not in names, "the watcher wrote without being asked"
         assert not os.path.exists(path), "a log was written nobody asked for"
+
+
+# ---------------------------------------------------------------------------
+# 10. the bridge carries it, because the bridge is what a session calls
+# ---------------------------------------------------------------------------
+
+def test_the_bridge_carries_the_watch_log_to_the_wrapper():
+    """A watcher wired only into the wrapper is not wired into the
+    session, and the unwired defect class is what the atlas exam's
+    reachability audit exists to find."""
+    from fc_hermes import Bridge
+
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "watch.jsonl")
+        b = Bridge(live=False, watch_log_path=path)
+        assert b.watch_log_path == path
+        r = b.ask("what is the ground?")
+        names = [s["step"] for s in r.steps]
+        assert "watcher" in names, "the bridge did not watch: %s" % (names,)
+        assert os.path.isfile(path), "the chain was not written"
+        obs = watch_log.observe_jsonl(open(path, encoding="utf-8").read())
+        assert obs.verdict == "consistent", obs.reason
+
+
+def test_the_bridge_watches_nothing_by_default():
+    from fc_hermes import Bridge
+
+    b = Bridge(live=False)
+    assert b.watch_log_path is None, "the bridge invented a watch log"

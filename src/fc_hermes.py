@@ -120,10 +120,20 @@ class Bridge:
     not silently drop a check.
     """
 
-    def __init__(self, live: Optional[bool] = None):
+    def __init__(self, live: Optional[bool] = None,
+                 watch_log_path: Optional[str] = None):
         from fc_wrapper import FieldCoreWrapper
         self.live = ALLOW_LIVE if live is None else live
-        self._wrapper = FieldCoreWrapper(live=self.live)
+        #: THE WATCH LOG, passed through to the wrapper. The bridge is
+        #: the thing a live session calls, so a watcher wired only into
+        #: the wrapper is not wired into the session -- and that is the
+        #: unwired defect class the atlas exam's reachability audit
+        #: exists to find.
+        #:
+        #: AND IT STAYS NONE BY DEFAULT, so the bridge's behaviour does
+        #: not change unless a caller asks for it.
+        self._wrapper = FieldCoreWrapper(live=self.live,
+                                         watch_log_path=watch_log_path)
 
     # -- the exchange ---------------------------------------------------
 
@@ -160,6 +170,13 @@ class Bridge:
         r.letters = self.survey()
         r.elapsed = time.time() - t0
         return r
+
+    # -- the watch log --------------------------------------------------
+
+    @property
+    def watch_log_path(self) -> Optional[str]:
+        """Where the exchange's chain is written, if anywhere."""
+        return getattr(self._wrapper, "watch_log_path", None)
 
     # -- the survey -----------------------------------------------------
 
