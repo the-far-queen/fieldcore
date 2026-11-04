@@ -179,14 +179,28 @@ def test_the_clean_channel_resolves_and_so_never_escalates(link, core):
     # ever produce two values.
     #
     # **THE INTERFERENCE BETWEEN STALKS IS THE NOISE**, and
-    # `bench_failup.py` measures it directly: the 1-bit DISCRIMINATION
-    # pass rate is 0% at population 2, 50% at population 4, and 16.7%
-    # at 8 and above. So the middle band is real, and the CROWD fills
-    # it.
+    # `bench_failup.py` measures it directly.
     #
-    # **SO THE CORRECT ASSERTION IS ABOUT THE CROWD, NOT ABOUT THE
-    # NOISE FLOOR.** And the crowd's effect is measured by the bench,
-    # not asserted here.
+    # **AND THE NUMBERS THAT USED TO STAND HERE WERE WRONG ABOUT THE
+    # SYSTEM.** They read "the 1-bit DISCRIMINATION pass rate is 0% at
+    # population 2, 50% at population 4, and 16.7% at 8 and above" --
+    # but they were measured on a construction the substrate never
+    # produces: the old bench added the crowd's addresses to the FRAME
+    # and transmitted that, while the substrate transmits the speaker's
+    # address ALONE and the crowd arrives through the channel's taps,
+    # where the equaliser cancels it. So those numbers described a
+    # synthetic construction.
+    #
+    # MEASURED, the system's own read: the equaliser recovers the
+    # transmitted spectrum to 2.9e-15 of the signal scale at
+    # population 4 and 4.8e-14 at population 64, so the channel's
+    # crowd is cancelled by the inversion; the system identifies the
+    # speaker at every population from 3 up; and the width escalates
+    # 1 -> 4 -> 8 -> 16 bits with the channel's tap count. **THE
+    # MIDDLE BAND IS REAL, AND WHAT FILLS IT IS THE GEOMETRY'S
+    # ADDRESS CLASSES** -- two addresses within 1/bins of each other
+    # are one class, and the read cannot separate them however wide
+    # the channel is.
     for nf in (-80.0, -20.0, -5.0):
         probe = IL.InterstalkLink(core=core, noise_floor=nf)
         ex = probe.exchange(ids[0], ids[1], in_view=ids[2:])
@@ -194,18 +208,33 @@ def test_the_clean_channel_resolves_and_so_never_escalates(link, core):
             "the alignment took a middle value %.6f at noise_floor %s"
             % (ex.alignment, nf))
 
-    # AND THE CROWD IS WHAT MOVES THE READING. MEASURED by
-    # bench_failup.py: the 1-bit gate passes 0% of the time at
-    # population 2 and 16.7% at population 8 -- so a channel with
-    # NO interference is trivially readable and a channel with a
-    # crowd is not. **THE BRAIN IS NOT BINARY; THE CROWD IS THE
-    # NOISE.**
+    # AND THE READ IS THE INSTRUMENT THAT MEASURES THE CROWD'S EFFECT.
+    # It must still exist, and it must be the SUBSTRATE'S read -- the
+    # one that transmits the speaker's address alone.
     import bench_failup as BF  # noqa: PLC0415
     pop = BF.make_population(4)
     crowded = BF.discriminate if hasattr(BF, "discriminate") else None
     assert crowded is not None, (
         "the discrimination bench is gone, and it is the instrument "
         "that measures the crowd's effect")
+
+    # AND THE READ MUST BE FAITHFUL TO THE TRANSMITTED PHASE, which is
+    # what the bench's control checks: transmit a DIFFERENT candidate's
+    # address, and the read must name THAT candidate. A read that named
+    # the speaker instead would be naming by position, not reading.
+    _stalks = BF.make_population(4)
+    _link = IL.InterstalkLink(core=WC.WoundCore(stalks=_stalks), bins=32)
+    _ids = [s.id for s in _stalks]
+    _rec = BF._recover(_link, _ids[0], _ids[1], _ids[:4], 32,
+                        BF._address_frame(BF.address_of(_link.stalk(_ids[1])), 32))
+    assert _rec is not None, (
+        "the substrate's read could not recover a frame at population 4")
+    _specs = {c: BF.spectrum(BF._address_frame(BF.address_of(_link.stalk(c)), 32))
+              for c in _ids}
+    _w, _m = BF._winner(BF._score(_rec, _specs))
+    assert _w == _ids[1], (
+        "the read named %r when %r's address was transmitted, so it is "
+        "not reading the transmitted phase" % (_w, _ids[1]))
 
 
 def test_the_ledger_shows_the_population(link, core):

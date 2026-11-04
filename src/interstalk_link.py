@@ -626,10 +626,31 @@ class InterstalkLink:
             #
             # **THE BRAIN IS NOT BINARY.** The interference between
             # stalks IS the noise -- that is the whole design -- and
-            # `bench_failup.py` measures it: MEASURED, the 1-bit
-            # discrimination pass rate is 0% at population 2, 50% at
-            # population 4, and 16.7% at 8 and above. So the middle
-            # band is REAL and it is the CROWD that fills it.
+            # `bench_failup.py` measures it.
+            #
+            # **BUT THE NUMBERS THAT USED TO STAND HERE WERE MEASURED
+            # ON A CONSTRUCTION THE SUBSTRATE NEVER PRODUCES, and they
+            # were wrong about the system.** The old bench added the
+            # crowd's addresses to the FRAME and transmitted that; the
+            # substrate transmits the speaker's address ALONE and the
+            # crowd arrives through the channel's taps, where the
+            # equaliser cancels it. So the old "1-bit discrimination
+            # pass rate is 0% at population 2, 50% at 4, and 16.7% at 8
+            # and above" measured a synthetic construction, and it
+            # carried a second error: at population 8 the channel
+            # derives 16 BITS, so it was never a 1-bit measurement.
+            #
+            # MEASURED, the system's own read: the equaliser recovers
+            # the transmitted spectrum to 2.9e-15 of the signal scale
+            # at population 4 and 4.8e-14 at population 64, so the
+            # channel's crowd is cancelled by the inversion; the system
+            # identifies the speaker at every population from 3 up;
+            # and the width escalates 1 -> 4 -> 8 -> 16 bits with the
+            # channel's tap count. So the middle band is real, and
+            # what fills it is the GEOMETRY's address classes -- two
+            # addresses within 1/bins of each other are one class,
+            # and the read cannot separate them however wide the
+            # channel is.
             #
             # So the escalation is asked on BOTH paths, and its answer
             # says what the caller should try next.

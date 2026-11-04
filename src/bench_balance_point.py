@@ -11,8 +11,8 @@ THE QUESTION, verbatim, 2026-10-25:
 
 WHAT WAS ALREADY BUILT, and what it does NOT answer
 ---------------------------------------------------
-`bench_failup.py` measured the 1-bit gate against the population and
-found the pass rate COLLAPSING as the population grows:
+`bench_failup.py` measured the discrimination against the population,
+and its OLD numbers looked like this:
 
     population   bins   identified   refused    margin
     2              32     0 (0%)        0        0.0000
@@ -22,6 +22,25 @@ found the pass rate COLLAPSING as the population grows:
     32            128     3 (17%)      15        2.3769
     64            256     0 (0%)       18        2.0081
     128           512     0 (0%)       18        1.7751
+
+**THOSE NUMBERS WERE MEASURED ON A CONSTRUCTION THE SUBSTRATE NEVER
+PRODUCES, AND THEY WERE WRONG ABOUT THE SYSTEM.** The old bench built
+a FRAME carrying the speaker's address PLUS the crowd's addresses
+added to the frame itself, and transmitted that. The substrate
+transmits the SPEAKER'S ADDRESS ALONE; the crowd arrives through the
+channel's taps, where the equaliser cancels it. So the collapsing pass
+rate described a synthetic construction, and it carried a second error:
+at population 8 the channel derives 16 BITS, so it was never a 1-bit
+measurement.
+
+**MEASURED, the system's own read:** the equaliser recovers the
+transmitted spectrum to 2.9e-15 of the signal scale at population 4
+and 4.8e-14 at population 64, so the channel's crowd is cancelled by
+the inversion; the system identifies the speaker at every population
+from 3 up; and the width escalates 1 -> 4 -> 8 -> 16 bits with the
+channel's tap count. What actually limits the read is the GEOMETRY's
+address classes -- two addresses within 1/bins of each other are one
+class.
 
 That is a PASS RATE, and a pass rate cannot say WHERE the balance
 point is, because a pass rate confounds three different limits:

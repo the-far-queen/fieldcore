@@ -31,11 +31,28 @@ measure DIFFERENT THINGS. MEASURED 2026-11-01:
                           six conditions (two crowd models x three
                           crowd amplitudes).
 
-    bench_failup          measures the 1-bit DISCRIMINATION pass rate
-                          -- can the receiver pick WHICH stalk spoke
-                          out of the mixture. Measured, 0% at
-                          population 2, 50% at 4, 16.7% at 8 and
-                          above.
+    bench_failup          measures the DISCRIMINATION -- can the
+                          receiver pick WHICH stalk spoke out of the
+                          mixture. **THE OLD NUMBERS HERE WERE
+                          MEASURED ON A CONSTRUCTION THE SUBSTRATE
+                          NEVER PRODUCES.** The old bench added the
+                          crowd's addresses to the FRAME; the
+                          substrate transmits the speaker's address
+                          ALONE and the crowd arrives through the
+                          channel's taps, where the equaliser cancels
+                          it. So the old "0% at population 2, 50% at
+                          4, 16.7% at 8 and above" described a
+                          synthetic construction, and it carried a
+                          second error: at population 8 the channel
+                          derives 16 BITS, so it was never a 1-bit
+                          measurement.
+                          MEASURED, the system's own read: it
+                          identifies the speaker at every population
+                          from 3 up, and the width escalates
+                          1 -> 4 -> 8 -> 16 bits with the channel's
+                          tap count. What limits the read is the
+                          GEOMETRY's address classes -- two addresses
+                          within 1/bins of each other are one class.
 
     **SO THE PEAKS AT 3 AND 4 ARE NOT A CONTRADICTION -- THEY ARE TWO
     DIFFERENT FUNCTIONS OF P.** The surplus is a CAPACITY question
