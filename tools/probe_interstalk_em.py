@@ -36,10 +36,26 @@ THE FIVE MEASUREMENTS
      remains.
 
   5 **AND THE SAME COUPLING IS BOTH THE SIGNAL AND THE NOISE.**
-     MEASURED by `bench_failup.py`, the 1-bit DISCRIMINATION pass
-     rate is 0% at population 2, 50% at 4, 16.7% at 8 and above --
-     because the receiver is offered a MIXTURE of the same taps that
-     carry the signal.
+     **BUT THE NUMBERS THAT USED TO STAND HERE WERE WRONG ABOUT THE
+     SYSTEM.** They read "the 1-bit DISCRIMINATION pass rate is 0% at
+     population 2, 50% at 4, 16.7% at 8 and above" -- measured on a
+     construction the substrate never produces, where the crowd's
+     addresses were added to the FRAME instead of arriving through the
+     channel's taps, where the equaliser cancels them.
+
+     MEASURED, the system's own read: the equaliser recovers the
+     transmitted spectrum to 2.9e-15 of the signal scale at
+     population 4 and 4.8e-14 at population 64, so the channel's
+     crowd IS cancelled by the inversion; the system identifies the
+     speaker at every population from 3 up; and what limits the read
+     is the GEOMETRY's address classes -- two addresses within
+     1/bins of each other are one class, and MEASURED population 8
+     gives 2 classes for 8 stalks.
+
+     **SO THE CROWD IS STILL REAL -- it is just not the crowd the old
+     number described.** The interference between stalks is still the
+     noise, and it still arrives through the same taps that carry the
+     signal. What changed is WHICH quantity the old number measured.
 
 **SO THE ANSWER TO BOBBY'S QUESTION IS: IT IS BOTH, AND THE DESIGN
 DECISION FOLLOWS FROM WHICH ONE YOU ARE READING.**
