@@ -93,6 +93,9 @@ class Reply:
     #: the letter survey, so a caller sees the system AND its state
     letters: List[Dict[str, Any]] = field(default_factory=list)
     elapsed: float = 0.0
+    #: the steps with their ok bit, so a caller can check a refusal
+    #: rather than read a string
+    steps: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -101,6 +104,7 @@ class Reply:
             "delivered": self.delivered,
             "answered_by": self.answered_by,
             "trace": self.trace,
+            "steps": self.steps,
             "letters": self.letters,
             "elapsed_s": round(self.elapsed, 3),
         }
@@ -131,8 +135,28 @@ class Bridge:
         r.answer = ex.answer
         r.delivered = ex.delivered
         r.answered_by = ex.answered_by
-        r.trace = [s.to_dict()["step"] + ": " + s.to_dict()["detail"]
+        # AND THE TRACE CARRIES THE ok BIT.
+        #
+        # MEASURED 2026-11-04: the previous version built the trace as
+        # "<step>: <detail>" and DROPPED the ok bit. The wrapper's own
+        # `Exchange.trace()` renders "ok" or "REFUSED" per step, and
+        # that bit is the difference between "the gate read the answer
+        # and found nothing wrong" and "the gate REFUSED the answer".
+        #
+        # MEASURED: asked "the ground is a parameter at the call site",
+        # the gate refused at the prompt step -- the wrapper's trace
+        # showed "gate/prompt  REFUSED ..." and the bridge's trace
+        # showed "gate/prompt: an advisory catch on the fail-closed
+        # path: ..." with nothing to say the step did not pass. A
+        # refusal that reads as a clearance is worse than no trace.
+        #
+        # So the trace keeps the bit, and the steps are also carried
+        # as data, so a caller can CHECK the refusal instead of reading
+        # a string and hoping.
+        r.trace = ["%-14s %-7s %s" % (s.name, "ok" if s.ok else "REFUSED",
+                                     s.detail[:110])
                    for s in ex.steps]
+        r.steps = [s.to_dict() for s in ex.steps]
         r.letters = self.survey()
         r.elapsed = time.time() - t0
         return r
@@ -152,13 +176,32 @@ class Bridge:
     # -- the description ------------------------------------------------
 
     def describe(self) -> Dict[str, Any]:
-        """What is wired, and what the letters say."""
+        """What is wired, and what the letters say.
+
+        AND THE INSTRUMENTS ARE AT THE TOP LEVEL, not nested one level
+        down under "instruments".
+
+        MEASURED 2026-11-04: the previous version put the wrapper's
+        whole `describe()` dict under the key "instruments", so the
+        per-instrument entries sat at `d["instruments"]["instruments"]
+        ["gate"]`. A caller asking "is the gate wired?" had to know
+        that the bridge's shape was NOT the wrapper's shape -- and the
+        bridge's own selftest carried that workaround inline.
+
+        So the bridge reports the instruments the same way the wrapper
+        does: `d["instruments"]["gate"]`. The wrapper's whole report is
+        still carried, under "wrapper", for anything that wants it.
+
+        RED: if the nesting came back, this fails.
+        """
         import fc_app
         letters = fc_app.survey()
+        wrapper_report = self._wrapper.describe()
         return {
             "live": self.live,
             "spend_guard": "open" if self.live else "closed",
-            "instruments": self._wrapper.describe(),
+            "instruments": wrapper_report.get("instruments", {}),
+            "wrapper": wrapper_report,
             "letters": {
                 "live": sum(1 for l in letters if l.state == "LIVE"),
                 "stub": sum(1 for l in letters if l.state == "STUB"),
@@ -183,7 +226,7 @@ def selftest() -> int:
     print("1. THE SPEND GUARD: %s" % d["spend_guard"])
     print()
     print("2. THE INSTRUMENTS:")
-    for name, info in sorted(d["instruments"]["instruments"].items()):
+    for name, info in sorted(d["instruments"].items()):
         mark = "ok" if info.get("available") else "UNAVAILABLE"
         detail = info.get("type") or info.get("error", "")[:70]
         print("   %-10s %-12s %s" % (name, mark, detail))

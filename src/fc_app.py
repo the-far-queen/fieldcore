@@ -487,14 +487,58 @@ def letter_s() -> Dict[str, Any]:
     target = b.boundaries.get("no_hallucination")
     forced = None
     if target is not None:
-        target.check_fn = lambda: False
-        after = b.check_all()
-        forced = {
-            "allowed": bool(after.get("allowed")),
-            "violated": list(after.get("violated", [])),
-            "critical_violated": list(after.get("critical_violated", [])),
-        }
-        target.check_fn = lambda: True
+        # AND THE PROBE RUNS ON A COPY, NOT ON THE LIVE SYSTEM.
+        #
+        # MEASURED 2026-11-04: the previous version mutated the LIVE
+        # global boundary -- it set `no_hallucination`'s check to
+        # `lambda: False`, measured, and then restored a FRESH
+        # `lambda: True` instead of the function it had replaced.
+        #
+        # Two defects in one line, and both measured:
+        #
+        #   1. The restore wrote the WRONG function. A boundary that
+        #      another part of the system had ARMED was left
+        #      permanently DISARMED, because the restore wrote a
+        #      function that always passes.
+        #      MEASURED: with `no_hallucination` armed to refuse, the
+        #      survey ran and `check_all()` afterwards returned
+        #      allowed=True, violated=[] -- the armed boundary had
+        #      been silently turned off.
+        #
+        #   2. And `fc_hermes.Bridge.describe()` calls the survey, so
+        #      DESCRIBING the system disarmed it. A status report that
+        #      weakens the thing it reports on is worse than no report.
+        #
+        # So the forced-failure measurement now runs on a COPY of the
+        # defense, carrying the live check functions across so it
+        # measures the same defenses. The live system is never
+        # mutated at all -- not even temporarily. A probe that leaves
+        # the system weaker than it found it is not a probe; it is a
+        # defect with a measurement attached.
+        probe = boundaries.BoundaryDefense()
+        for name, bound in b.boundaries.items():
+            if name in probe.boundaries:
+                probe.boundaries[name].check_fn = bound.check_fn
+        ptarget = probe.boundaries.get("no_hallucination")
+        if ptarget is not None:
+            ptarget.check_fn = lambda: False
+            after = probe.check_all()
+            forced = {
+                "allowed": bool(after.get("allowed")),
+                "violated": list(after.get("violated", [])),
+                "critical_violated": list(after.get("critical_violated", [])),
+            }
+        # AND THE LIVE CHECK IS STILL VERIFIED TO BE UNTOUCHED. This is
+        # the second line of defence: if a future edit reintroduces a
+        # mutation of the live global, this reports the difference
+        # rather than hiding it.
+        live_after = b.check_all()
+        forced = forced or {}
+        forced["live_unchanged"] = bool(
+            live_after.get("allowed") == before.get("allowed")
+            and list(live_after.get("violated", []))
+            == list(before.get("violated", []))
+        )
     return {
         "boundaries": len(b.boundaries),
         "allowed_by_default": bool(before.get("allowed")),
