@@ -250,7 +250,8 @@ class FieldCoreWrapper:
 
     def __init__(self, live: Optional[bool] = None, library_path: Optional[str] = None,
                  timeout: int = 180, max_tokens: int = 4000,
-                 client: Optional[Any] = None):
+                 client: Optional[Any] = None,
+                 watch_log_path: Optional[str] = None):
         self.live = ALLOW_LIVE if live is None else live
         self.timeout = timeout
         self.max_tokens = max_tokens
@@ -273,6 +274,18 @@ class FieldCoreWrapper:
         #: is the governor process READY? the handshake is paid for
         #: when it is created, so every ask is a steady-state ask.
         self._governor_ready = False
+        #: THE WATCHER. It watches THIS exchange's own steps, and its
+        #: observer re-derives them afterwards. It is a DUTY added to
+        #: the instruments the project already had -- it is not a new
+        #: detection layer, because it decides nothing: the gate still
+        #: decides whether a reply is true.
+        #:
+        #: AND IT IS OFF BY DEFAULT, because a watcher that writes a
+        #: file on every exchange changes the system's behaviour, and
+        #: that has to be a decision rather than a side effect. A
+        #: caller that wants it passes `watch_log_path`.
+        self._watcher = None
+        self.watch_log_path = watch_log_path
 
     # -- the instruments -------------------------------------------------
 
@@ -560,7 +573,85 @@ class FieldCoreWrapper:
 
     # -- one exchange ----------------------------------------------------
 
+    @property
+    def watcher(self):
+        """THE WATCHER, and its observer.
+
+        AND WHY IT IS A PROPERTY AND NOT A STEP. The watcher watches
+        the exchange; it cannot watch itself while it is being built.
+        So it is resolved here and the exchange asks it for itself at
+        the end.
+
+        AND IT IS LAZY, like every other instrument, so a wrapper whose
+        watcher is unavailable says so in `describe()` rather than
+        making the module unimportable.
+        """
+        if self._watcher is None:
+            import watch_log
+            self._watcher = watch_log.Watcher()
+        return self._watcher
+
+    def _watch_exchange(self, ex: Exchange) -> None:
+        """Watch this exchange, if the watcher is on.
+
+        AND THE THREE DUTIES, and each of them re-derives rather than
+        reports:
+
+          1. EVERY STEP, with its own verdict, so the chain and the
+             trace cannot disagree.
+          2. THE ORDER. The order IS the architecture -- the grounding
+             must come before the governor -- and a trace reads the
+             same either way unless the order is checked.
+          3. THE GATE'S VERDICT, re-run on the same answer. A gate
+             that changes its mind makes everything downstream of it
+             non-deterministic, and nothing else would say so.
+
+        AND IT NEVER REFUSES. This is a watcher, not a gate: it
+        records what happened and it names a fault when it finds one,
+        and the exchange still goes out. A watcher that refused would
+        be a second gate, and the project has been explicit that it
+        does not want one.
+        """
+        if not self.watch_log_path:
+            return
+        try:
+            import watch_log
+            w = self.watcher
+            for step in ex.steps:
+                w.watch_step(step)
+            w.watch_order([s.name for s in ex.steps])
+            # the gate's verdict on the ANSWER, re-derived
+            gate_answer = next((s for s in ex.steps
+                                if s.name == "gate/answer"), None)
+            if gate_answer is not None:
+                w.watch_gate_verdict(ex.answer, gate_answer.ok,
+                                     gate_answer.detail, self.gate)
+            w.watch_summary()
+            watch_log.append_log(self.watch_log_path, w.chain)
+            ex.steps.append(Step("watcher", True,
+                                  "watched %d steps; the chain is on disk"
+                                  % len(w.chain.entries), time.time()))
+        except Exception as exc:  # noqa: BLE001 -- a watcher never blocks
+            ex.steps.append(Step("watcher", False,
+                                  "the watcher could not record: %r" % (exc,),
+                                  time.time()))
+
     def ask(self, prompt: str, learn: bool = True) -> Exchange:
+        """One exchange through the whole system, watched.
+
+        AND WHY THE WATCH IS HERE AND NOT INSIDE THE BODY. The body has
+        several early returns -- one per refusal -- and a watcher that
+        has to be called at each of them is a watcher that will be
+        forgotten at one of them. So the body is `_ask` and this is the
+        thin wrapper that watches whatever came back, refused or not.
+
+        AND THE WATCHER NEVER BLOCKS. It is a duty, not a gate.
+        """
+        ex = self._ask(prompt, learn=learn)
+        self._watch_exchange(ex)
+        return ex
+
+    def _ask(self, prompt: str, learn: bool = True) -> Exchange:
         """One exchange through the whole system.
 
         AND THE ORDER, and it is the architecture:
