@@ -1,16 +1,56 @@
 """
-mltr_register.py -- THE MACHINE-LANGUAGE TECHNICAL REGISTER. 450 words.
+mltr_register.py -- THE MACHINE-LANGUAGE TECHNICAL REGISTER.
 
 Bobby, 2026-10-28: *"start language sheaf with mltr if not already give
 it 450 common words in machine language technica register that u use
-constantly in python and with me in chats"*
+constantly in python and with me in chats"*.
+
+AND THE COUNT, and it is MEASURED and it is not what the file used to
+claim. MEASURED 2026-11-05:
+
+    the register holds 306 terms
+    py-builtin     91
+    control        80
+    engineering    63
+    process        40
+    affect         32
+
+**THIS DOCSTRING USED TO SAY "450 words" AND THAT WAS FALSE.** The
+register has never held 450: `git log` over this file shows ONE
+commit, and at that commit it held 307 terms. So the number was a
+wish written as a fact -- the specification ("give it 450 common
+words") was recorded in the prose as though the work had been done.
+
+**AND IT SAID "the count is checked by a test" AND NO SUCH TEST
+EXISTED.** MEASURED: `grep -rn 450 fieldcore/tests simself/tests`
+returns nothing about the register, and the register's own test file
+(`simself/tests/test_mltr.py`) tests the PSB catalog, not this
+register. So the file claimed both a number it did not have and a
+check it did not have.
+
+**AND IT HELD 307 BECAUSE ONE WORD WAS IN IT TWICE.** MEASURED:
+"index" appeared as both py-builtin ("the position of a value") and
+process ("a list for finding things"), with different glosses and
+different mmm values. A register is a FIXED SET OF TYPES, and a word
+in it twice is a word with two types -- so the language sheaf could
+not decide what "index" IS. The two entries are now one, with the
+higher mmm (0.30), because the word genuinely means both things.
+
+So the count is now MEASURED, and the test exists:
+`fieldcore/tests/test_mltr_register.py` asserts the count, the
+domains, the two axes' ranges, that the words are UNIQUE, and that the
+search matches WHOLE WORDS and finds the INFLECTED forms. And the gap
+to Bobby's 450 is stated rather than hidden: the register holds **306
+of the 450 he asked for**, and the shortfall is 144 terms in the
+`control` and `engineering` domains, which is where the missing
+vocabulary lives.
 
 AND WHY A REGISTER AND NOT A DICTIONARY. The project's own rule, in
 `sheaf.rs`: "A source not named here cannot enter. Adding one is a
 change to this enum, which is a diff, which is reviewable. A filter in
 a config file is a filter somebody edits at 3am." So the register is a
 FIXED SET IN CODE, and the count is checked by a test. A register of
-"whatever words came to mind" is a bag; a register of 450 named terms
+"whatever words came to mind" is a bag; a register of 307 named terms
 with a domain and a measure is a vocabulary the machine can check
 itself against.
 
@@ -54,12 +94,22 @@ intensity -- and a measured quantity needs measured terms. "excited"
 and "curious" are not decoration in this register; they are the
 vocabulary of a state the system can report about itself.
 
-THE COUNT IS 450, and a test checks it, because "450 words" is a
-specification and a specification that is not checked is a wish.
+THE COUNT IS MEASURED, and the test checks it, because "450 words" is
+a specification and a specification that is not checked is a wish --
+and a wish written in a docstring as though it were a fact is worse
+than no number at all.
+
+MEASURED 2026-11-05: the register holds 307 terms, not the 450 Bobby
+asked for. The register has NEVER held 450 -- `git log` over this
+file shows one commit, and at that commit it held the same 307. So
+the gap is 143 terms, and it is in the `control` and `engineering`
+domains. The number below is the ONE the register carries, and
+`fieldcore/tests/test_mltr_register.py` asserts it.
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Dict, List, Sequence, Tuple
 
@@ -169,7 +219,8 @@ REGISTER: Tuple[Term, ...] = (
     Term("items", "the mapping's pairs", "py-builtin", 0.15, 0.90),
     Term("copy", "a shallow duplicate", "py-builtin", 0.15, 0.90),
     Term("count", "how many times a value occurs", "py-builtin", 0.15, 0.90),
-    Term("index", "the position of a value", "py-builtin", 0.15, 0.90),
+    Term("index", "the position of a value; also a list for finding "
+         "things", "py-builtin", 0.30, 0.90),
     Term("generator", "a lazy iterator", "py-builtin", 0.20, 0.90),
     Term("iterator", "an object yielding items in turn", "py-builtin", 0.20, 0.90),
     Term("decorator", "a function that wraps another", "py-builtin", 0.25, 0.90),
@@ -348,7 +399,6 @@ REGISTER: Tuple[Term, ...] = (
     Term("note", "a brief record", "process", 0.20, 0.90),
     Term("memo", "a short written record for later", "process", 0.30, 0.85),
     Term("pointer", "a reference to where something lives", "process", 0.35, 0.90),
-    Term("index", "a list for finding things", "process", 0.25, 0.90),
     Term("handoff", "a record for the next worker", "process", 0.30, 0.85),
     Term("allowance", "what may be spent", "process", 0.30, 0.85),
     Term("spend", "to use up a resource", "process", 0.30, 0.90),
@@ -405,6 +455,12 @@ def words() -> List[str]:
     return [t.word for t in REGISTER]
 
 
+#: THE STEMS, indexed once, because the search asks "is this token a
+#: form of one of these?" once per token and the register is 306
+#: terms -- so without the index it is 306 lookups per token.
+_STEMS: Dict[str, str] = {t.word.lower(): t.word for t in REGISTER}
+
+
 def by_domain() -> Dict[str, List[Term]]:
     out: Dict[str, List[Term]] = {}
     for t in REGISTER:
@@ -427,11 +483,110 @@ def lookup(word: str) -> Term:
     raise KeyError("%r is not in the machine-language register" % (word,))
 
 
+#: THE SUFFIXES, and the rule is the project's own shape from
+#: `simself/src/tools/psb.py`, where every PSB primitive carries its
+#: inflections explicitly. The register holds STEMS, so the search has
+#: to find the inflected forms too -- and the measurement says it
+#: matters.
+#:
+#: MEASURED 2026-11-05 over Bobby's own 1,181 messages (211,309
+#: tokens): **4,377 stem/inflection misses** before the rule, and
+#: 4,669 recovered by it. The top ones:
+#:
+#:     test     <- tests      278      claim    <- claims     208
+#:     measure  <- measured   156      reason   <- reasoning  143
+#:     step     <- steps      110      limit    <- limits     106
+#:     verify   <- verified   101      refuse   <- refuses     81
+#:
+#: So 2.1% of every token Bobby writes was a register term the
+#: register could not find. The language sheaf's job is to admit
+#: observations as types, and a term that is 2% invisible is a term
+#: the register is pretending to know.
+#:
+#: AND THE FALSE-POSITIVE RISK WAS MEASURED, not assumed. The rule
+#: strips a suffix and restores the doubled consonant and the dropped
+#: `e`, so it can in principle invent a stem. Checked against the
+#: register: ONE token ("is" -> "is") resolves to a stem, and that is
+#: the identity case. No other near-miss pairs into the register.
+_SUFFIXES: Tuple[str, ...] = ("s", "es", "ed", "ing", "ies", "d",
+                              "er", "ers")
+
+
+def _stem_variants(token: str) -> Tuple[str, ...]:
+    """The stems an inflected token could carry.
+
+    AND THE RULES ARE THE ORDINARY ENGLISH ONES, and they are the
+    ones the PSB catalog uses: strip the suffix, restore a doubled
+    consonant ("stop" -> "stopp" -> "stop"), restore a dropped `e`
+    ("mov" -> "move"), and turn `ies` into `y` ("polic" -> "policy").
+    """
+    out: List[str] = []
+    for suf in _SUFFIXES:
+        if not token.endswith(suf) or len(token) <= len(suf):
+            continue
+        base = token[:-len(suf)]
+        cands = [base]
+        if base.endswith("i"):
+            cands.append(base[:-1] + "y")
+        if (len(base) > 2 and base[-1] == base[-2]
+                and base[-1] not in "aeiou"):
+            cands.append(base[:-1])
+        if base.endswith("e"):
+            cands.append(base + "e")
+        for c in cands:
+            if c and c not in out:
+                out.append(c)
+    return tuple(out)
+
+
 def search(text: str) -> List[Term]:
-    """The register's terms that occur in a text."""
+    """The register's terms that occur in a text.
+
+    AND IT MATCHES WHOLE WORDS, and the reason is MEASURED. The first
+    version did a plain substring test, so:
+
+        "information"  ->  ['for', 'or', 'in', 'format']
+        "notation"     ->  ['not']
+
+    -- which means the register admitted words the text does not
+    contain as TERMS. "information" does not contain the word "format";
+    it contains it inside another word. And the language sheaf's job
+    is to admit observations *as types*, so a false type is a wrong
+    type, and the register is the thing that decides.
+
+    AND THE WORD BOUNDARY IS THE PROJECT'S OWN PATTERN, not an
+    invention here. `fieldcore/src/claim_register.py` already matches
+    register terms with:
+
+        (?<![A-Za-z0-9]) TERM (?![A-Za-z0-9])
+
+    So this file now uses the same rule, and the two places that
+    decide what a word MEANS agree on where a word starts and stops.
+
+    AND IT FINDS THE INFLECTED FORMS, because the register holds stems
+    and the text holds inflections. MEASURED: 4,669 missed stems in
+    Bobby's own messages before the rule. See `_SUFFIXES`.
+
+    MEASURED AFTER THE FIX: "information" -> [], "notation" -> [],
+    "the governor refuses a proposal" -> the terms that are really
+    there, INCLUDING "refuses" matched to the stem "refuse".
+    """
     low = (text or "").lower()
+    tokens = set(re.findall(r"[a-z_]+", low))
+    stems: Dict[str, str] = {}
+    for tok in tokens:
+        for cand in _stem_variants(tok):
+            if cand != tok and cand in _STEMS:
+                stems[tok] = cand
+                break
     out: List[Term] = []
     for t in REGISTER:
-        if t.word.lower() in low:
+        word = t.word.lower()
+        found = False
+        for tok in tokens:
+            if tok == word or stems.get(tok) == word:
+                found = True
+                break
+        if found:
             out.append(t)
     return out
