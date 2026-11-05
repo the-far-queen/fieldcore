@@ -65,9 +65,21 @@ because it is the difference between a loop that helps and a loop that
 misleads: **this loop can only find problems that FAIL SOMETHING.** A
 failure the substrate cannot see is invisible to it. So the loop's
 coverage is exactly the coverage of the atlas's checks, and the atlas is
-11 of 23 areas. The other 12 areas are the ones this loop cannot see
-yet -- and the atlas's TODO list is therefore the loop's TO-DO list, in
-the most literal sense.
+now 23 of 23 areas implemented -- 21 of 23 PASS, with the two failures
+being areas 6 and 8 grading a real transcript and finding real
+untraceable numbers in it.
+
+AND THE LIMIT IS STILL A LIMIT, and it moved rather than disappeared.
+When this was written the atlas covered 11 of 23 areas and the other 12
+were holes; the loop could not see them. The eight holes were then
+built (areas 7, 11, 12, 13, 19, 20, 21, 22), so the atlas now grades
+all 23. But two of the new areas -- 19, tools and 21, initiative -- need
+an EXECUTOR and a directory to act in, and area 13, adversarial, needs
+a crafted attack; this loop generates none of those, so it still
+cannot see them. The atlas's coverage of THIS LOOP's defects is
+narrower than the atlas's coverage of the substrate, and the loop's
+TO-DO list is the atlas's list of areas that need something this loop
+does not produce.
 
 Run:
     python src/creative.py --selftest

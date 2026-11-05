@@ -250,7 +250,24 @@ def test_agrees_with_the_five_copies_it_replaces():
         import tiniest_core as tc
     finally:
         sys.path.pop(0)
-    for emb in (GOOD, ORTHOGONAL, OVERSIZE, ZERO, np.full(8, 0.5)):
+    # AND THE NON-FINITE CASES ARE IN THIS LIST NOW.
+    #
+    # MEASURED 2026-11-05: the list was (GOOD, ORTHOGONAL, OVERSIZE,
+    # ZERO, np.full(8, 0.5)) -- and it did NOT include NaN. So the
+    # agreement test could not see the split that area 13 of the
+    # atlas-exam found: `tiniest_core.gate` did not test finiteness,
+    # while the canonical gate did, so the SAME NaN packet was refused
+    # by one and admitted by the other. The copy was FIXED (the
+    # finiteness check is now in `tiniest_core.gate`), but the
+    # agreement test could not see it either way -- a fix with no
+    # test that can fail is a fix that can be undone silently.
+    #
+    # So NaN and the infinities are in the list now, and the reason
+    # string is compared too, because a copy that refuses for a
+    # DIFFERENT reason is still a split in the policy.
+    for emb in (GOOD, ORTHOGONAL, OVERSIZE, ZERO, np.full(8, 0.5),
+                np.full(8, np.nan), np.full(8, np.inf),
+                np.full(8, -np.inf), np.array([np.nan] + [0.0] * 7)):
         allow, kind = G.gate(emb, PSI0)
         legacy_ok, legacy_kind = tc.gate(emb, PSI0)
         assert allow == legacy_ok, emb

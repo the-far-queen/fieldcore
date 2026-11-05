@@ -14,13 +14,25 @@ WHAT ALREADY EXISTED, MEASURED BEFORE THIS FILE WAS WRITTEN:
     fieldcore python   1195 passed, 1 skipped, 1 xfailed  (pytest, 103.91s)
     fieldcore rust      105 passed  (80 lib + 25 integration, cargo +gnu)
     simself             646 passed, 2 skipped                (pytest, 109.70s)
-    atlas-exam          11 of 23 areas PASS, 8 not implemented
+    atlas-exam          23 of 23 areas implemented, 21 PASS
     fc_wrapper          8 of 8 instruments wired, selftest green
 
 SO THE PROBLEM WAS NEVER "the pieces do not exist". The pieces exist and
 they pass. The problem was that there was no ONE PLACE where the ten
 lettered modules are all visible at once, and where a reader can see
 which are live, which are stubbed, and which are dark.
+
+AND THE ATLAS LINE IS NOW MEASURED DIFFERENTLY. It used to say "11 of 23
+areas PASS, 8 not implemented", and it was TRUE when it was written. The
+eight unimplemented areas were then BUILT -- areas 7, 11, 12, 13, 19, 20,
+21 and 22 -- and the exam now runs 21 of 23 PASS, with the two failures
+being areas 6 and 8 grading a real transcript and finding real
+untraceable numbers in it. Those two are FAILING HONESTLY, which is the
+exam doing its job.
+
+AND "implemented" is now READ FROM THE EXAM'S OWN REGISTRY rather than
+sniffed from its source text, so the number above is a measurement and
+not a guess. The registry is `atlas-exam/src/exam/areas.py`.
 
 THE TEN LETTERS, from fieldcore/PROJECT.md:
 
@@ -444,32 +456,84 @@ def letter_m() -> Dict[str, Any]:
 @_letter("Q", "qualification", "what may be promoted. atlas-exam",
          "atlas-exam/src/exam/")
 def letter_q() -> Dict[str, Any]:
-    from exam import AREAS
-    from exam import cli as exam_cli
-    import inspect
-    implemented, unimplemented = [], []
-    for number, name in AREAS:
-        fn = None
-        for attr in dir(exam_cli):
-            if attr.startswith("area_%d_" % number):
-                fn = getattr(exam_cli, attr)
-                break
-        if fn is None:
-            unimplemented.append(name)
-            continue
-        try:
-            src = inspect.getsource(fn)
-        except Exception:
-            src = ""
-        if "todo(" in src and "make(" not in src:
-            unimplemented.append(name)
-        else:
-            implemented.append(name)
+    """Read the exam's AREA REGISTRY, not a guess about its source.
+
+    AND WHY THE REGISTRY, AND NOT A SNIFF. MEASURED 2026-11-05: this
+    letter used to decide whether an area was implemented by reading
+    the SOURCE TEXT of `exam/cli.py` and looking for the string
+    "todo(". That is a two-state answer to a three-state question, and
+    it is wrong in a way that cannot be seen from inside the check:
+    a function that imports a module which RAISES is not "todo(", so
+    it reads as IMPLEMENTED.
+
+    The exam now carries its own registry -- `exam/areas.py` -- which
+    declares each area LIVE, STUB or DARK, with a REASON for the two
+    that are not LIVE. So this letter reads that, and the survey says
+    what is MISSING rather than implying coverage.
+
+    AND THE DEPENDENCY DIRECTION. The registry lives in the exam
+    because the exam must not depend on anything, and fieldcore must
+    not depend on the exam. The dependency points AT the exam, never
+    the other way. So the registry is read the way the exam reads the
+    substrate: AT RUNTIME, IN A SUBPROCESS. An import would make
+    fieldcore depend on the exam, and would make a broken exam crash
+    the survey instead of being reported by it.
+    """
+    import json
+    import subprocess
+    import sys
+
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join(
+        [ATLAS_SRC, env.get("PYTHONPATH", "")]).strip(os.pathsep)
+    code = (
+        "import json, sys\n"
+        "from exam import AREAS\n"
+        "from exam.areas import summary, AREA_DECLS\n"
+        "s = summary()\n"
+        "out = dict(s)\n"
+        "out['by_area'] = [d.to_dict() for d in AREA_DECLS]\n"
+        "out['exam_area_count'] = len(AREAS)\n"
+        "out['exam_area_names'] = [n for _, n in AREAS]\n"
+        "print(json.dumps(out))\n"
+    )
+    proc = subprocess.run([sys.executable, "-c", code], env=env,
+                          capture_output=True, text=True, timeout=120)
+    if proc.returncode != 0:
+        tail = (proc.stderr or "").strip().splitlines()
+        raise RuntimeError("the exam registry could not be read: %s"
+                           % (tail[-1] if tail else "exit %d" % proc.returncode))
+    out = (proc.stdout or "").strip().splitlines()
+    if not out:
+        raise RuntimeError("the exam registry printed nothing")
+    data = json.loads(out[-1])
+
+    # AND THE COUNT IS CROSS-CHECKED against the exam's own area list,
+    # because a registry that forgets an area is a registry that hides
+    # a hole. If the two disagree, the survey says so rather than
+    # reporting a confident number.
+    declared = int(data.get("exam_area_count", 0))
+    listed = int(data.get("areas", 0))
+    if declared != listed:
+        raise RuntimeError(
+            "the exam declares %d areas but its registry lists %d. A "
+            "registry that does not cover the area list is a registry "
+            "that hides a hole." % (declared, listed))
+
+    not_live = [
+        {"area": a["area"], "name": a["name"], "state": a["state"],
+         "why": a["reason"]}
+        for a in data.get("by_area", [])
+        if a.get("state") != "LIVE"
+    ]
     return {
-        "areas": len(AREAS),
-        "implemented": len(implemented),
-        "not_implemented": len(unimplemented),
-        "not_implemented_names": unimplemented,
+        "areas": declared,
+        "live": int(data.get("live", 0)),
+        "stub": int(data.get("stub", 0)),
+        "dark": int(data.get("dark", 0)),
+        "not_implemented": len(not_live),
+        "not_implemented_names": [a["name"] for a in not_live],
+        "not_implemented_detail": not_live,
     }
 
 

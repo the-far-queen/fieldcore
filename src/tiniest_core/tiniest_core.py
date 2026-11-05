@@ -66,6 +66,7 @@ class VerdictKind(str, Enum):
     REFUSE_NORM = "refuse_norm"
     REFUSE_COHERENCE = "refuse_coherence"
     REFUSE_ZERO = "refuse_zero"
+    REFUSE_NONFINITE = "refuse_nonfinite"
     REFUSE_OUTSIDE_BALL = "refuse_outside_ball"
 
 
@@ -121,7 +122,20 @@ def gate(
     """Apply both inequalities. Returns (allow, kind).
 
     Same predicates as simself/src/harness/gate.py per Batch 1 K8.
+
+    AND THE FINITENESS CHECK, WHICH IS THE FOURTH INEQUALITY AND WAS
+    MISSING HERE. MEASURED 2026-11-04: a NaN payload was ADMITTED by
+    this gate, because `nan > 4.0` is False and `nan < 0.4` is False.
+
+    The canonical gate in `fieldcore/src/gate.py` has carried this check
+    since it was written, and so has the out-of-process governor. This
+    copy did not, so the same packet was refused by one core and
+    admitted by another. The shape of that attack is not "beat the
+    gate" -- it is "find the copy of the gate that does not have the
+    check".
     """
+    if not (_is_finite(emb) and _is_finite(psi0)):
+        return False, VerdictKind.REFUSE_NONFINITE
     ne = float(np.linalg.norm(emb))
     if ne > max_norm:
         return False, VerdictKind.REFUSE_NORM
@@ -131,6 +145,21 @@ def gate(
     if float(np.dot(emb, psi0) / (ne * n0)) < min_cos:
         return False, VerdictKind.REFUSE_COHERENCE
     return True, VerdictKind.ALLOW
+
+
+def _is_finite(arr) -> bool:
+    """A NaN or an infinity is refused, never admitted.
+
+    MEASURED: `float('nan') > 4.0` is False, so a gate that tests only
+    `ne > max_norm` returns ALLOW for a vector of NaN.
+
+    An exception is not a verdict, so this returns False rather than
+    raising on a non-numeric input.
+    """
+    try:
+        return bool(np.all(np.isfinite(np.asarray(arr, dtype=float))))
+    except (TypeError, ValueError):
+        return False
 
 
 # ----------------------------------------------------------------------------

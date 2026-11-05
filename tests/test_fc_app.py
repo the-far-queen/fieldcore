@@ -463,9 +463,108 @@ def test_the_spend_guard_is_closed_by_default_in_both_modules():
     assert fc_hermes.ALLOW_LIVE is False, "fc_hermes' guard is open"
 
 
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# 5b. letter Q reads the exam's REGISTRY, and says what is missing
+# ---------------------------------------------------------------------
+#
+# THE DEFECT, MEASURED 2026-11-05: `letter_q` decided whether an exam
+# area was implemented by SNIFFING THE SOURCE TEXT of `exam/cli.py` for
+# the string "todo(". That is a two-state answer to a three-state
+# question, and it cannot see the case that matters: a function that
+# imports a module which RAISES is not "todo(", so it reads as
+# IMPLEMENTED. A hole wearing an implemented area's name.
+#
+# The exam now carries its own registry (`exam/areas.py`), and this
+# letter reads it -- through a SUBPROCESS, because the dependency
+# points AT the exam and never the other way.
+
+def test_letter_q_reports_the_exam_registry_not_a_source_sniff():
+    """The letter reports the registry's three states.
+
+    RED: if the letter went back to sniffing source text, the
+    `live`/`stub`/`dark` keys would be missing.
+    """
+    letter = fc_app.letter_q()
+    assert letter.state == "LIVE", (letter.state, letter.reason)
+    m = letter.measured
+    for key in ("areas", "live", "stub", "dark", "not_implemented"):
+        assert key in m, "letter_q does not report %r: %s" % (key, m)
+    assert m["live"] + m["stub"] + m["dark"] == m["areas"], m
+    assert m["not_implemented"] == len(m["not_implemented_names"]), m
+
+
+def test_letter_q_names_every_area_that_is_not_live_with_a_reason():
+    """A missing area is NAMED, and says WHY.
+
+    A hole with no reason attached is the failure this project fights:
+    it is indistinguishable from a hole that was simply forgotten.
+
+    RED: if the letter dropped the names, or the reasons, this fails.
+    """
+    letter = fc_app.letter_q()
+    m = letter.measured
+    for entry in m["not_implemented_detail"]:
+        assert entry["name"], entry
+        assert entry["state"] in ("STUB", "DARK"), entry
+        assert entry["why"].strip(), (
+            "area %s is %s with no reason attached" % (entry["name"],
+                                                      entry["state"]))
+    assert m["not_implemented_names"] == [
+        e["name"] for e in m["not_implemented_detail"]], m
+
+
+def test_letter_q_fails_loudly_when_the_registry_does_not_cover_the_area_list():
+    """A registry that forgets an area is a registry that hides a hole.
+
+    MEASURED 2026-11-05: the letter cross-checks the registry's count
+    against the exam's own `AREAS` list, and REFUSES to report a
+    confident number when they disagree. This test drives that refusal
+    by pointing the subprocess at a registry that is missing an area.
+
+    RED: if the cross-check were removed, this fails.
+    """
+    import json
+    import subprocess
+    import sys
+
+    # The stub emits VALID JSON with a lying area count. The first
+    # version of this stub emitted Python source rather than JSON, so
+    # the letter failed at the JSON parse and the test asserted the
+    # wrong reason -- the letter was DARK for the wrong cause, which
+    # is a test that passes for the wrong reason.
+    payload = json.dumps({
+        "areas": 23, "live": 23, "stub": 0, "dark": 0,
+        "stub_areas": [], "dark_areas": [],
+        "by_area": [{"area": i, "name": "a%d" % i, "state": "LIVE",
+                     "module": "exam/cli.py", "reason": "",
+                     "does_not_establish": "x"}
+                    for i in range(23)],
+        "exam_area_count": 99,          # <- the lie
+        "exam_area_names": ["a%d" % i for i in range(23)],
+    })
+    original = subprocess.run
+
+    def fake_run(cmd, **kwargs):
+        if isinstance(cmd, list) and cmd[:2] == [sys.executable, "-c"]:
+            return subprocess.CompletedProcess(cmd, 0, stdout=payload + "\n",
+                                               stderr="")
+        return original(cmd, **kwargs)
+
+    subprocess.run = fake_run
+    try:
+        letter = fc_app.letter_q()
+    finally:
+        subprocess.run = original
+
+    assert letter.state == "DARK", (
+        "a registry that does not cover the area list was reported as %s "
+        "instead of DARK" % letter.state)
+    assert "registry" in letter.reason.lower(), letter.reason
+
+
+# ---------------------------------------------------------------------
 # 6. the mutation check -- each mechanism, removed, must go RED
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 
 def _run_with_patched(src, name, replacement):
     """Run `src` with `name` temporarily replaced, and report whether
