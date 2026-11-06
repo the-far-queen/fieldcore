@@ -26,6 +26,39 @@ arrives through the channel's taps, where the equaliser cancels it.
 **SO THIS FILE MEASURES THE SAME QUESTION AGAINST THE SYSTEM, WITH THE
 CONTROL THE QUESTION DEMANDS.**
 
+**AND ON 2026-11-05 BOTH THE POPULATION AND THE CONTROL WERE FIXED,
+AND THE ANSWER CHANGED.** Two defects, both measured:
+
+  * THE POPULATION. Seven files carried their own copy of the
+    population recipe and the copies had DIVERGED. Three of them
+    clustered the addresses within thousandths, so population 8 gave 2
+    DFT classes for 8 stalks -- and that was published as the
+    population code's "real ceiling". The repo's own
+    `bench_tradeoff.py` had already called the clustered recipe a
+    CONFOUND: "it was asking the receiver to separate things no
+    transform could separate, and then reporting that as a limit of
+    the design."  The recipe now lives in ONE place,
+    `stalk_population.py`, and every stalk is in its own class.
+
+  * THE CONTROL. The false transmission used to pick the NEXT INDEX as
+    its false candidate, whose difficulty depends on the recipe -- on
+    the clustered recipe that was a parity flip, half the circle
+    away, so the false transmission was trivially rejected. The
+    adversarial candidate is the one whose ADDRESS is NEAREST the
+    speaker's, and that is what this file now uses.
+
+WITH BOTH FIXED, MEASURED: the alignment gate ADMITS the nearest
+neighbour at population 8 and above -- 0.569506 at population 8 and
+0.943521 at population 64, against MIN_COS = 0.4.  So the gate does
+NOT keep the truth counterweight against its hardest case.
+
+THE CAUSE, MEASURED: the frame is a tone of frequency ph/n cycles per
+sample, so its DFT peak sits at index ph -- and ph is in [0,1).  EVERY
+ADDRESS LANDS IN THE FIRST DFT BIN, and the other bins carry the
+frame's skirt, not the address.  So the bins do not separate
+addresses, and the separation the gate needs does not shrink with
+more bins: 0.184445 of the circle at 32 bins, 0.180562 at 256.
+
 WHAT THIS FILE MEASURES
 -----------------------
 For each population, on the substrate's own read (the speaker's address
@@ -40,8 +73,9 @@ equaliser):
      channel is.
 
   2. THE TRUTH COUNTERWEIGHT -- the same measurement for a FALSE
-     transmission, where a DIFFERENT candidate's address is sent. A gate
-     that admits the false transmission has lost its counterweight. This
+     transmission, where the ADVERSARIAL candidate's address is sent: the
+     one nearest the speaker's. A gate that admits the false
+     transmission has lost its counterweight. This
      is the measurement item 40 asked for and did not have.
 
   3. TWO GATES, SIDE BY SIDE -- the alignment gate that ships today
@@ -107,34 +141,28 @@ from interstalk_link import (  # noqa: E402
 from tiniest_core.tiniest_core import MIN_COS  # noqa: E402
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while the other spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
 
 # ===========================================================================
 # THE POPULATION AND THE ADDRESSES
 # ===========================================================================
-
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks with distinct geometry, so distinct addresses.
-
-    THE SAME RECIPE as `bench_failup.py`, so the numbers here are
-    comparable with the numbers in the bench and the balance benches.
-    """
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        core = 0.018 + 0.0007 * (i % 7)
-        inner = 0.050 + 0.0011 * (i % 11)
-        outer = 0.090 + 0.0019 * (i % 13)
-        if not (core < inner < outer):
-            core, inner, outer = 0.016, 0.048, 0.092
-        out.append(CoaxWinding(
-            id="p%03d" % i, girth_out=outer, girth_in=inner, girth_core=core,
-            n_in=5 + (i % 6), n_out=11 + (i % 9)))
-    return out
-
-
-def address_of(stalk: CoaxWinding) -> float:
-    """The stalk's phase address: parity of outer turns + girth ratio."""
-    ph = (stalk.n_out % 2) / 2.0
-    return (ph + (stalk.girth_ratio - 1.0)) % 1.0
 
 
 def spectrum(x: Sequence[Tuple[float, float]]) -> List[Tuple[float, float]]:
@@ -330,6 +358,42 @@ def _picks(population: int) -> List[int]:
     return [min(i, population - 1) for i in range(0, population, step)][:n]
 
 
+def _address_separation(addrs: Dict[str, float], a: str, b: str) -> float:
+    """How far apart two addresses are on the unit circle.
+
+    The circle wraps, so the separation is the SHORT way round.
+    """
+    d = abs(addrs[a] - addrs[b])
+    return min(d, 1.0 - d)
+
+
+def _nearest_by_address(addrs: Dict[str, float], tx: str,
+                        ids: List[str]) -> str:
+    """The candidate whose ADDRESS is nearest the speaker's.
+
+    THIS IS THE ADVERSARIAL FALSE CANDIDATE, and it is the control the
+    false transmission must use.  The previous control picked the next
+    INDEX, whose difficulty depends on the recipe: on the old
+    clustered recipe that was a parity flip (half the circle away, so
+    trivially rejected) and on the canonical recipe it is 1/n of the
+    circle away (the hardest case).  A control whose difficulty is a
+    property of the generator measures the generator.
+
+    MEASURED 2026-11-05, the separations this picks:
+        clustered recipe, population 8 : 0.002498 = 0.16 bins
+        canonical recipe, population 8 : 0.125000 = 8.00 bins
+
+    So the clustered recipe's neighbours are UNRESOLVABLE BY
+    CONSTRUCTION -- their frames are the same frame -- while the
+    canonical recipe's are as far apart as n addresses on a circle can
+    be.
+    """
+    cands = [c for c in ids if c != tx]
+    if not cands:
+        return tx
+    return min(cands, key=lambda c: _address_separation(addrs, tx, c))
+
+
 def run_case(population: int, bins: int) -> Dict[str, object]:
     """One population: the margin's distribution and both gates."""
     stalks = make_population(population)
@@ -354,11 +418,34 @@ def run_case(population: int, bins: int) -> Dict[str, object]:
     named_true = named_false = 0
     sys_lifts: List[float] = []
     model_lifts: List[float] = []
+    false_seps: List[float] = []
 
     for n, i in enumerate(picks):
         tx, rx = ids[i], ids[(i + 1) % population]
-        other = ids[picks[(n + 1) % len(picks)]]
         sent_spec = spectrum(address_frame(addrs[tx], bins))
+
+        # -- the FALSE transmission: the ADVERSARIAL candidate ----------
+        #
+        # MEASURED 2026-11-05.  The false candidate used to be the
+        # NEXT INDEX:
+        #
+        #     other = ids[picks[(n + 1) % len(picks)]]
+        #
+        # which is a control whose difficulty depends on the recipe.
+        # On the old clustered recipe the next index was a PARITY FLIP
+        # -- half the circle away -- so the false transmission was
+        # trivially rejected and the gate looked perfect.  On the
+        # canonical recipe the next index is 1/n of the circle away --
+        # the hardest case -- and the gate looked broken.  Neither was
+        # the control.
+        #
+        # THE ADVERSARIAL FALSE CANDIDATE IS THE ONE WHOSE ADDRESS IS
+        # NEAREST THE SPEAKER'S.  That is the hardest case whatever the
+        # recipe is, so the number it produces is a property of the
+        # DESIGN and not of the generator.
+        other = _nearest_by_address(addrs, tx, ids)
+        false_sep = _address_separation(addrs, tx, other)
+        false_seps.append(false_sep)
 
         # -- the TRUE transmission -------------------------------------
         rec = recover(link, tx, rx, view, bins, address_frame(addrs[tx], bins))
@@ -426,6 +513,13 @@ def run_case(population: int, bins: int) -> Dict[str, object]:
         "margin_gate_false": margin_gate_false,
         "named_true": named_true,
         "named_false": named_false,
+        # THE CONTROL'S DIFFICULTY, in address units and in bins.  A
+        # reader must be able to see how hard the false transmission
+        # was: a control whose difficulty is a property of the recipe
+        # measures the recipe.
+        "false_separation": min(false_seps) if false_seps else 0.0,
+        "false_separation_bins": (min(false_seps) * bins
+                                  if false_seps else 0.0),
         "system_lift_min": min(sys_lifts) if sys_lifts else 0.0,
         "system_lift_max": max(sys_lifts) if sys_lifts else 0.0,
     }
@@ -486,6 +580,10 @@ def main() -> int:
         print("  B. THE TRUTH COUNTERWEIGHT")
         print("     TRUE  alignment %s" % _rng(r["true_alignment"]))
         print("     FALSE alignment %s" % _rng(r["false_alignment"]))
+        print("     the false candidate is the ADVERSARIAL one: nearest "
+              "address,")
+        print("     %.6f of the circle = %.2f bins away"
+              % (r["false_separation"], r["false_separation_bins"]))
         print("     the margin ranges OVERLAP? %s" %
               _overlap(r["true_margin"], r["false_margin"]))
         print("     the alignment ranges OVERLAP? %s" %
@@ -548,30 +646,70 @@ def main() -> int:
         print("     the alignment separates the true from the false at")
         print("     every measured population.")
     print()
+    # AND THE THRESHOLD, which is the question the gate actually asks.
+    # The ranges can separate while the THRESHOLD admits the false
+    # transmission -- and with the adversarial control they do.
+    admit_rows = [r for r in rows
+                  if int(r["align_gate_false"]) > 0]  # type: ignore[arg-type]
+    if admit_rows:
+        print("     BUT THE RANGES SEPARATE WHILE THE THRESHOLD DOES NOT.")
+        print("     MEASURED, the alignment gate ADMITS the false")
+        print("     transmission at %d of %d populations:"
+              % (len(admit_rows), len(rows)))
+        for r in admit_rows:
+            print("        population %3d bins %3d : %d of %d false "
+                  "transmissions admitted, worst alignment %.6f, the "
+                  "false candidate %.2f bins away"
+                  % (r["population"], r["bins"], r["align_gate_false"],
+                     r["trials"], max(r["false_alignment"]),  # type: ignore[arg-type]
+                     r["false_separation_bins"]))
+        print()
+        print("     THE CAUSE, MEASURED: the frame is a tone of frequency")
+        print("     ph/n cycles per sample, so its DFT peak sits at index")
+        print("     ph -- and ph is in [0,1).  EVERY ADDRESS LANDS IN THE")
+        print("     FIRST DFT BIN, and the other bins carry the frame's")
+        print("     skirt, not the address.  So two nearby addresses have")
+        print("     overlapping frames, and widening the channel adds bins")
+        print("     that do not separate addresses.")
+    else:
+        print("     and the threshold refuses the false transmission at")
+        print("     every measured population.")
+    print()
 
     # 3. what the margin actually is
-    worst_same = min(min(r["true_margin_same_class"])          # type: ignore[arg-type]
-                     for r in rows if r["true_margin_same_class"])  # type: ignore[arg-type]
-    worst_diff = min(min(r["true_margin_other_class"])        # type: ignore[arg-type]
-                     for r in rows if r["true_margin_other_class"])  # type: ignore[arg-type]
     print("  3. WHAT THE MARGIN ACTUALLY IS.")
-    print("     MEASURED, the margin over a class-mate is as small as")
-    print("     %.6e, and the margin over another class is as small as"
-          % worst_same)
-    print("     %.6e -- a factor of %.3g between them."
-          % (worst_diff, (worst_diff / worst_same) if worst_same else 0.0))
-    print("     So the margin is NOT a confidence measure that grows with")
-    print("     the crowd's strength: it is a REPORT OF THE ADDRESS")
-    print("     CLASSES. The runner-up is either a class-mate (the margin")
-    print("     is negligible) or it is not (the margin is enormous).")
-    print()
-    print("     AND WHERE THE CLASSES COME FROM: the DFT BIN. MEASURED,")
-    print("     at population 8 the two classes land in bins 19 and 51,")
-    print("     and the winner's score is the bin count (64.000000 at")
-    print("     64 bins) while a class-mate scores 63.996136 -- so the")
-    print("     margin over a class-mate is the tiny residue inside the")
-    print("     bin, and the margin over another class is the whole")
-    print("     distance between two bins.")
+    same_rows = [r for r in rows if r["true_margin_same_class"]]
+    if same_rows:
+        worst_same = min(min(r["true_margin_same_class"])      # type: ignore[arg-type]
+                         for r in same_rows)                   # type: ignore[arg-type]
+        worst_diff = min(min(r["true_margin_other_class"])    # type: ignore[arg-type]
+                         for r in rows if r["true_margin_other_class"])  # type: ignore[arg-type]
+        print("     MEASURED, the margin over a class-mate is as small as")
+        print("     %.6e, and the margin over another class is as small as"
+              % worst_same)
+        print("     %.6e -- a factor of %.3g between them."
+              % (worst_diff, (worst_diff / worst_same) if worst_same else 0.0))
+        print("     So the margin is NOT a confidence measure that grows with")
+        print("     the crowd's strength: it is a REPORT OF THE ADDRESS")
+        print("     CLASSES. The runner-up is either a class-mate (the margin")
+        print("     is negligible) or it is not (the margin is enormous).")
+    else:
+        # MEASURED 2026-11-05: on the canonical recipe there are NO
+        # class-mates -- every stalk is in its own class -- so the
+        # class-mate margin does not exist and the old comparison could
+        # not be made.  The first version of this report called
+        # min() on the empty list and raised ValueError.
+        print("     MEASURED, there is NO CLASS-MATE at any measured")
+        print("     population: the canonical recipe puts every stalk in its")
+        print("     own class, so the margin over a class-mate does not")
+        print("     exist and cannot be compared against the margin over")
+        print("     another class.")
+        print()
+        print("     THAT IS THE POINT OF THE CANONICAL RECIPE. The old")
+        print("     recipe collapsed the population into two classes, and")
+        print("     the margin-over-a-class-mate comparison -- and the")
+        print("     'the population code's real ceiling' built on it --")
+        print("     was measuring that collapse, not the design.")
     print()
 
     # 4. the crowd's effect
@@ -592,8 +730,27 @@ def main() -> int:
     print("     the sent spectrum carries the TRANSMITTER's address. So the")
     print("     alignment measures agreement with what was sent, NOT with")
     print("     the winning candidate. The item's premise -- that the gate")
-    print("     'measures the winner' -- is FALSE, and the constant does")
-    print("     not need to move.")
+    print("     'measures the winner' -- is FALSE.")
+    print()
+    if admit_rows:
+        print("     AND THE CONSTANT DOES NEED TO MOVE, or rather the")
+        print("     THRESHOLD IS NOT THE PROBLEM. MEASURED, the false")
+        print("     transmission's alignment reaches %.6f while the true"
+              % max(max(r["false_alignment"])  # type: ignore[arg-type]
+                    for r in admit_rows))
+        print("     one is 1.000000, so a threshold ABOVE %.6f would refuse"
+              % max(max(r["false_alignment"])   # type: ignore[arg-type]
+                    for r in admit_rows))
+        print("     it -- but the cross-talk RISES as the population grows")
+        print("     (the neighbours get closer), so no fixed threshold")
+        print("     separates them at every population.  The threshold is")
+        print("     not what is wrong; the FRAME is.  Every address lands")
+        print("     in DFT bin 0, so the bins do not separate addresses and")
+        print("     widening the channel cannot help.")
+    else:
+        print("     AND THE CONSTANT DOES NOT NEED TO MOVE: the gate")
+        print("     refuses the false transmission at every measured")
+        print("     population.")
     print()
     return 0
 

@@ -97,6 +97,25 @@ import bench_balance_final as BF  # noqa: E402
 from interstalk_link import InterstalkLink, transport  # noqa: E402
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while the other spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
+
 BINS = BF.BINS
 POPS = BF.POPS
 AMPS = BF.AMPS
@@ -140,14 +159,6 @@ class Rand:
 # ===========================================================================
 # THE GEOMETRY -- imported from the frequency path's bench
 # ===========================================================================
-
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks with evenly spread addresses. The repo's own builder."""
-    return BF.make_population(n)
-
-
-def address_of(s: CoaxWinding) -> float:
-    return BF.address_of(s)
 
 
 def carrier_value(phase: float) -> complex:

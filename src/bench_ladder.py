@@ -60,28 +60,30 @@ from wound_core import CoaxWinding, WoundCore  # noqa: E402
 # A SYNTHETIC POPULATION
 # ===========================================================================
 
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks, each with its own geometry.
-
-    The geometry varies the way the standard four do: the girths and
-    the turn counts both move, so no two stalks share an address.
-    """
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        core = 0.018 + 0.0007 * (i % 7)
-        inner = 0.050 + 0.0011 * (i % 11)
-        outer = 0.090 + 0.0019 * (i % 13)
-        # keep the concentric order: core < inner < outer
-        if not (core < inner < outer):
-            core = 0.016
-            inner = 0.048
-            outer = 0.092
-        n_in = 5 + (i % 6)
-        n_out = 11 + (i % 9)
-        out.append(CoaxWinding(id="p%03d" % i, girth_out=outer,
-                                girth_in=inner, girth_core=core,
-                                n_in=n_in, n_out=n_out))
-    return out
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-06: this file used to carry its OWN copy of the
+#: population recipe -- the CLUSTERED one, whose addresses land within
+#: thousandths of each other, so population 8 gives 2 address classes
+#: for 8 stalks.  The repo already called that recipe a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: MEASURED, the difference is not cosmetic.  On the clustered recipe
+#: this bench's section 3 (the escalation rate) reported 132/132 at
+#: population 16 and 32, and 55/132 at population 64; on the canonical
+#: recipe it reports 110/132 at population 16 and 32, and 132/132 at
+#: population 64.  The clustered recipe's neighbours are UNRESOLVABLE
+#: BY CONSTRUCTION -- their frames are the same frame -- so the bench
+#: was measuring the recipe.
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do -- and it DISCOVERS the builders by AST, because a
+#: hardcoded list cannot report a copy it does not know about.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
 
 
 # ===========================================================================

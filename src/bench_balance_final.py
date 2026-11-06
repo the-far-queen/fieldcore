@@ -110,6 +110,25 @@ from interstalk_link import (  # noqa: E402
 )
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while the other spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
+
 BINS = 128
 
 #: The populations swept. THE GRID WAS TOO COARSE, and it is the reason
@@ -153,23 +172,6 @@ AMPS: Tuple[float, ...] = (0.05, 0.10, 0.15, 0.25, 0.35)
 #: The number of reflected paths in the channel. 1 is the smallest
 #: channel that has a null to invert; more costs capacity.
 PATHS = 1
-
-
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks, addresses evenly spread, geometry solved from the
-    address so every stalk is resolvable."""
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        a = (i + 0.5) / n
-        girth_in = 0.050
-        out.append(CoaxWinding(
-            id="p%03d" % i, girth_out=girth_in * (1.0 + a),
-            girth_in=girth_in, girth_core=0.018, n_in=5, n_out=10))
-    return out
-
-
-def address_of(s: CoaxWinding) -> float:
-    return (((s.n_out % 2) / 2.0) + (s.girth_ratio - 1.0)) % 1.0
 
 
 def spectrum(x: List[Tuple[float, float]]) -> List[Tuple[float, float]]:

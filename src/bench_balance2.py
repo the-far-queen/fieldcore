@@ -86,6 +86,25 @@ from interstalk_link import (  # noqa: E402
 )
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while the other spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
+
 #: The amplitude of ONE interfering stalk, relative to the speaker.
 CROWD_AMPLITUDES = (0.35, 0.15)
 
@@ -99,42 +118,6 @@ DB_PER_BIT = 6.0
 # ===========================================================================
 # THE POPULATION, WITH EVENLY SPREAD ADDRESSES
 # ===========================================================================
-
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks whose addresses are EVENLY SPREAD over the unit circle.
-
-    THE ADDRESS IS CHOSEN, THEN THE GEOMETRY IS SOLVED FOR IT, because
-    the address formula is invertible:
-
-        address = ((n_out % 2)/2 + (girth_ratio - 1)) % 1
-
-    With an even n_out (parity term 0) the target address a gives
-    girth_ratio = 1 + a. So the stalk's geometry is DERIVED from its
-    address rather than the other way round, which is what a real
-    population code would do -- the code assigns the addresses and the
-    hardware realises them.
-
-    THE POINT: address_i = (i + 0.5)/n, so the closest pair is
-    exactly 1/n apart, i.e. n bins apart at 128 bins. Every stalk is
-    resolvable, and any collapse that follows is a CHANNEL limit.
-    """
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        a = (i + 0.5) / n
-        girth_in = 0.050
-        girth_out = girth_in * (1.0 + a)
-        girth_core = 0.018
-        out.append(CoaxWinding(
-            id="p%03d" % i,
-            girth_out=girth_out, girth_in=girth_in, girth_core=girth_core,
-            n_in=5, n_out=10))          # even n_out -> parity term 0
-    return out
-
-
-def address_of(stalk: CoaxWinding) -> float:
-    """The stalk's phase address: parity of outer turns + girth ratio."""
-    ph = (stalk.n_out % 2) / 2.0
-    return (ph + (stalk.girth_ratio - 1.0)) % 1.0
 
 
 def min_spacing_bins(stalks: List[CoaxWinding], bins: int) -> float:

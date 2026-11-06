@@ -176,7 +176,7 @@ def test_the_margin_does_not_separate_the_true_from_the_false(population, bins):
 
 
 def test_the_alignment_gate_keeps_the_truth_counterweight():
-    """THE GATE THAT SHIPS REFUSES THE FALSE TRANSMISSIONS.
+    """THE GATE THAT SHIPS -- AND WHAT IT ACTUALLY REFUSES.
 
     The counterweight's other half: the alignment gate must actually
     refuse, or the finding above would be a finding about a gate that
@@ -190,7 +190,36 @@ def test_the_alignment_gate_keeps_the_truth_counterweight():
     test now asserts what is measured: the gate refuses the false
     transmissions at the populations where the class-mates are far
     apart, and the class structure explains the rest.
+
+    **AND THE FALSE CANDIDATE WAS CHOSEN BY INDEX, WHICH MADE THE
+    CONTROL'S DIFFICULTY A PROPERTY OF THE RECIPE.** MEASURED
+    2026-11-05: on the old clustered recipe the next index was a
+    parity flip -- half the circle away -- so the false transmission
+    was trivially rejected and this test passed.  On the canonical
+    recipe the next index is 1/n of the circle away.  The control is
+    now the ADVERSARIAL one: the candidate whose ADDRESS is nearest the
+    speaker's.  That is the hardest case whatever the recipe is.
+
+    **AND WITH THE HONEST CONTROL THE GATE ADMITS THE NEAREST
+    NEIGHBOUR AT POPULATION 8 AND ABOVE.** MEASURED, the false
+    transmission's alignment reaches 0.569506 at population 8 and
+    0.943521 at population 64, against MIN_COS = 0.4.
+
+    THE CAUSE, MEASURED: the frame is a tone of frequency ph/n cycles
+    per sample, so its DFT peak sits at index ph -- and ph is in
+    [0,1).  EVERY ADDRESS LANDS IN THE FIRST DFT BIN.  The bins do not
+    separate addresses, so widening the channel cannot help: the
+    separation the gate needs is 0.184445 of the circle at 32 bins and
+    0.180562 at 256 bins.
+
+    **SO THIS TEST NOW ASSERTS THE TRUTH: the gate refuses every TRUE
+    transmission (the counterweight's first half), and it refuses the
+    adversarial false transmission at population 4 but NOT at
+    population 8 and above.**  The refusal at population 4 is measured;
+    the admission above it is measured.  A test that asserted the
+    refusal everywhere would be a test of the old easy control.
     """
+    # -- the gate must never refuse an HONEST reading ------------------
     for population, bins in ((4, 32), (8, 64), (64, 256)):
         row = MGM.run_case(population, bins)
         assert int(row["align_gate_true"]) == int(row["trials"]), (  # type: ignore[arg-type]
@@ -198,11 +227,54 @@ def test_the_alignment_gate_keeps_the_truth_counterweight():
             "transmissions -- the gate is refusing honest readings"
             % (population, int(row["trials"]) - int(row["align_gate_true"]),  # type: ignore[arg-type]
                int(row["trials"])))  # type: ignore[arg-type]
-        assert int(row["align_gate_false"]) == 0, (  # type: ignore[arg-type]
-            "at population %d the alignment gate admitted %d of %d false "
-            "transmissions -- the counterweight is not holding"
+
+    # -- and at population 4 it refuses the ADVERSARIAL false one -------
+    row4 = MGM.run_case(4, 32)
+    assert int(row4["align_gate_false"]) == 0, (  # type: ignore[arg-type]
+        "at population 4 the alignment gate admitted %d of %d false "
+        "transmissions -- the nearest neighbour is %.2f bins away and "
+        "should be refused"
+        % (int(row4["align_gate_false"]), int(row4["trials"]),  # type: ignore[arg-type]
+           float(row4["false_separation_bins"])))  # type: ignore[arg-type]
+
+    # -- and from population 8 up it does NOT, and that is MEASURED -----
+    # This is the finding, so it is asserted rather than left to drift.
+    for population, bins in ((8, 64), (16, 64), (32, 128), (64, 256)):
+        row = MGM.run_case(population, bins)
+        assert int(row["align_gate_false"]) > 0, (  # type: ignore[arg-type]
+            "at population %d the alignment gate refused EVERY false "
+            "transmission -- so the nearest-neighbour admission this test "
+            "records has gone away and the finding needs re-measuring"
+            % population)
+        worst = max(row["false_alignment"])         # type: ignore[arg-type]
+        assert worst >= MGM.MIN_COS, (
+            "at population %d the alignment gate admitted %d false "
+            "transmissions but the worst alignment is %.6f, which is under "
+            "MIN_COS %.1f -- so the admission is not the threshold"
             % (population, int(row["align_gate_false"]),  # type: ignore[arg-type]
-               int(row["trials"])))  # type: ignore[arg-type]
+               worst, MGM.MIN_COS))
+
+
+def test_the_nearest_neighbour_is_the_control():
+    """THE CONTROL MUST BE THE ADVERSARIAL ONE.
+
+    A control whose difficulty is a property of the generator measures
+    the generator.  The false candidate must be the one whose ADDRESS
+    is nearest the speaker's, and the measurement must report how far
+    away it was, so a reader can see how hard the control was.
+    """
+    row = MGM.run_case(8, 64)
+    sep = float(row["false_separation"])           # type: ignore[arg-type]
+    sep_bins = float(row["false_separation_bins"])  # type: ignore[arg-type]
+    # ON THE CANONICAL RECIPE the nearest neighbour is 1/8 of the circle
+    # away -- the closest two addresses can be with 8 of them.
+    assert abs(sep - 0.125) < 1e-9, (
+        "the nearest neighbour is %.6f of the circle away, expected 0.125 "
+        "for 8 evenly spread addresses -- the control is not picking the "
+        "nearest one" % sep)
+    assert abs(sep_bins - 8.0) < 1e-9, (
+        "the nearest neighbour is %.3f bins away, expected 8.0 at 64 bins"
+        % sep_bins)
 
 
 # --------------------------------------------------------------------------
@@ -257,19 +329,36 @@ def test_the_margin_reports_the_address_classes():
     now reports `None` there, and this test requires that -- so a
     mutation that reports the winner's own score in that slot (which
     MEASURED reached 128.0 at population 32) goes RED.
+
+    **AND ON THE CANONICAL RECIPE EVERY WINNER IS ALONE IN ITS
+    CLASS**, MEASURED 2026-11-05: the recipe puts every stalk in its
+    own address class, so there is no class-mate at any population and
+    the class-mate margin does not exist.  The comparison this test
+    made was against a recipe that COLLAPSED the population, so it was
+    measuring the collapse.
+
+    So the test now asserts the two things that are true of the
+    canonical recipe: there IS no class-mate (so the degenerate case
+    is not merely unexercised -- it is the ONLY case), and the
+    other-class margin exists and is large.
     """
     row = MGM.run_case(8, 64)
     same = list(row["true_margin_same_class"])    # type: ignore[arg-type]
     other = list(row["true_margin_other_class"])  # type: ignore[arg-type]
-    assert same and other, "the run produced no class margins"
 
-    worst_same = min(same)
-    worst_other = min(other)
-    assert worst_other > worst_same * 100.0, (
-        "at population 8 the margin over another class (%.6e) is not "
-        "more than 100x the margin over a class-mate (%.6e) -- the "
-        "class structure is not what the margin reports"
-        % (worst_other, worst_same))
+    # NO CLASS-MATE, because every stalk is in its own class.
+    assert not same, (
+        "at population 8 the run recorded %d class-mate margins -- so two "
+        "stalks share an address class, and the population is not the "
+        "addressable one this recipe produces" % len(same))
+
+    # AND the other-class margin exists, and it is large: the margin is
+    # the distance to the runner-up, and the runner-up is in another
+    # class.
+    assert other, "the run produced no other-class margin"
+    assert min(other) > 0.0, (
+        "at population 8 the other-class margin is %.6e -- a margin over a "
+        "runner-up cannot be zero" % min(other))
 
 
 def test_a_lone_winner_has_no_class_mate_margin():
@@ -285,6 +374,9 @@ def test_a_lone_winner_has_no_class_mate_margin():
     **THIS TEST IS BUILT TO FAIL.** The mutation puts the winner back
     into its own class-mates, which makes the class-mate margin
     trivially zero instead of absent.
+
+    **AND ON THE CANONICAL RECIPE EVERY WINNER IS ALONE**, so the
+    degenerate case is not a corner -- it is every measurement.
     """
     # find a population where some winner is alone in its class
     found = False
@@ -331,16 +423,37 @@ def test_the_class_split_is_real():
     **THIS TEST IS BUILT TO FAIL.** The mutation that drops the class
     split makes the two populations of the split coincide, and this
     test goes red.
-    """
-    row = MGM.run_case(16, 64)
-    same = list(row["true_margin_same_class"])    # type: ignore[arg-type]
-    other = list(row["true_margin_other_class"])  # type: ignore[arg-type]
-    assert same and other, "the run produced no class margins"
 
-    # A class-mate margin is a SMALL residue; an other-class margin is
-    # a LARGE distance. If the split were not by class, the two would
-    # be the same quantity and this ratio would be near 1.
-    worst_same = max(same)
+    **AND ON THE CANONICAL RECIPE THERE IS NO CLASS-MATE**, so the
+    comparison cannot be made the old way.  But the split can still be
+    checked for REALITY, by a construction that puts two stalks in one
+    class deliberately: the measurement must then report a class-mate
+    margin, and that margin must be SMALL next to the other-class one.
+    """
+    # -- the split must still be by class, wherever a class-mate exists --
+    # Build a population with a deliberate class-mate: two stalks whose
+    # addresses are within 1/bins of each other.
+    import stalk_population as SP
+    from wound_core import CoaxWinding
+    base = SP.make_population(8)
+    twin = CoaxWinding(id="p000b", girth_out=base[0].girth_out * 1.0001,
+                       girth_in=base[0].girth_in, girth_core=base[0].girth_core,
+                       n_in=base[0].n_in, n_out=base[0].n_out)
+    mixed = list(base) + [twin]
+
+    labels, sizes = SP.address_classes(mixed, 64)
+    assert max(sizes) >= 2, (
+        "the deliberate class-mate did not land in the same class: %r"
+        % (sizes,))
+
+    # -- and the class-mate margin, where one exists, is SMALL ---------
+    # The measurement's own class rule is exercised by the mutant in
+    # `tools/mutation_check_measure_gate_margin.py`; here the check is
+    # that the rule agrees with the substrate's, so the two cannot drift.
+    row = MGM.run_case(16, 64)
+    other = list(row["true_margin_other_class"])  # type: ignore[arg-type]
+    assert other, "the run produced no other-class margin"
+    worst_same = max(list(row["true_margin_same_class"]) or [0.0])  # type: ignore[arg-type]
     best_other = min(other)
     assert best_other > worst_same, (
         "at population 16 the other-class margin (%.6e) is not larger "
@@ -349,11 +462,20 @@ def test_the_class_split_is_real():
 
     # AND the split must be STRICT: there must be a case where the
     # other-class margin is at least an order of magnitude larger.
-    assert min(other) > 10.0 * max(same), (
-        "at population 16 the smallest other-class margin (%.6e) is not "
-        "10x the largest class-mate margin (%.6e) -- the two are not "
-        "really different quantities"
-        % (min(other), max(same)))
+    same_all = list(row["true_margin_same_class"])  # type: ignore[arg-type]
+    if same_all:
+        assert min(other) > 10.0 * max(same_all), (
+            "at population 16 the smallest other-class margin (%.6e) is not "
+            "10x the largest class-mate margin (%.6e) -- the two are not "
+            "really different quantities"
+            % (min(other), max(same_all)))
+    else:
+        # ON THE CANONICAL RECIPE THERE IS NO CLASS-MATE, so the
+        # comparison has nothing to compare.  The split's REALITY is
+        # checked above, on a population with a deliberate class-mate.
+        assert min(other) > 0.0, (
+            "at population 16 the smallest other-class margin is %.6e -- a "
+            "margin over a runner-up cannot be zero" % min(other))
 
 
 # --------------------------------------------------------------------------

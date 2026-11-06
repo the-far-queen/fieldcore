@@ -120,19 +120,16 @@ def the_population(n: int = 8) -> List[CoaxWinding]:
     transcription error in the recipe, not a physical result, and the
     73% naming rate it produced was the 2-bin population's, not the
     8-bin one's.
+
+    MEASURED 2026-11-06: this used to carry its OWN copy of the 8-bin
+    recipe.  The census in `stalk_population.py` found FOUR copies of
+    it -- here, in `awareness.py`, in `fc_wrapper.py` and in
+    `locus.py` -- all identical stalk for stalk.  They now share ONE
+    builder in the substrate, `make_locus_population`, and the constants
+    this file measured are that builder's constants.
     """
-    out: List[CoaxWinding] = []
-    half = max(n // 2, 1)
-    for i in range(n):
-        parity = i % 2
-        k = i // 2
-        ratio = BASE_RATIO + (k + 0.5) * SPREAD_STEP
-        out.append(CoaxWinding(
-            id="s%02d" % i,
-            girth_core=INNER_GIRTH * CORE_RATIO, girth_in=INNER_GIRTH,
-            girth_out=INNER_GIRTH * ratio,
-            n_in=N_IN, n_out=13 + parity))
-    return out
+    from stalk_population import make_locus_population
+    return make_locus_population(n, id_fmt="s%02d")
 
 
 def address_of(s: CoaxWinding) -> float:

@@ -83,26 +83,27 @@ from wound_core import CoaxWinding, WoundCore  # noqa: E402
 # GEOMETRY
 # ===========================================================================
 
-def make_stalk(i: int) -> CoaxWinding:
-    """A stalk with distinct geometry, so a distinct channel.
-
-    The girths and the turn counts both move, so no two share an
-    address AND no two share a channel.
-    """
-    core = 0.018 + 0.0007 * (i % 7)
-    inner = 0.050 + 0.0011 * (i % 11)
-    outer = 0.090 + 0.0019 * (i % 13)
-    if not (core < inner < outer):
-        core, inner, outer = 0.016, 0.048, 0.092
-    return CoaxWinding(
-        id="s%03d" % i, girth_out=outer, girth_in=inner, girth_core=core,
-        n_in=5 + (i % 6), n_out=11 + (i % 9))
-
-
-def address_of(stalk: CoaxWinding) -> float:
-    """The stalk's phase address: parity of outer turns + girth ratio."""
-    ph = (stalk.n_out % 2) / 2.0
-    return (ph + (stalk.girth_ratio - 1.0)) % 1.0
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-06: this file used to carry its OWN copy of the
+#: population recipe -- the CLUSTERED one, whose addresses land within
+#: thousandths of each other, so population 8 gives 2 address classes
+#: for 8 stalks, with 4 stalks in the largest class.  The repo already
+#: called that recipe a CONFOUND, in `bench_tradeoff.py`: "it was
+#: asking the receiver to separate things no transform could separate,
+#: and then reporting that as a limit of the design."
+#:
+#: THIS BENCH MEASURES THE CROWD, so the confound was in its subject:
+#: with 4 stalks per address class, the "crowd" it added was four
+#: transmissions of the SAME address, not four different speakers.
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do -- and it DISCOVERS the builders by AST, because a
+#: hardcoded list cannot report a copy it does not know about.  This
+#: file's copy was invisible to that list for exactly that reason.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
 
 
 def cohort_address(members: Sequence[CoaxWinding]) -> float:
@@ -342,7 +343,7 @@ def main() -> int:
         "cohort", "population", "identified", "margin", "ms/trial"))
     for cohort in (1, 2, 3, 4, 6, 8):
         pop = 8
-        stalks = [make_stalk(i) for i in range(pop)]
+        stalks = make_population(pop)
         t0 = time.perf_counter()
         ok = 0
         total = 0
@@ -373,7 +374,7 @@ def main() -> int:
     for cohort in (1, 2, 4, 8):
         for noise in (0.0, 0.3, 0.8):
             pop = 8
-            stalks = [make_stalk(i) for i in range(pop)]
+            stalks = make_population(pop)
             ok = 0
             total = 0
             margins: List[float] = []
@@ -395,7 +396,7 @@ def main() -> int:
     print("=" * 78)
     print()
     pop = 8
-    stalks = [make_stalk(i) for i in range(pop)]
+    stalks = make_population(pop)
     # population ladder: grow the cohort
     print("   POPULATION LADDER -- recruit more stalks")
     print("   %-12s %-14s %-12s" % ("cohort", "identified", "margin"))

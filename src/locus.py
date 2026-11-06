@@ -589,17 +589,18 @@ def _spectrum(x: Sequence[Tuple[float, float]]) -> List[Tuple[float, float]]:
 # ===========================================================================
 
 def _population(n: int = LOCUS_STALKS) -> List[CoaxWinding]:
-    """A locus's stalks, from the measured geometry recipe."""
-    out: List[CoaxWinding] = []
-    half = max(n // 2, 1)
-    for i in range(n):
-        parity = i % 2
-        k = i // 2
-        ratio = 1.200 + (k + 0.5) * 0.0625
-        out.append(CoaxWinding(
-            id="L%d" % i, girth_core=0.030, girth_in=0.060,
-            girth_out=0.060 * ratio, n_in=12, n_out=13 + parity))
-    return out
+    """A locus's stalks, from the measured geometry recipe.
+
+    MEASURED 2026-11-06: this used to carry its OWN copy of the 8-bin
+    recipe.  The census in `stalk_population.py` found FOUR copies of
+    it -- here, in `awareness.py`, in `fc_wrapper.py` and in
+    `do_stalks_communicate.py` -- all identical stalk for stalk.  They
+    now share ONE builder in the substrate, `make_locus_population`.
+    The id format stays the caller's business, because the ids are
+    labels and this file PRINTS them: `L0`, `L1`.
+    """
+    from stalk_population import make_locus_population
+    return make_locus_population(n, id_fmt="L%d")
 
 
 def selftest() -> int:

@@ -50,9 +50,16 @@ measure DIFFERENT THINGS. MEASURED 2026-11-01:
                           identifies the speaker at every population
                           from 3 up, and the width escalates
                           1 -> 4 -> 8 -> 16 bits with the channel's
-                          tap count. What limits the read is the
-                          GEOMETRY's address classes -- two addresses
-                          within 1/bins of each other are one class.
+                          tap count.
+                          MEASURED 2026-11-05: the "the address
+                          classes limit the read" story was measured
+                          on a CONFOUND -- seven copies of the
+                          population recipe had drifted apart, and the
+                          clustered one gave population 8 two classes
+                          for eight stalks. On the canonical recipe
+                          every stalk is in its own class, and the real
+                          limit is the FRAME: every address lands in
+                          DFT bin 0.
 
     **SO THE PEAKS AT 3 AND 4 ARE NOT A CONTRADICTION -- THEY ARE TWO
     DIFFERENT FUNCTIONS OF P.** The surplus is a CAPACITY question

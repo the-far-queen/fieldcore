@@ -646,11 +646,22 @@ class InterstalkLink:
             # channel's crowd is cancelled by the inversion; the system
             # identifies the speaker at every population from 3 up;
             # and the width escalates 1 -> 4 -> 8 -> 16 bits with the
-            # channel's tap count. So the middle band is real, and
-            # what fills it is the GEOMETRY's address classes -- two
-            # addresses within 1/bins of each other are one class,
-            # and the read cannot separate them however wide the
-            # channel is.
+            # channel's tap count. So the middle band is real.
+            #
+            # MEASURED 2026-11-05: the "address classes limit the read"
+            # story was measured on a CONFOUND. Seven copies of the
+            # population recipe had drifted apart, and the one this
+            # file's neighbours used clustered the addresses within
+            # thousandths -- so population 8 gave 2 classes for 8
+            # stalks, and that was published as the population code's
+            # real ceiling. On the canonical recipe every stalk is in
+            # its own class at every population.
+            #
+            # AND THE REAL LIMIT, MEASURED, IS THE FRAME: it is a tone
+            # of frequency ph/n cycles per sample, so its DFT peak sits
+            # at index ph, and ph is in [0,1). Every address lands in
+            # the FIRST DFT bin, so the bins do not separate addresses
+            # and widening the channel cannot help.
             #
             # So the escalation is asked on BOTH paths, and its answer
             # says what the caller should try next.

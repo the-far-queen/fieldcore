@@ -342,22 +342,45 @@ def test_the_bench_reports_the_width_it_claims():
 
 
 def test_the_address_classes_are_reported():
-    """THE CEILING IS THE ADDRESS CLASSES, AND IT MUST BE REPORTED.
+    """THE CLASSES MUST BE REPORTED, AND THE POPULATION MUST BE ADDRESSABLE.
 
     Two addresses within 1/bins of each other are one class, and the
-    read cannot separate them however wide the channel is. The standard
-    recipe varies the girths by thousandths, so the addresses land
-    within thousandths of each other: MEASURED, population 8 gives 2
-    classes for 8 stalks.
+    read cannot separate them however wide the channel is. So the
+    classes are a REPORT of what the read can resolve -- and a recipe
+    that collapses the population reports a CEILING that is really the
+    recipe's.
+
+    **THIS TEST USED TO ASSERT THE OPPOSITE, AND IT WAS ASSERTING A
+    STALE NUMBER.** It required `classes < population` -- that is, it
+    required the population 8 to give FEWER than 8 classes -- and its
+    message said so: "the addresses are spread -- and the recorded
+    ceiling is stale". MEASURED 2026-11-05: the recipe that produced
+    those 2 classes was one of SEVEN COPIES of the population recipe,
+    and it had diverged from the other six. `bench_tradeoff.py` had
+    already called it a CONFOUND -- "it was asking the receiver to
+    separate things no transform could separate, and then reporting
+    that as a limit of the design."
+
+    So the test was pinning the confound in place, and the ceiling the
+    project published -- "population 8 gives 2 classes for 8 stalks,
+    that is the population code's real ceiling" -- was measured on it.
+
+    THE TRUTH, MEASURED: on the canonical recipe every stalk is in its
+    own class at every population, so the classes are a REPORT and not
+    a CEILING.  The bench still reports them -- a reader must be able
+    to see the resolution the read had -- and now they say the truth.
     """
     row = BF.run_case(8, 64)
     classes = int(row["classes"])  # type: ignore[arg-type]
     population = int(row["population"])  # type: ignore[arg-type]
     sizes = list(row["class_sizes"])  # type: ignore[arg-type]
-    assert classes < population, (
-        "at population 8 the recipe gave %d classes for %d stalks, so the "
-        "addresses are spread -- and the recorded ceiling (%d) is stale"
-        % (classes, population, classes))
+    assert classes == population, (
+        "at population 8 the recipe gave %d classes for %d stalks, so two "
+        "stalks share an address class and the population is NOT "
+        "addressable -- whatever the read measures is then a limit of "
+        "the RECIPE and not of the design" % (classes, population))
+    assert sizes and max(sizes) == 1, (
+        "the classes are still collapsed: %r" % (sizes,))
     assert sum(sizes) == population, (
         "the class sizes do not account for every stalk: %r" % (sizes,))
 

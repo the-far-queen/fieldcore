@@ -125,33 +125,25 @@ from wound_core import CoaxWinding, WoundCore  # noqa: E402
 # THE POPULATION
 # ===========================================================================
 
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks with distinct geometry, so distinct addresses.
-
-    The geometry varies the way the standard four do: girths and turn
-    counts both move, so no two stalks share an address, and the
-    concentric order core < inner < outer is preserved.
-
-    UNCHANGED on purpose: the balance benches copy this recipe, so the
-    numbers stay comparable across the benches.
-    """
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        core = 0.018 + 0.0007 * (i % 7)
-        inner = 0.050 + 0.0011 * (i % 11)
-        outer = 0.090 + 0.0019 * (i % 13)
-        if not (core < inner < outer):
-            core, inner, outer = 0.016, 0.048, 0.092
-        out.append(CoaxWinding(
-            id="p%03d" % i, girth_out=outer, girth_in=inner, girth_core=core,
-            n_in=5 + (i % 6), n_out=11 + (i % 9)))
-    return out
-
-
-def address_of(stalk: CoaxWinding) -> float:
-    """The stalk's phase address: parity of outer turns + girth ratio."""
-    ph = (stalk.n_out % 2) / 2.0
-    return (ph + (stalk.girth_ratio - 1.0)) % 1.0
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- this one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while four of the other six spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."  So the ceiling this bench published -- "population 8
+#: gives 2 classes for 8 stalks" -- was measured on the confound.
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
 
 
 # ===========================================================================
@@ -186,22 +178,18 @@ def address_classes(stalks: Sequence[CoaxWinding], bins: int) -> List[int]:
     so the read cannot tell those two stalks apart -- no matter how
     wide the channel is. The class SIZES are returned, largest first.
 
-    MEASURED, the standard recipe: population 4 gives 2 classes for 4
-    stalks, population 8 gives 2 classes for 8 stalks. The recipe
-    varies the girths by thousandths, so the addresses land within
-    thousandths of each other and the crowd is one class.
+    THE RULE IS THE SUBSTRATE'S, in `stalk_population.address_classes`,
+    and it is imported rather than copied -- a copy is a promise that
+    somebody will remember to update it.
+
+    MEASURED 2026-11-05, on the canonical recipe: every stalk is in
+    its own class at every population -- population 8 gives 8 classes
+    for 8 stalks, largest class 1.  The classes are a REPORT of the
+    population, not a CEILING on it.  (The "2 classes for 8 stalks"
+    that this docstring used to quote was the stale recipe's.)
     """
-    addrs = [address_of(s) for s in stalks]
-    classes: List[List[float]] = []
-    for a in addrs:
-        for c in classes:
-            d = abs(a - c[0])
-            if min(d, 1.0 - d) <= 1.0 / bins:
-                c[1] += 1
-                break
-        else:
-            classes.append([a, 1])
-    return sorted((int(c[1]) for c in classes), reverse=True)
+    _labels, sizes = SP.address_classes(stalks, bins)
+    return sizes
 
 
 def _address_frame(ph: float, bins: int) -> List[Tuple[float, float]]:

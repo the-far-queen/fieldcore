@@ -38,9 +38,17 @@ transmitted spectrum to 2.9e-15 of the signal scale at population 4
 and 4.8e-14 at population 64, so the channel's crowd is cancelled by
 the inversion; the system identifies the speaker at every population
 from 3 up; and the width escalates 1 -> 4 -> 8 -> 16 bits with the
-channel's tap count. What actually limits the read is the GEOMETRY's
-address classes -- two addresses within 1/bins of each other are one
-class.
+channel's tap count.
+     MEASURED 2026-11-05: the "address classes limit the read" story
+     was measured on a CONFOUND. Seven copies of the population recipe
+     had drifted apart, and the clustered one put population 8 into two
+     classes for eight stalks -- which was published as the population
+     code's real ceiling. On the canonical recipe every stalk is in its
+     own class at every population, and the real limit is the FRAME:
+     it is a tone of frequency ph/n cycles per sample, so its DFT peak
+     sits at index ph, and ph is in [0,1). Every address lands in the
+     FIRST DFT bin, so the bins do not separate addresses and widening
+     the channel cannot help.
 
 That is a PASS RATE, and a pass rate cannot say WHERE the balance
 point is, because a pass rate confounds three different limits:
@@ -135,6 +143,25 @@ from wound_core import CoaxWinding, WoundCore  # noqa: E402
 #: The channel's derived width, and the repo's own REACH table.
 from interstalk_link import REACH  # noqa: E402
 
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while the other spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
+
 #: The ladder's width schedule, from the Rust core's ladder.rs.
 WIDTHS: Tuple[int, ...] = (1, 4, 8, 16, 32, 64, 128, 256)
 
@@ -158,30 +185,6 @@ DB_PER_BIT = 6.0
 # ===========================================================================
 # THE POPULATION
 # ===========================================================================
-
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks with distinct geometry, so distinct addresses.
-
-    Copied from bench_failup.py so the two benches measure the same
-    population and their numbers can be compared.
-    """
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        core = 0.018 + 0.0007 * (i % 7)
-        inner = 0.050 + 0.0011 * (i % 11)
-        outer = 0.090 + 0.0019 * (i % 13)
-        if not (core < inner < outer):
-            core, inner, outer = 0.016, 0.048, 0.092
-        out.append(CoaxWinding(
-            id="p%03d" % i, girth_out=outer, girth_in=inner, girth_core=core,
-            n_in=5 + (i % 6), n_out=11 + (i % 9)))
-    return out
-
-
-def address_of(stalk: CoaxWinding) -> float:
-    """The stalk's phase address: parity of outer turns + girth ratio."""
-    ph = (stalk.n_out % 2) / 2.0
-    return (ph + (stalk.girth_ratio - 1.0)) % 1.0
 
 
 def spectrum(x: List[Tuple[float, float]]) -> List[Tuple[float, float]]:

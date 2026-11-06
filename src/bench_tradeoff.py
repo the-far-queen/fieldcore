@@ -97,6 +97,25 @@ from interstalk_link import (  # noqa: E402
 )
 from wound_core import CoaxWinding, WoundCore  # noqa: E402
 
+#: THE POPULATION AND THE ADDRESS.
+#:
+#: MEASURED 2026-11-05: this file used to carry its OWN copy of the
+#: population recipe, and so did six others.  The copies had DIVERGED
+#: into two behaviours -- one clustered the addresses within
+#: thousandths, so the population collapsed into two DFT classes at
+#: population 8, while the other spread them evenly.
+#:
+#: The repo already called the clustered one a CONFOUND, in
+#: `bench_tradeoff.py`: "it was asking the receiver to separate things
+#: no transform could separate, and then reporting that as a limit of
+#: the design."
+#:
+#: The recipe now lives in ONE place, `stalk_population.py`, and every
+#: bench imports it.  `tools/check_population_recipe.py` checks that
+#: they all do.
+import stalk_population as SP  # noqa: E402
+from stalk_population import address_of, make_population  # noqa: E402,F401
+
 #: The frame length, fixed so the resolution limit is constant.
 BINS = 128
 
@@ -118,38 +137,6 @@ DB_PER_BIT = 6.0
 # ===========================================================================
 # THE POPULATION WITH EVENLY SPREAD ADDRESSES
 # ===========================================================================
-
-def make_population(n: int) -> List[CoaxWinding]:
-    """n stalks whose addresses are evenly spread, and whose geometry is
-    SOLVED FROM the address.
-
-    The address formula is
-        address = ((n_out % 2)/2 + (girth_ratio - 1)) % 1
-    so with an even n_out (parity term 0) a target address a gives
-    girth_ratio = 1 + a. The code assigns the addresses; the hardware
-    realises them. address_i = (i + 0.5)/n, so the closest pair is
-    exactly n bins apart at 128 bins and every stalk is resolvable.
-
-    THIS FIXED A CONFOUND: the first bench's generator produced
-    addresses clustered within 0.012 of each other, which is under two
-    DFT bins -- so it was asking the receiver to separate things no
-    transform could separate, and then reporting that as a limit of the
-    design.
-    """
-    out: List[CoaxWinding] = []
-    for i in range(n):
-        a = (i + 0.5) / n
-        girth_in = 0.050
-        out.append(CoaxWinding(
-            id="p%03d" % i,
-            girth_out=girth_in * (1.0 + a), girth_in=girth_in,
-            girth_core=0.018, n_in=5, n_out=10))
-    return out
-
-
-def address_of(stalk: CoaxWinding) -> float:
-    ph = (stalk.n_out % 2) / 2.0
-    return (ph + (stalk.girth_ratio - 1.0)) % 1.0
 
 
 def spectrum(x: List[Tuple[float, float]]) -> List[Tuple[float, float]]:

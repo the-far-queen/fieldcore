@@ -2,8 +2,8 @@
   "peak_population": 3,
   "peak_width": 4,
   "command": "python src/bench_balance_final.py",
-  "measured_on": "2026-10-31T08:44:46Z",
-  "bench_sha256": "19b1987e5305ae26759d88c3bd9fe120b03020bc275ab722cd443be7473c426d",
+  "measured_on": "2026-11-05T14:29:56Z",
+  "bench_sha256": "5bf31a4349641a62b0d28c929dbb6f7ed68961c861144e13064e2126a59add33",
   "conditions": [
     {
       "model": "A",

@@ -47,10 +47,18 @@ THE FIVE MEASUREMENTS
      transmitted spectrum to 2.9e-15 of the signal scale at
      population 4 and 4.8e-14 at population 64, so the channel's
      crowd IS cancelled by the inversion; the system identifies the
-     speaker at every population from 3 up; and what limits the read
-     is the GEOMETRY's address classes -- two addresses within
-     1/bins of each other are one class, and MEASURED population 8
-     gives 2 classes for 8 stalks.
+     speaker at every population from 3 up.
+
+     MEASURED 2026-11-05: the "what limits the read is the address
+     classes" story was measured on a CONFOUND. Seven copies of the
+     population recipe had drifted apart, and the clustered one gave
+     population 8 two classes for eight stalks -- which was published
+     as the population code's real ceiling. On the canonical recipe
+     every stalk is in its own class at every population. The real
+     limit is the FRAME: it is a tone of frequency ph/n cycles per
+     sample, so its DFT peak sits at index ph, and ph is in [0,1), so
+     every address lands in the FIRST DFT bin and the bins do not
+     separate addresses.
 
      **SO THE CROWD IS STILL REAL -- it is just not the crowd the old
      number described.** The interference between stalks is still the

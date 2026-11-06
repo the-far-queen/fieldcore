@@ -157,19 +157,17 @@ def _stalks(n: int = N_STALKS):
     1/16 per pair. The width axis has 8 entries and the population 6, so
     the ladder runs out of width first -- which is the measured fact
     that the alternation was fixed for.
+
+    MEASURED 2026-11-06: this used to carry its OWN copy of the 8-bin
+    recipe.  The census in `stalk_population.py` found FOUR copies of
+    it -- here, in `awareness.py`, in `locus.py` and in
+    `do_stalks_communicate.py` -- all identical stalk for stalk.  They
+    now share ONE builder in the substrate, `make_locus_population`,
+    and the id format stays the caller's business because the ids are
+    labels, not physics.
     """
-    from wound_core import CoaxWinding
-    return [
-        CoaxWinding(
-            id="s%02d" % i,
-            girth_core=0.030,
-            girth_in=0.060,
-            girth_out=0.060 * (1.200 + (i // 2 + 0.5) * 0.0625),
-            n_in=12,
-            n_out=13 + (i % 2),
-        )
-        for i in range(n)
-    ]
+    from stalk_population import make_locus_population
+    return make_locus_population(n, id_fmt="s%02d")
 
 
 @dataclass
