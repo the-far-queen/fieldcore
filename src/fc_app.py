@@ -443,11 +443,35 @@ def letter_m() -> Dict[str, Any]:
                          "at module level -- the import error is swallowed "
                          "and the class is never created")
     m = modulator.Modulator()
-    cycle = m.run_cycle() if hasattr(m, "run_cycle") else {}
+    # AND THE CHECK THAT THE MODULATOR IS A MODULATOR.
+    #
+    # MEASURED 2026-11-06: this probe used to read
+    #     cycle = m.run_cycle() if hasattr(m, "run_cycle") else {}
+    # so a `Modulator` class with NO run_cycle at all was reported LIVE
+    # with cycle_keys=[] and stage="". That is not LIVE by this file's
+    # own definition -- "it was constructed and it ran, and it produced
+    # a measurement" -- and it is the same defect class as the import
+    # swallow one level up: a probe that cannot fail.
+    #
+    # so the cycle is REQUIRED, and it must MEASURE something. a
+    # modulator that runs and returns nothing is a stub with a reason,
+    # not a live letter.
+    if not hasattr(m, "run_cycle"):
+        return Stub("M", "modulator.Modulator has no run_cycle -- the "
+                         "class exists but the controller cannot run")
+    cycle = m.run_cycle()
+    if not isinstance(cycle, dict):
+        return Stub("M", "modulator.Modulator.run_cycle returned %s, not a "
+                         "measurement -- expected a dict"
+                         % type(cycle).__name__)
+    if not cycle:
+        return Stub("M", "modulator.Modulator.run_cycle returned an empty "
+                         "measurement -- the controller ran and measured "
+                         "nothing")
     return {
         "has_modulator": True,
-        "cycle_keys": sorted(cycle.keys()) if isinstance(cycle, dict) else [],
-        "stage": str(cycle.get("stage", "")) if isinstance(cycle, dict) else "",
+        "cycle_keys": sorted(cycle.keys()),
+        "stage": str(cycle.get("stage", "")),
     }
 
 

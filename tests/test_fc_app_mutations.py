@@ -379,6 +379,18 @@ def test_mutation_8_the_survey_stops_being_idempotent():
     run differs from the first.
 
     MUST BE CAUGHT BY: test_the_survey_is_idempotent
+
+    WHY THE FLIP, AND NOT A FIXED VALUE. this mutation used to set
+    letter M to the literal "LIVE". That only worked while M was a
+    STUB: setting STUB to LIVE changes the answer. When letter M was
+    fixed and became LIVE -- measured 2026-11-06, the modulator's
+    swallowed import was repaired -- the same mutation set LIVE to LIVE
+    and changed NOTHING, so it stopped being a mutation and started
+    being a no-op that reported a pass.
+
+    so it now flips M to whatever it IS NOT. the defect under test is
+    "the second run differs from the first", and that is independent of
+    what any letter currently reports.
     """
     original = fc_app.survey
     state = {"n": 0}
@@ -390,7 +402,7 @@ def test_mutation_8_the_survey_stops_being_idempotent():
             # THE DEFECT: the second run reports something different.
             for lt in out:
                 if lt.letter == "M":
-                    lt.state = "LIVE"
+                    lt.state = "STUB" if lt.state == "LIVE" else "LIVE"
         return out
 
     try:

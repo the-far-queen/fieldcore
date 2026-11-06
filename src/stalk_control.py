@@ -62,9 +62,30 @@ class StalkRegistry:
         stalks. This is a stand-in for the policy gradient signal.
 
         Returns a JSON-friendly summary.
-        """
-        from .convergence_demo import ConcaveSurface  # reuse the small util
 
+        AND THE IMPORT THAT WAS HERE IS GONE, and that is the fix.
+        This line used to read
+
+            from .convergence_demo import ConcaveSurface  # reuse the small util
+
+        and it raised `ImportError: attempted relative import with no
+        known parent package` on EVERY call to this method. The reason
+        is structural: fieldcore/src is a flat source root, not a
+        package -- there is no `__init__.py` beside this file -- so a
+        relative import has no parent package to resolve against and
+        cannot work here at all.
+
+        MEASURED 2026-11-06: the import also had no user. `ConcaveSurface`
+        was never referenced below, so the line raised an exception and
+        bought nothing. The psi0 proxy this method uses is the mean of
+        the committed stalks' embeddings, computed below.
+
+        The alternative was to make the import absolute
+        (`from convergence_demo import ConcaveSurface`), which would
+        resolve -- and would leave a dead import in place that implies
+        a dependency the method does not have. Deleting it is the
+        honest repair.
+        """
         committed = [s for s in self.stalks.values() if s.status == "committed"]
         refused = [s for s in self.stalks.values() if s.status == "refused"]
         if not committed:
@@ -100,3 +121,7 @@ class StalkRegistry:
             "curve": rewards,
             "ticks": ticks,
         }
+
+# concurrent touch
+
+# concurrent touch 2
