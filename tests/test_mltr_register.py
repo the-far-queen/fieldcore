@@ -67,15 +67,15 @@ import mltr_register as REG  # noqa: E402
 #: The derived count is asserted separately, because a count that
 #: cannot say WHICH population it is counting is a count that cannot
 #: be checked.
-EXPECTED_COUNT = 412
+EXPECTED_COUNT = 413
 EXPECTED_CURATED = 306
-EXPECTED_DERIVED = 106
+EXPECTED_DERIVED = 107
 
 #: THE FIVE DOMAINS, and their measured sizes.
 EXPECTED_DOMAINS = {
     "py-builtin": 91,
-    "control": 171,
-    "engineering": 78,
+    "control": 173,
+    "engineering": 77,
     "process": 40,
     "affect": 32,
 }
@@ -334,8 +334,8 @@ def test_the_gap_is_stated_not_padded():
     RED: change EXPECTED_COUNT without changing the register.
     """
     gap = SPEC_TARGET - len(REG.REGISTER)
-    assert gap == 38, (
-        "the gap to the spec is %d, not 38 -- the register holds %d of "
+    assert gap == 37, (
+        "the gap to the spec is %d, not 37 -- the register holds %d of "
         "the %d asked for" % (gap, len(REG.REGISTER), SPEC_TARGET))
     assert len(REG.REGISTER) <= SPEC_TARGET, (
         "the register holds %d, which is MORE than the %d asked for"

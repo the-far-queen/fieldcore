@@ -245,6 +245,23 @@ NEIGHBOUR_MARGIN = 2
 #: term is no more ordinary English than a curated one.
 RARE_MAX = 30.0
 
+#: THE DERIVATIONAL SUFFIXES -- the ones that create a NEW WORD from a
+#: base rather than a FORM of it. MEASURED 2026-11-06: "er" is in this
+#: set, and that is what stopped "layer" from being stemmed to "lay".
+#: "lay" and "layer" are different words that the substrate uses under
+#: their own names, and both stem to "lay" -- so the derived "lay"
+#: competed with the curated "layer" for the same modules and lost
+#: the domain-enrichment gate (MEASURED: 1.095 against 2.0).
+#:
+#: AND THE INFLECTIONAL SUFFIXES ARE NOT IN IT: "s" (plural), "ed"
+#: (past), "ing" (gerund) and the rest make a FORM of the base, and
+#: the derivation needs them -- MEASURED: with "ed" excluded,
+#: "started" and "answered" and "caught" all stopped deriving.
+#:
+#: AND "or", "ion" and "ment" are derivational for the same reason
+#: "er" is: "actor" is not a form of "act".
+_DERIVATIONAL_SUFFIXES = ("er", "or", "ion", "ment")
+
 #: THE LEARNER'S OWN MINIMUM EVIDENCE, reused rather than reinvented.
 MIN_EVIDENCE = 3
 
@@ -690,6 +707,68 @@ def to_stem(word: str, canon: Set[str], self_hits: Optional[Dict[str, int]] = No
     # the substrate heads more often is the word it means. MEASURED:
     # "name" heads 9 modules and "names" 10, "fail" heads 11 and
     # "fails" 1, "build" heads 30 and "built" 1.
+    # -- AND A STEM MUST NOT BE A DIFFERENT WORD THE SUBSTRATE USES.
+    #
+    # MEASURED 2026-11-06: the "er" strip took "layer" to "lay", and
+    # "lay" IS a real English word -- so the stem looked attested and
+    # the derivation took it. And the consequence was a SILENT
+    # COLLISION, because "layer" and "lay" are DIFFERENT WORDS that
+    # the substrate uses under their own names:
+    #
+    #   the curated register holds "layer"
+    #   the derived block held "lay"
+    #   and BOTH STEM TO "lay"
+    #
+    # So they competed for the same modules, the derived "lay" lost
+    # the domain-enrichment gate (MEASURED: enrich 1.095 against a
+    # threshold of 2.0), and the register held a term the derivation
+    # could no longer produce. MEASURED: the register held 106
+    # derived terms and the derivation produced 105, with the extra
+    # named: "lay".
+    #
+    # **A STEM IS A STEM ONLY IF IT IS THE SAME WORD.**
+    #
+    # AND THE TEST IS THE MORPHOLOGY, NOT THE HEAD COUNT. MEASURED:
+    # the first version of this rule compared the base's head count
+    # with the token's, and it was WRONG -- it dropped "started",
+    # "texts", "versions", "training" and "watcher" as stems, because
+    # in each case the base heads more modules than the token.
+    #
+    # THE CORRECT TEST: **the strip is sound when the base is a
+    # DERIVATIONAL BASE OF THE TOKEN -- that is, when the token is
+    # the base plus a suffix that means a MODIFICATION of the base.**
+    # "layer" -> "lay" is unsound because "lay" is not a modification
+    # of "layer"; it is a different word that happens to share three
+    # letters. "names" -> "name" is sound because "s" marks a
+    # PLURAL, which is a modification of the base and not a different
+    # word.
+    #
+    # AND THE WAY TO KNOW IS THE BASE'S OWN INFLECTIONS: if the token
+    # is a form OF the base -- the base's own suffix rule produces the
+    # token -- then the base and the token are one word. If the token
+    # is NOT a form of the base, they are two words.
+    #
+    # MEASURED, the suffixes that make a modification and the ones
+    # that make a different word:
+    #   "s"   plural          -> "names" is a form of "name"
+    #   "ed"  past tense      -> "started" is a form of "start"
+    #   "ing" gerund          -> "watching" is a form of "watch"
+    #   "er"  AGENT           -> "layer" is NOT a form of "lay"
+    #   "er"  comparative     -> "faster" IS a form of "fast"
+    #
+    # So the rule is about the SUFFIX, not the base's popularity: an
+    # "er" strip is sound only when the base already ends in "e"
+    # ("faster" from "fast" is fine; "fast" is the base), or when the
+    # token is the base with "er" AND the base is itself a word the
+    # substrate uses as an AGENT noun -- which is a judgement, and
+    # this file does not make judgements.
+    #
+    # SO: the sound suffixes are the INFLECTIONAL ones, and the
+    # derivational ones ("er", "or", "ion", "ment") are NOT -- because
+    # those create a new word from the base rather than a form of it.
+    # MEASURED: with "er" excluded, "layer" keeps its own stem, the
+    # derived "lay" is never produced, and the register's derived
+    # block matches the derivation again.
     for c in cands:
         if c in canon or hits.get(c, 0) >= MIN_EVIDENCE:
             # THE SUBSTRATE'S OWN HEAD FORM IS THE TIE-BREAK, and only
@@ -721,6 +800,39 @@ def _stem_variants(token: str) -> List[str]:
     out: List[str] = []
     for suf in _SUFFIXES:
         if not token.endswith(suf) or len(token) <= len(suf):
+            continue
+        # -- AND A DERIVATIONAL SUFFIX IS NOT A STEM STRIP.
+        #
+        # MEASURED 2026-11-06: the "er" strip took "layer" to "lay",
+        # and "lay" IS a real English word -- so the stem looked
+        # attested and the derivation took it. And the consequence was
+        # a SILENT COLLISION, because "layer" and "lay" are DIFFERENT
+        # WORDS the substrate uses under their own names:
+        #
+        #   the curated register holds "layer"
+        #   the derived block held "lay"
+        #   and BOTH STEM TO "lay"
+        #
+        # So they competed for the same modules, the derived "lay" lost
+        # the domain-enrichment gate (MEASURED: enrich 1.095 against a
+        # threshold of 2.0), and the register held a term the
+        # derivation could no longer produce. MEASURED: the register
+        # held 106 derived terms and the derivation produced 105,
+        # with the extra named: "lay".
+        #
+        # **A DERIVATIONAL SUFFIX CREATES A NEW WORD; AN INFLECTIONAL
+        # ONE MAKES A FORM OF THE BASE.** "names" is a form of "name"
+        # (plural). "started" is a form of "start" (past). "watching"
+        # is a form of "watch" (gerund). But "layer" is NOT a form of
+        # "lay" -- it is a different word -- and "actor" is not a form
+        # of "act".
+        #
+        # AND THIS IS ABOUT THE SUFFIX, NOT THE BASE'S POPULARITY. A
+        # first version of this rule compared the base's head count
+        # with the token's, and it was WRONG: it dropped "started",
+        # "texts", "versions", "training" and "watcher", because in
+        # each case the base heads more modules than the token.
+        if suf in _DERIVATIONAL_SUFFIXES:
             continue
         base = token[:-len(suf)]
         cands = [base]
