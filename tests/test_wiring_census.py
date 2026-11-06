@@ -143,7 +143,7 @@ def test_the_census_finds_enough_modules_to_be_the_whole_fc():
         "surveying a fraction of the tree" % len(mods))
 
 
-def test_the_orphan_count_is_a_measurement_not_a_zero():
+def test_the_orphan_bin_still_fires():
     """the census must still FIND orphans, and it finds some.
 
     AND WHY THIS MATTERS. If the census reported zero orphans, that
@@ -151,12 +151,49 @@ def test_the_orphan_count_is_a_measurement_not_a_zero():
     capabilities that nothing reaches, and the census is what makes
     them visible. A census that can only say "all clear" is not
     measuring anything.
+
+    AND WHY THIS RUNS AGAINST THE FIXTURE AND NOT THE REAL TREE.
+    MEASURED 2026-11-06: this assertion ran against the real tree and
+    said the orphan count must be above zero. The real tree now has
+    ZERO orphans, because `src/capability_wiring.py` was added and it
+    reaches every capability the census had measured as unreached.
+
+    That is the tree getting fixed, not the census getting weaker, and
+    the distinction matters: a census whose orphan bin has stopped
+    firing would ALSO report zero orphans, and the two are
+    indistinguishable if the only evidence is the count. So the
+    property is now asserted where it can be seen -- on the fixture
+    tree, whose orphans are known by hand -- and the real tree's zero
+    is asserted separately, as the result rather than as the
+    instrument's health.
+    """
+    mods = wc.census(repos=("fieldcore",), roots=("src",),
+                     work_repos=str(FIXTURE_REPOS))
+    orphans = [m.rel for m in mods if m.bin == "ORPHAN"]
+    assert orphans, (
+        "the census found no orphans on the fixture tree -- the ORPHAN "
+        "bin has stopped firing, and a census that can only say 'all "
+        "clear' is not measuring anything")
+    assert "src/orphan_top.py" in orphans, orphans
+    assert "src/other/result.py" in orphans, orphans
+
+
+def test_the_real_tree_has_no_orphans_left():
+    """The fc is fully wired, and that is a RESULT, not a broken census.
+
+    MEASURED 2026-11-06: the census measured 25 modules that nothing
+    imported. `src/capability_wiring.py` now reaches every one of
+    them, and the count is zero.
+
+    The census rules were NOT changed to make this happen -- the
+    mutation harness still proves the ORPHAN bin fires when it is
+    broken (5 of 5 caught), and the fixture tree above still has its
+    hand-written orphans.
     """
     s = wc.summarise(wc.census())
-    assert s["orphan"] > 0, (
-        "the census reports zero orphans -- either the fc is now "
-        "fully wired, which is worth saying out loud, or the orphan "
-        "bin has stopped firing")
+    assert s["orphan"] == 0, (
+        "the census still reports %d orphans: %s"
+        % (s["orphan"], s["orphans"]))
     assert s["wired"] > 0 and s["entry"] > 0
 
 

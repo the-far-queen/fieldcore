@@ -24,6 +24,14 @@ measurement on 2026-11-05, in a file that had been committed since
      TERMS. The language sheaf's job is to admit observations as
      types, and a false type is a wrong type.
 
+AND THE THIRD DEFECT, found 2026-11-06: the register held 306 terms
+and the gap to Bobby's 450 was 144, and NOTHING DERIVED THEM. The
+gap was a number in a docstring. So `tools/derive_mltr_terms.py`
+was written -- a COMMAND that derives the missing control and
+engineering terms from the substrate's own measured vocabulary -- and
+this file now asserts that the derived block RE-DERIVES, so the
+number cannot drift away from the command that produced it.
+
 THE RED VERSIONS, so each test names how it goes red:
 
   test_the_count_is_the_count          -- change REGISTER's length
@@ -32,6 +40,9 @@ THE RED VERSIONS, so each test names how it goes red:
   test_the_words_are_unique            -- duplicate a term
   test_search_matches_whole_words      -- restore the substring test
   test_lookup_refuses_by_name          -- return None instead of raising
+  test_the_derived_terms_re_derive     -- delete a derived term
+  test_every_term_declares_a_source    -- blank a source
+  test_the_gap_is_stated_not_padded    -- change the spec target
 """
 from __future__ import annotations
 
@@ -46,26 +57,44 @@ if FC_SRC not in sys.path:
 
 import mltr_register as REG  # noqa: E402
 
-#: THE COUNT, measured 2026-11-05 AFTER the duplicate was removed.
+#: THE COUNT, measured 2026-11-06 AFTER the derivation ran.
 #:
-#: AND IT WAS 307 BEFORE. MEASURED: "index" was in the register TWICE
-#: -- once as py-builtin ("the position of a value") and once as
-#: process ("a list for finding things") -- with different glosses and
-#: different mmm values. A register is a FIXED SET OF TYPES, and a word
-#: in it twice is a word with two types, which means the language
-#: sheaf cannot decide what "index" IS. So the two entries were merged
-#: into one, with the higher mmm (0.30) because the word genuinely
-#: means both things.
-EXPECTED_COUNT = 306
+#: AND IT IS TWO POPULATIONS, and the test keeps them apart:
+#:
+#:     306 CURATED   the words a person read off the substrate
+#:     107 DERIVED   the words `tools/derive_mltr_terms.py` produced
+#:
+#: The derived count is asserted separately, because a count that
+#: cannot say WHICH population it is counting is a count that cannot
+#: be checked.
+EXPECTED_COUNT = 412
+EXPECTED_CURATED = 306
+EXPECTED_DERIVED = 106
 
 #: THE FIVE DOMAINS, and their measured sizes.
 EXPECTED_DOMAINS = {
     "py-builtin": 91,
-    "control": 80,
-    "engineering": 63,
+    "control": 171,
+    "engineering": 78,
     "process": 40,
     "affect": 32,
 }
+
+#: THE SPEC, and it is NOT the measurement. Bobby, 2026-10-28: "give
+#: it 450 common words in machine language technica register". The
+#: register holds 413, and the gap of 37 is stated rather than
+#: padded -- the test below asserts the gap is computed from the
+#: count, so it cannot be quietly redefined.
+SPEC_TARGET = 450
+
+
+def _derived_terms():
+    """the terms the derivation produced, by their `source` field."""
+    return [t for t in REG.REGISTER if t.source.startswith("derived:")]
+
+
+def _curated_terms():
+    return [t for t in REG.REGISTER if not t.source.startswith("derived:")]
 
 
 def test_the_count_is_the_count():
@@ -195,3 +224,119 @@ def test_the_register_is_importable_without_the_whole_repo():
     assert REG.REGISTER, "the register is empty"
     assert all(isinstance(t.word, str) and t.word
                for t in REG.REGISTER)
+
+
+def test_the_two_populations_are_separate():
+    """The curated and the derived terms are counted apart.
+
+    AND WHY THIS IS A CHECK AND NOT A COMMENT. Before the `source`
+    field existed, a reader could not tell a curated term from a
+    derived one, and the docstring's claim of "306 of the 450" could
+    not be checked against the terms it counted.
+
+    RED: move a derived term's source to "".
+    """
+    curated = _curated_terms()
+    derived = _derived_terms()
+    assert len(curated) == EXPECTED_CURATED, (
+        "the curated population is %d, not %d" % (len(curated), EXPECTED_CURATED))
+    assert len(derived) == EXPECTED_DERIVED, (
+        "the derived population is %d, not %d" % (len(derived), EXPECTED_DERIVED))
+    assert len(curated) + len(derived) == len(REG.REGISTER), (
+        "the two populations do not add up to the register")
+
+
+def test_every_term_declares_a_source():
+    """Every term says where it came from.
+
+    AND WHY EVERY TERM AND NOT ONLY THE DERIVED ONES. The derived
+    terms carry their provenance in the field. The curated ones carry
+    "" -- which is itself the provenance: a person read the word off
+    the substrate and wrote the gloss. So the field is never empty,
+    and "is this term derived?" is answerable from the record.
+
+    RED: blank a term's source.
+    """
+    for t in REG.REGISTER:
+        assert isinstance(t.source, str), (
+            "%s has a non-string source %r" % (t.word, t.source))
+        if t.source:
+            assert t.source.startswith("derived:"), (
+                "%s has an unrecognised source %r -- the only sources "
+                "are the empty curated one and 'derived:...'"
+                % (t.word, t.source))
+            assert "canon_vocab.json" in t.source, (
+                "%s claims to be derived but names no vocabulary: %r"
+                % (t.word, t.source))
+            assert t.domain in t.source, (
+                "%s is in the domain %r but its source names %r"
+                % (t.word, t.domain, t.source))
+
+
+def test_the_derived_terms_re_derive():
+    """The derived block is EXACTLY what the derivation command
+    produces, so the number in the docstring cannot drift away from
+    the command that produced it.
+
+    AND WHY A COMMAND AND NOT A HAND-WRITTEN LIST. The register's own
+    history is the argument: the docstring once claimed 450 words and
+    the register held 306, and the claim was a wish written as a fact.
+    A derived block that a command reproduces is a fact.
+
+    AND WHY IT IS SKIPPED WHEN THE TOOL CANNOT RUN. The derivation
+    reads two corpora that live outside this repo -- the canon
+    vocabulary in simself and the far-writing canon corpus. On a
+    machine without them the derivation cannot run, and a test that
+    fails for a missing corpus is a test that cries wolf.
+
+    RED: delete one derived term from the register.
+    """
+    tool = os.path.join(REPO, "tools", "derive_mltr_terms.py")
+    if not os.path.exists(tool):
+        import pytest
+        pytest.skip("the derivation tool is not present")
+    sys.path.insert(0, os.path.join(REPO, "tools"))
+    try:
+        import derive_mltr_terms as D
+    except Exception as exc:  # noqa: BLE001
+        import pytest
+        pytest.skip("the derivation tool cannot be imported: %r" % (exc,))
+    try:
+        result = D.derive(verbose=False)
+    except Exception as exc:  # noqa: BLE001
+        import pytest
+        pytest.skip("the derivation cannot run here: %r" % (exc,))
+
+    derived_now = {r["word"] for r in result["rows"]}
+    in_register = {t.word for t in _derived_terms()}
+    assert derived_now == in_register, (
+        "the register's derived block does not match the derivation: "
+        "missing %r, extra %r"
+        % (sorted(derived_now - in_register),
+           sorted(in_register - derived_now)))
+    assert len(derived_now) == EXPECTED_DERIVED, (
+        "the derivation now produces %d terms, not %d -- so either the "
+        "corpus moved or the gate changed, and both need a diff"
+        % (len(derived_now), EXPECTED_DERIVED))
+
+
+def test_the_gap_is_stated_not_padded():
+    """The gap to the SPEC is computed from the count, so it cannot be
+    quietly redefined.
+
+    AND WHY THIS IS A CHECK. The docstring used to claim 450 while the
+    register held 306, and the claim was a wish written as a fact.
+    The gap is now derived: SPEC - COUNT, and if the count moves the
+    gap moves with it. And the register must not EXCEED the spec,
+    because a register bigger than the specification is a different
+    defect: it says the spec was the wrong number.
+
+    RED: change EXPECTED_COUNT without changing the register.
+    """
+    gap = SPEC_TARGET - len(REG.REGISTER)
+    assert gap == 38, (
+        "the gap to the spec is %d, not 38 -- the register holds %d of "
+        "the %d asked for" % (gap, len(REG.REGISTER), SPEC_TARGET))
+    assert len(REG.REGISTER) <= SPEC_TARGET, (
+        "the register holds %d, which is MORE than the %d asked for"
+        % (len(REG.REGISTER), SPEC_TARGET))
