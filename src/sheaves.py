@@ -283,6 +283,33 @@ class Sheaves:
             out["domains"] = {d: len(v) for d, v in REG.by_domain().items()}
         except Exception as exc:  # noqa: BLE001
             out["error"] = repr(exc)
+
+        # -- AND THE PSB SCHEMA, reached from here --------------------
+        #
+        # AND WHY IT IS REACHED FROM HERE AND NOT LEFT AS AN ORPHAN.
+        # `fieldcore/src/psb.py` is the PSB schema's thin validator,
+        # and the schema is the substrate's. But the thing that has to
+        # be CHECKED is the language sheaf's register -- and the
+        # language sheaf is this. So the check runs here, where the
+        # census already says this module is WIRED, and `psb.py` is
+        # not a file nobody reaches.
+        #
+        # MEASURED 2026-11-06: `tools/wiring_census.py` reports
+        # ORPHAN 0 over 435 modules, and this import is what keeps it
+        # there. An unreached module is a module whose failures nobody
+        # sees.
+        try:
+            import psb as PSB
+            out["psb_layers"] = [lay.value for lay in PSB.LAYERS]
+            out["psb_n_layers"] = len(PSB.LAYERS)
+            ok, broken = PSB.check_registry()
+            out["psb_registry_ok"] = ok
+            out["psb_broken"] = broken[:5]
+            # AND THE DERIVATION IS COUNTED, so the gap is a number.
+            derived = PSB.derive_from_register()
+            out["psb_candidates"] = len(derived)
+        except Exception as exc:  # noqa: BLE001
+            out["psb_error"] = repr(exc)
         return out
 
     def robot_contract(self) -> Dict[str, Any]:
