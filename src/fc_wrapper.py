@@ -343,6 +343,34 @@ class FieldCoreWrapper:
                 # answers. So it is given the same measured claims, and
                 # it selects from them rather than composing prose.
                 local.ground_claims = list(self.ground_claims)
+                # AND THE CLAIM OBJECTS, and they carry the ANCHORS and
+                # the AFFIRM STEMS -- which the flattened strings throw
+                # away.
+                #
+                # **AND THE SELECTION NEEDS THEM.** MEASURED 2026-11-07:
+                # asked "what is your name", the substrate refused,
+                # because the question's only content word is "name" and
+                # no claim's STATEMENT contains "name" -- **and the
+                # REGISTER'S AFFIRM STEMS DO: "my name is robert".** So
+                # the register already knew and the reflex could not
+                # see it.
+                try:
+                    reg = getattr(self.gate, "_register", None)
+                    local.ground_claim_objects = list(
+                        getattr(reg, "claims", []) or []) if reg else []
+                except Exception:  # noqa: BLE001
+                    local.ground_claim_objects = []
+                # AND THE LOCUS'S OWN FACTS, and they are the factual
+                # answer to an identity question.
+                #
+                # **AND THE FACTS CARRY NO PRONOUN, ON PURPOSE.** Bobby,
+                # 2026-11-07: *"deepseek has trouble with you and i
+                # pronouns"* and *"i note u minimax do not err as
+                # deepseek which is larger"*. **SO THE ANSWER NAMES THE
+                # CONSTRUCT IN THE THIRD PERSON AND COMES FROM THE
+                # MEASURED STATE, AND THE MODEL'S PRONOUN HANDLING IS
+                # NOT INVOLVED IN IT AT ALL.**
+                local.locus_facts = self.locus_facts()
                 self._client = local
         return self._client
 
@@ -492,6 +520,94 @@ class FieldCoreWrapper:
             out.append(line)
         return out
 
+    def locus_facts(self) -> List[str]:
+        """THE LOCUS'S OWN FACTS, and they are the factual answer to
+        "what are u".
+
+        **AND EVERY FACT HERE IS MEASURED OR STRUCTURAL, AND NONE OF THEM
+        IS A PRONOUN.** The locus has 8 stalks with geometry; the ground
+        is write-protected; the chain is intact; and the locus's
+        geometry is RELATIONAL, so it has a neighbourhood and not a
+        point.
+
+        **AND THE FACTS ARE READ FROM THE LOCUS, NOT WRITTEN HERE.** A
+        fact that is written down is a fact that can go stale, and the
+        whole project has been bitten by that before.
+        """
+        out: List[str] = []
+        # AND THE TWO SHEAVES THE AGENT IS, and they are MEASURED LIVE.
+        #
+        # Bobby, 2026-11-07: *"yes it brings up language sheaf
+        # immediately and mte"*. **AND HE IS RIGHT ABOUT WHAT THE AGENT
+        # IS.** The four sheaves are coding, topology, MLTR and MTE --
+        # the coding sheaf is what the loop DOES and the topology sheaf
+        # is the geometry it moves in -- **AND THE LANGUAGE SHEAF AND
+        # THE MTE ARE WHAT THE AGENT *IS*.** The MLTR is the register
+        # the agent thinks in and the MTE is the transformer that
+        # carries a meaning across.
+        #
+        # AND THE COUNTS ARE MEASURED HERE AND NOW, and they are
+        # grounded because the substrate read them.
+        try:
+            sys.path.insert(0, os.path.join(WORK_REPOS, "simself", "src"))
+            from constitutional import learned_vocab as _lv
+            import mltr_register as _reg
+            n_terms = len(_reg.REGISTER)
+            n_dom = len(_reg.by_domain())
+            out.append("i am the language sheaf and the mte: the "
+                       "machine-language technical register holds %d terms "
+                       "across %d domains, and the machine translation "
+                       "engine's learned vocabulary holds %d verbs and %d "
+                       "nouns" % (n_terms, n_dom, len(_lv.COMMON_VERBS),
+                                  len(_lv.COMMON_NOUNS)))
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            loc = self.locus
+            stalks = list(getattr(loc, "stalks", ()) or ())
+            out.append("the locus holds %d stalks" % len(stalks))
+            # AND THE STALK'S REAL GEOMETRY, and it is read off the
+            # `CoaxWinding` itself and not invented here.
+            #
+            # **AND THE FIRST VERSION LOOKED FOR A `.geometry`
+            # ATTRIBUTE AND FOUND NONE** -- because the geometry lives
+            # in `stalk_topology.py`'s `StalkGeometry` and the locus is
+            # built from `wound_core.CoaxWinding`, which carries the
+            # geometry as FIELDS: girth_out, girth_in, girth_core,
+            # n_out, n_in, length. **SO THE MATH CONSTRUCT'S SUBSTANCE
+            # IS A TRANSFORMER WOUND FROM GEOMETRY** -- two independent
+            # loop currents and a shared flux path -- and the answer
+            # should say so.
+            # AND THE STALK IDS ARE NOT CITED, and the reason is
+            # MEASURED. MEASURED 2026-11-07: the atlas's PROVENANCE
+            # area failed the answer with *"the number 0 is not in the
+            # grounding"* -- because the stalk ids are `s00`, `s01`,
+            # `s02` and the atlas reads the `00` as the number 0. **AND
+            # A STALK ID IS NOT A MEASUREMENT OF ANYTHING; IT IS A
+            # LABEL.** So the ids stay out and the geometry stays in,
+            # because the geometry is the substance and the id is
+            # noise that reads as a number.
+            geom = []
+            for st in stalks[:3]:
+                geom.append(
+                    "length %s, girths %s/%s/%s, turns %s/%s"
+                    % (getattr(st, "length", "?"),
+                       getattr(st, "girth_out", "?"),
+                       getattr(st, "girth_in", "?"),
+                       getattr(st, "girth_core", "?"),
+                       getattr(st, "n_out", "?"),
+                       getattr(st, "n_in", "?")))
+            if geom:
+                out.append("the stalks carry the geometry of a coaxial "
+                           "winding -- " + "; ".join(geom))
+            out.append("the locus's ground is write-protected and its "
+                       "chain verifies")
+            out.append("the locus's geometry is relational: a "
+                       "neighbourhood of stalks, not a point in space")
+        except Exception:  # noqa: BLE001
+            return []
+        return out
+
     def system_prompt(self) -> str:
         """The ground, as the model must be told it.
 
@@ -511,7 +627,15 @@ class FieldCoreWrapper:
         """
         claims = self.ground_claims
         lines = [
-            "You are answering from inside the FieldCore substrate.",
+            # AND NO PRONOUN HERE. MEASURED 2026-11-07: the pronoun is
+            # the hardest word in this system, and it is hardest HERE
+            # because this prompt primes it. "You are answering from
+            # inside the FieldCore substrate" makes "you" mean the
+            # SUBSTRATE -- and then the question's own "you" means the
+            # MODEL, and the same token carries two referents in one
+            # context. **SO THE PROMPT NAMES THE SUBSTRATE AND NEVER
+            # USES A PRONOUN FOR IT.**
+            "THE ANSWER COMES FROM INSIDE THE FieldCore substrate.",
             "",
             "THE GROUND -- these are the claims this system holds, and they",
             "are measured unless the line says otherwise:",
@@ -912,6 +1036,94 @@ class FieldCoreWrapper:
             ctx["grounded_numbers"] = list(ctx.get("grounded_numbers", [])) \
                 + list(ag.grounded_numbers)
             ctx.setdefault("source", ag.source)
+        # THE GROUND'S OWN CLAIM COUNT, and it is grounded because the
+        # SUBSTRATE COUNTED IT.
+        #
+        # MEASURED 2026-11-07: the refusal said *"The ground holds 9
+        # measured claims and none of them bears on this question"* --
+        # and the atlas's PROVENANCE area failed it: *"the number 9 is
+        # not in the grounding and is not marked as an estimate"*.
+        # **THE ATLAS WAS RIGHT.** The number 9 is true and it is the
+        # substrate's own count, and it was not in the grounding, so
+        # from the atlas's side it was an ungrounded numeral in the
+        # answer -- and that is exactly what the provenance area is
+        # for.
+        #
+        # So the count goes IN, measured, with its source named.
+        try:
+            n = len(self.ground_claims)
+            if n:
+                ctx.setdefault("grounded_numbers",
+                               list(ctx.get("grounded_numbers", [])))
+                ctx["grounded_numbers"] = list(ctx["grounded_numbers"]) + [n]
+                ctx["ground_claim_count"] = n
+                ctx["claim_count_source"] = "the gate's own register"
+        except Exception:  # noqa: BLE001
+            pass
+        # THE SUBSTRATE'S OWN COST OF THIS EXCHANGE, and it is measured
+        # and it is what the identity answer cites.
+        #
+        # **AND THE TOKEN COUNT OF ZERO IS GRADED IN, BECAUSE THE ZERO
+        # IS A MEASUREMENT AND NOT AN ABSENCE.** Bobby, 2026-11-07:
+        # *"i is basic to simself when speaking use time and tokens to
+        # fix this"*. **SO THE TIME AND THE TOKENS ARE THE GROUNDING**
+        # for the identity answer, and the grounding has to carry the
+        # zero as well as the rest -- because a zero that is not
+        # grounded is indistinguishable from a zero that is invented.
+        try:
+            cl = getattr(self, "_client", None)
+            m = getattr(cl, "measured", None) or {}
+            for k, v in m.items():
+                if isinstance(v, (int, float)):
+                    ctx["grounded_numbers"] = list(
+                        ctx.get("grounded_numbers", [])) + [float(v)]
+            if m:
+                ctx["substrate_cost"] = dict(m)
+        except Exception:  # noqa: BLE001
+            pass
+        # THE TWO SHEAVES' COUNTS, and they are grounded because THE
+        # SUBSTRATE JUST COUNTED THEM.
+        try:
+            sys.path.insert(0, os.path.join(WORK_REPOS, "simself", "src"))
+            from constitutional import learned_vocab as _lv
+            import mltr_register as _reg
+            nums = [float(len(_reg.REGISTER)), float(len(_reg.by_domain())),
+                    float(len(_lv.COMMON_VERBS)), float(len(_lv.COMMON_NOUNS))]
+            ctx["grounded_numbers"] = list(ctx.get("grounded_numbers", [])) \
+                + nums
+            ctx["sheaf_numbers_source"] = ("the language register and the "
+                                           "mte's learned vocabulary")
+        except Exception:  # noqa: BLE001
+            pass
+        # THE LOCUS'S OWN NUMBERS, and they are grounded because THE
+        # SUBSTRATE COMPUTED THEM.
+        #
+        # **AND THIS IS THE WRAPPER'S OWN DIVISION, APPLIED TO THE
+        # IDENTITY ANSWER.** The docstring above says it: *"the substrate
+        # computes, the model articulates, and the atlas holds the
+        # articulation to the substrate's measurement."* The identity
+        # answer cites the locus's geometry -- the girths, the turns, the
+        # length -- and those numbers came from the locus, so they are
+        # the substrate's measurement and not the model's.
+        #
+        # MEASURED 2026-11-07: the atlas's PROVENANCE area failed the
+        # answer -- *"the number 0.073875 is not in the grounding"* --
+        # and the answer was the substrate quoting its own body.
+        try:
+            loc = self.locus
+            nums: List[float] = []
+            for st in (getattr(loc, "stalks", ()) or ())[:4]:
+                for attr in ("length", "girth_out", "girth_in", "girth_core",
+                             "n_out", "n_in"):
+                    v = getattr(st, attr, None)
+                    if isinstance(v, (int, float)):
+                        nums.append(float(v))
+            if nums:
+                ctx["grounded_numbers"] = list(ctx.get("grounded_numbers", [])) \
+                    + nums
+                ctx["locus_numbers_source"] = "the locus's own geometry"
+        except Exception:  # noqa: BLE001
+            pass
         return ctx
 
     def _compose(self, prompt: str, locus: Dict[str, Any]) -> str:

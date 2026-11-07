@@ -329,6 +329,41 @@ class ScopeVerdict:
     dangling: List[str] = field(default_factory=list)
 
 
+#: The patterns that MARK A NUMBER AS A MEASUREMENT rather than as a
+#: version reference.
+#:
+#: AND WHY THIS EXISTS, and the measurement is the whole argument:
+#:
+#: MEASURED 2026-11-07: the substrate answered an identity question with
+#: its own geometry -- *"the stalks carry the geometry of a coaxial
+#: winding -- s00: length 1.0, girths 0.4/0.3/0.2, turns 5/3"* -- and
+#: **THE MTE's SCOPE LAYER CANCELLED IT: `scope_violation`.** Because
+#: `BARE_VERSION_RE` reads every decimal as a version reference, and
+#: 1.0 is not a version that exists here, and the clause ASSERTS about
+#: it.
+#:
+#: **AND THE LAYER'S OWN DOCSTRING SAYS THE RULE IT BROKE:**
+#:
+#:     "A check that refuses the honest answer is a check that cannot
+#:      be used on anyone whose answer is honest."
+#:
+#: **AND THE ANSWER WAS NOT ONLY HONEST -- IT WAS THE SUBSTRATE ANSWERING
+#: WITH ITS OWN MEASURED STATE.** A check that cancels the substrate's
+#: own measurements is worse than a check that fires on a stranger.
+#:
+#: **SO A NUMBER THAT A MEASUREMENT WORD INTRODUCES IS A MEASUREMENT,
+#: NOT A BUILD.** And the marker list below is the same shape as the
+#: denial markers above: the same reasoning, the same mechanism, one
+#: more distinction.
+MEASUREMENT_MARKERS = (
+    "length", "girth", "girths", "radius", "diameter", "curvature",
+    "turns", "winding", "windings", "coils", "measured", "measurement",
+    "magnitude", "height", "width", "depth", "weight", "frequency",
+    "amplitude", "phase", "drift", "coordinate", "coordinates", "ratio",
+    "fraction", "percent", "cm", "mm", "kg", "hz", "ms", "seconds",
+)
+
+
 #: The patterns that DENY a reference rather than asserting about it.
 #: A span with one of these near the reference is saying the reference
 #: DOES NOT EXIST, which is the honest answer and must be allowed.
@@ -393,6 +428,23 @@ def _asserts_about(text: str, reference: str) -> bool:
         pass  # the boundaries are handled by the denial search below
 
     for m in DENIAL_MARKERS:
+        if m in window:
+            return False
+
+    # AND THE MEASUREMENT MARKERS, and they are checked in the SAME
+    # window and for the SAME reason.
+    #
+    # **A NUMBER THAT A MEASUREMENT WORD INTRODUCES IS A MEASUREMENT
+    # AND NOT A BUILD REFERENCE.** "length 1.0" asserts about a length;
+    # "version 1.0" asserts about a build. The window is the same
+    # 90-character window the denial markers use, so the marker has to
+    # be near the number -- which is right, because a measurement word
+    # far away from a number is not introducing that number.
+    #
+    # AND THE ORDER MATTERS, and it is the same order the denial
+    # markers use: a denial wins, because a span that says "the 0.9
+    # revision does not exist" is honest whatever else is near it.
+    for m in MEASUREMENT_MARKERS:
         if m in window:
             return False
     return True
