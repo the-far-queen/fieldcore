@@ -39,6 +39,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from mutation_restore import Restored  # noqa: E402
+
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "src"
 TARGET = SRC / "walrus_memory.py"
@@ -141,8 +144,9 @@ def main() -> int:
     stayed_green = []
     try:
         for name, old, new in MUTATIONS:
-            TARGET.write_text(_mutate(original, old, new), encoding="utf-8")
-            passed, mout = _run_selftest()
+            with Restored(TARGET) as f:
+                f.write(_mutate(original, old, new))
+                passed, mout = _run_selftest()
             if passed:
                 stayed_green.append(name)
                 print("  [GREEN] %-52s <-- THE CLAIM IS NOT PROVEN" % name)
@@ -158,6 +162,7 @@ def main() -> int:
         # AND THE MTIME GOES BACK TO WHERE IT WAS.
         TARGET.write_text(original, encoding="utf-8")
         os.utime(TARGET, ns=(_orig_stat.st_atime_ns, _orig_stat.st_mtime_ns))
+        # AND THE MTIME IS BACK, so the tree ends stat-identical.
         if backup.exists():
             backup.unlink()
 

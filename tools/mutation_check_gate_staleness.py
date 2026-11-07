@@ -30,6 +30,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from mutation_restore import Restored  # noqa: E402
+
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent
 TARGET = REPO / "src" / "gate_staleness.py"
@@ -176,8 +179,9 @@ def main() -> int:
                 print("%-52s SKIP (%s)" % (name, exc))
                 all_red = False
                 continue
-            TARGET.write_text(mutated, encoding="utf-8")
-            rc, out = run_in_place()
+            with Restored(TARGET) as f:
+                f.write(mutated)
+                rc, out = run_in_place()
             state = "RED" if rc != 0 else "GREEN"
             failed = re.findall(r"^FAILED (\S+)", out, re.M)
             print("%-52s %s  rc=%d  %s"
@@ -189,6 +193,7 @@ def main() -> int:
             TARGET.write_text(original, encoding="utf-8")
             os.utime(TARGET,
                      ns=(_orig_stat.st_atime_ns, _orig_stat.st_mtime_ns))
+            # AND THE MTIME IS BACK, so the tree ends stat-identical.
 
         print("-" * 72)
         print("every mutation went RED" if all_red
