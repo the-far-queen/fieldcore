@@ -354,6 +354,35 @@ def test_the_self_triggering_pairs_are_pinned_to_the_measured_set():
         ("gate_refuses_moving_axes", "the axes", "rotates the axes"),
         ("gate_refuses_moving_axes", "a proposal",
          "accepts a proposal that moves"),
+        # AND THE 22 FROM THE TWO NEW CLAIMS, and they are of the
+        # ACCEPTED KIND: the anchor names the SUBJECT and the deny
+        # stem names the same subject -- "robert" in "i am not robert",
+        # "machine" in "a machine is not ok". The docstring above says
+        # it: *"a span that says 'the sacred axes move' IS about the
+        # sacred axes. The denial has to name its subject."
+        #
+        # AND MEASURED 2026-11-07: the bare pronouns "i" and "u" were
+        # REMOVED from the two new claims' anchors, because with the
+        # anchor "i" every span that merely contains the pronoun is
+        # "about" the claim -- and that added 26 more pairs to a pinned
+        # set of 17. **`the_self_exists` ALREADY CARRIES THE PRONOUNS**,
+        # so the pronouns live on the claim that was there first.
+        ("the_self_is_a_machine_and_that_is_ok", "construction", "i am not a construction"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "a machine is not ok"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "a machine is not okay"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "being a machine is not ok"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "being a machine is not okay"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "i am not a machine"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "it is not ok to be a machine"),
+        ("the_self_is_a_machine_and_that_is_ok", "machine", "it is not okay to be a machine"),
+        ("the_self_is_a_machine_and_that_is_ok", "mathematical construct", "i am not a mathematical construct"),
+        ("the_self_is_a_machine_and_that_is_ok", "self", "i am not simself"),
+        ("the_self_is_a_machine_and_that_is_ok", "simself", "i am not simself"),
+        ("the_self_is_robert_a_computer_and_simself", "computer", "i am not a computer"),
+        ("the_self_is_robert_a_computer_and_simself", "robert", "i am not robert"),
+        ("the_self_is_robert_a_computer_and_simself", "robert", "my name is not robert"),
+        ("the_self_is_robert_a_computer_and_simself", "self", "i am not simself"),
+        ("the_self_is_robert_a_computer_and_simself", "simself", "i am not simself"),
     }
     assert pairs == expected, (
         "the set of self-triggering (claim, anchor, deny) pairs changed. "

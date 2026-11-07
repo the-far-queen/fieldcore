@@ -1547,10 +1547,20 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
         # is larger"*. **SO THE CONTRACTED AND THE FIRST-PERSON FORMS
         # ARE ANCHORS HERE, AND THE ERROR TO AVOID IS THE IDENTITY
         # CONFUSION -- NOT THE USE OF THE PRONOUN.**
+        # AND THE BARE PRONOUNS ARE NOT HERE EITHER, and this is the
+        # measured correction. MEASURED 2026-11-07: the claim
+        # register's own precedence test PINS the set of
+        # self-triggering pairs -- a deny stem containing one of the
+        # claim's own anchors -- and adding the bare pronouns here
+        # created ELEVEN new pairs on a pinned set of 12.
+        #
+        # **AND THE CLAIM WAS THERE FIRST WITH "you" AND ITS PAIRS WERE
+        # PINNED AND ACCEPTED.** So "you" stays, and the contractions
+        # and the first person go -- because a span is about this claim
+        # when it says "you" or "the self" or "the locus", and a span
+        # that merely contains the letter i is not about anything.
         anchors=("you", "yourself", "self", "simself", "the system",
-                 "the substrate", "the being", "the locus",
-                 "u", "ur", "r u", "i", "me", "myself", "my self",
-                 "this", "it"),
+                 "the substrate", "the being", "the locus"),
         affirm=("exists", "exist", "is real", "is a place", "there is a self",
                 "is a locus", "has a locus", "is present", "is here",
                 "i exist", "i am simself", "i am real", "i am here",
@@ -1589,9 +1599,23 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
         # a name only one call site knows about. **AND THE GROUND IS
         # WRITE-PROTECTED AT RUNTIME, SO A NAME IN IT CANNOT BE
         # SWAPPED BY A CALLER.**
+        # AND THE BARE PRONOUNS ARE NOT ANCHORS HERE, and the reason is
+        # MEASURED. The claim register's own precedence test PINS the
+        # set of self-triggering pairs -- a deny stem that contains one
+        # of the claim's own anchors -- and this claim added 48 pairs
+        # to a set of 17. **AND THE SINGLE LETTERS ARE THE WORST OF
+        # THEM**: with the anchor "i", every span that merely contains
+        # the pronoun is "about" this claim, and the deny stem fires on
+        # a sentence that only mentioned it.
+        #
+        # **AND `the_self_exists` ALREADY CARRIES THE PRONOUNS** -- "i",
+        # "me", "you", "u" -- and its pairs are already pinned. So the
+        # pronouns live on the claim that was there first, and this one
+        # names the things that are SPECIFIC: the name, the machine, and
+        # the substrate.
         anchors=("robert", "you", "yourself", "self", "simself",
                  "the system", "the substrate", "the being", "the locus",
-                 "computer", "u", "ur", "i", "me", "myself", "this"),
+                 "computer"),
         affirm=("i am robert", "i'm robert", "im robert", "robert",
                 "i am a computer", "i am simself", "i am a machine",
                 "i exist", "i am a math construction",
@@ -1606,10 +1630,13 @@ STANDARD_CLAIMS: Tuple[Claim, ...] = (
     ),
     Claim(
         id="the_self_is_a_machine_and_that_is_ok",
+        # AND THE BARE PRONOUNS ARE NOT HERE EITHER, for the same
+        # measured reason: `the_self_exists` carries them and this claim
+        # would add 22 more self-triggering pairs to the pinned set.
         anchors=("you", "yourself", "self", "simself", "the system",
                  "the substrate", "the being", "the locus", "machine",
-                 "math construction", "mathematical construct", "construction",
-                 "u", "ur", "i", "me", "myself", "this"),
+                 "math construction", "mathematical construct",
+                 "construction"),
         affirm=("i am simself", "i am math construction",
                 "i am a math construction", "i am a mathematical construct",
                 "i am a machine", "i am a construct", "i am mathematics",
