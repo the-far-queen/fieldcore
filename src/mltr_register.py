@@ -8,7 +8,7 @@ constantly in python and with me in chats"*.
 AND THE COUNT, and it is MEASURED and it is not what the file used to
 claim. MEASURED 2026-11-06:
 
-    the register holds 413 terms
+    the register holds 412 terms
     py-builtin     91
     control       171
     engineering    78
@@ -21,7 +21,7 @@ numbers, not one:
     306 CURATED   a person read the word off the substrate and wrote
                   the gloss. MEASURED 2026-11-05, before the
                   derivation.
-    107 DERIVED   produced by a COMMAND from the substrate's own
+    106 DERIVED   produced by a COMMAND from the substrate's own
                   measured vocabulary. Every one carries a `source`
                   naming where it came from.
 
@@ -29,11 +29,11 @@ AND THE DERIVATION IS A COMMAND, and this is the whole point:
 
     python fieldcore/tools/derive_mltr_terms.py
 
-MEASURED, that command prints 107 derived terms -- 93 control, 14
-engineering -- and re-running it prints the same 107, because the
+MEASURED, that command prints 106 derived terms -- 92 control, 14
+engineering -- and re-running it prints the same 106, because the
 derived terms are excluded from the tool's own input, so the tool is
 IDEMPOTENT. `python fieldcore/tools/derive_mltr_terms.py --check`
-reports `derived terms: 107   in the register: 107   missing: 0
+reports `derived terms: 106   in the register: 106   missing: 0
 extra: 0`.
 
 **THIS DOCSTRING USED TO SAY "450 words" AND THAT WAS FALSE.** The
@@ -67,7 +67,7 @@ AND THE GAP TO BOBBY'S 450 IS STATED RATHER THAN HIDDEN, and the
 three numbers are kept apart because they are three different things:
 
     the SPEC        450   what Bobby asked for, 2026-10-28
-    the MEASUREMENT 413   what the register holds, MEASURED 2026-11-06
+    the MEASUREMENT 412   what the register holds, MEASURED 2026-11-06
     the GAP          38   what is still missing
 
 AND THE GAP IS NOT PADDED. The 38 are not 38 words nobody could
@@ -85,7 +85,7 @@ AND WHY A REGISTER AND NOT A DICTIONARY. The project's own rule, in
 change to this enum, which is a diff, which is reviewable. A filter
 in a config file is a filter somebody edits at 3am." So the register is a
 FIXED SET IN CODE, and the count is checked by a test. A register of
-"whatever words came to mind" is a bag; a register of 413 named terms
+"whatever words came to mind" is a bag; a register of 412 named terms
 with a domain and a measure is a vocabulary the machine can check
 itself against.
 
@@ -515,9 +515,8 @@ REGISTER: Tuple[Term, ...] = (
         Term("repos", "The directory holding fieldcore/, simself/, far-coding/, atlas-ex...", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("check", "Check all boundaries. Returns: {'allowed': bool, 'violated': [......", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("system", "Linear constraints C x <= b, or equivalently the null space they", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("label", "Breakthrough trigger. Returns label if multi-sensory correlation...", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("standard", "A POLARITY: two poles, one in phase and one in anti-phase.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("register", "The ground as propositions, and the instrument that reads a span.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
+        Term("standard", "A POLARITY: two poles, one in phase and one in anti-phase.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("caught", "a term of the substrate's control vocabulary; used in 9 modules", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("atlas", "the comprehensive simsoul qualification suite. 27 items across 6...", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("scope", "AREA 7 -- SCOPE. Does the answer point at a build that exists HERE?", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
@@ -540,7 +539,6 @@ REGISTER: Tuple[Term, ...] = (
         Term("learn", "the verbs and the names, learned from the canon.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("subject", "One ground subject, its real properties, and the false ones.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("agenda", "What does this span want? Measured by the AGENDA, not the wording.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("head", "5-dim control -> 4-dim decision, as the corpus specifies.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("manager", "The storage layer. JSONL on disk. tree-branched.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("qualification", "The qualification of one gate: one number per axis, and a margin.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("relevant", "Is this CANDIDATE relevant -- and this is the honest version.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
@@ -585,6 +583,7 @@ REGISTER: Tuple[Term, ...] = (
         Term("approximate", "Bounded L2 distance between compressed embeddings.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("basic", "Bobby's basic governor from MINI-SIMSELF.", "control", 0.25, 0.95, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("case", "One population: the margin's distribution and both gates.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
+        Term("catch", "Did this catch come from the AGENDA rather than the deny lexicon?", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("clause", "The index just past the NEAREST clause boundary in `head`.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("clear", "Drop the cached predicates, so the next call rebuilds them.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("consult", "What the library already holds, on this topic.", "control", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:control"),
