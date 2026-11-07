@@ -201,6 +201,30 @@ class SheafControlLoop:
         c = np.atleast_1d(np.asarray(cocycle, dtype=float))
         if c.size == 0:
             return {"question": None, "directions": []}
+
+        # AND A ZERO COCYCLE IS NOT A QUESTION. MEASURED 2026-11-07:
+        # with AGREEING local sections the loop still reported
+        # `h1_dim: 1` and `obstructed: True` -- because H^1 > 0 is a
+        # fact about the COVER (the codimension), not about the DATA --
+        # and then it asked:
+        #
+        #     "stalks disagree on shared coordinate 0: +0.0000.
+        #      Which value is authoritative?"
+        #
+        # **THE STALKS AGREE. THE QUESTION WAS ABOUT A ZERO
+        # DISAGREEMENT, AND IT NAMED A DISAGREEMENT THAT WAS NOT
+        # THERE.** A question about nothing is worse than no question,
+        # because it looks like the loop did something.
+        #
+        # AND THE TWO ARE DIFFERENT CLAIMS: H^1 > 0 says the COVER is
+        # obstructed (a structural fact about the codimension), and a
+        # non-zero COCYCLE says the DATA are obstructed. Only the
+        # second one is a disagreement between two stalks, and only the
+        # second one is worth asking about.
+        norm = float(np.max(np.abs(c))) if c.size else 0.0
+        if norm <= 1e-12:
+            return {"question": None, "directions": [], "vacuous": True}
+
         worst = int(np.argmax(np.abs(c)))
         q = {
             "question": (f"stalks disagree on shared coordinate {worst}: "
