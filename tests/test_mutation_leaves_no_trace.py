@@ -129,7 +129,14 @@ def test_the_gate_does_not_go_stale_after_a_mutation_check():
     stale = g.stale(force=True)
     assert stale is None, (
         "the gate went stale after a mutation check that restored the "
-        "file: %r" % (stale,))
+        "file: %r\n\n"
+        "AND IF THE FILE NAMED ABOVE IS NOT ONE OF THE MUTATION CHECKS' "
+        "TARGETS, THEN SOMETHING ELSE WROTE IT DURING THIS TEST.\n\n"
+        "MEASURED 2026-11-07: the `workqueue-continuation` cron job runs "
+        "EVERY 25 MINUTES and writes to `simself/src/`, which the gate "
+        "fingerprints on purpose. So a failure here can be the cron, and "
+        "the gate naming a file in `simself/src` is the gate doing its "
+        "job, not this test being wrong." % (stale,))
     assert g.stale(force=True) is None, "the gate went stale"
 
 

@@ -192,7 +192,24 @@ def test_the_gate_exposes_a_staleness_check():
     g.warm()
     assert hasattr(g, "stale"), "the gate has no stale() method"
     result = g.stale(force=True)
-    assert result is None, "a freshly built gate said stale: %r" % (result,)
+    assert result is None, (
+        "a freshly built gate said stale: %r\n\n"
+        "AND THE CAUSE IS USUALLY A CONCURRENT WRITER, AND IT IS NOT A "
+        "DEFECT IN THIS TEST.\n\n"
+        "MEASURED 2026-11-07: the `workqueue-continuation` cron job runs "
+        "EVERY 25 MINUTES and writes to `simself/src/` -- which is one of "
+        "the two directories the gate fingerprints, on purpose, because "
+        "`gate_staleness.py` says so: *\"the predicates ASK the substrate, "
+        "and the substrate is in both repos\"*. **SO WHILE THE CRON IS "
+        "WORKING, A RULE FILE MOVES, AND THIS TEST FAILS BECAUSE THE GATE "
+        "IS CORRECTLY REPORTING A TREE THAT IS CHANGING UNDER IT.**\n\n"
+        "The message above names the file that moved. If that file is one "
+        "the cron is working on, the tree was changing during the test and "
+        "the gate was right.\n\n"
+        "AND THE FINGERPRINT IS MTIME-BASED ON PURPOSE, so the report is "
+        "also raised by a file whose CONTENT did not change -- see "
+        "`gate_staleness.py`, which says a spurious report *\"is safe\"*."
+        % (result,))
 
 
 def test_the_gate_reports_a_stale_build():
