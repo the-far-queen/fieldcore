@@ -90,7 +90,16 @@ def test_h4_naive_run_overflows_float64():
     is False -- an earlier draft asserted on traj[-1] and passed for the
     wrong reason.
     """
-    traj = run_horizon(400, D, op=naive_harm(D))
+    # AND THE OVERFLOW IS DELIBERATE, so numpy's warning about it is
+    # expected here and ONLY here. MEASURED 2026-11-07: the full suite
+    # reported `RuntimeWarning: invalid value encountered in matmul` at
+    # src/hodge_cycle.py:304, and that line is `x = M @ x` inside
+    # `run_horizon` -- this test's own deliberate overflow. **AND THE
+    # WARNING WAS NOISE: a real NaN anywhere else in the suite must be
+    # VISIBLE, and a warning that fires on every run for a thing that is
+    # supposed to happen teaches the reader to ignore it.**
+    with np.errstate(invalid="ignore", over="ignore"):
+        traj = run_horizon(400, D, op=naive_harm(D))
     finite_mask = np.isfinite(traj)
     assert not finite_mask.all(), "the naive operator must overflow within 400 steps"
     last_finite = traj[np.where(finite_mask)[0][-1]]
