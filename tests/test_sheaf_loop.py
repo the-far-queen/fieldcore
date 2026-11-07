@@ -214,3 +214,64 @@ def test_a_larger_overlap_gives_a_larger_obstruction():
     h1_4 = L4.glue(compatible_sections(r4, 8, seed=1), r4)["h1_dim"]
     h1_6 = L6.glue(compatible_sections(r6, 12, seed=1), r6)["h1_dim"]
     assert h1_4 == 1 and h1_6 == 1      # exactly the codimension
+
+# ---------------------------------------------------------------------------
+# THE NAMED REFUSAL, and the crash it replaces
+# ---------------------------------------------------------------------------
+
+def test_an_impossible_cover_is_refused_by_name():
+    """**AND THE COVER IS CHECKED BEFORE IT IS BUILT, and it was NOT
+    checked at all.** MEASURED 2026-11-07: `dim_intersection > dim`
+    crashed with a bare `IndexError: index 3 is out of bounds for axis 1
+    with size 3`, from the line `proj_a[i, i] = 1.0`.
+
+    **AND THE CRASH WAS A SHAPE ERROR AND NOT A CLAIM**, so it said
+    nothing about WHY the cover was impossible. A system that computes
+    cohomology should REFUSE an impossible cover by NAME rather than fail
+    on an array index.
+    """
+    L = SheafControlLoop(n_stalks=2, dim=3, dim_intersection=4)
+    with pytest.raises(ValueError) as exc:
+        L.build_cover(seed=1)
+    msg = str(exc.value)
+    assert "the cover is impossible" in msg, msg
+    assert "4-dimensional" in msg and "3-dimensional" in msg, msg
+
+
+def test_every_impossible_cover_is_refused_not_crashed():
+    """**AND THE REFUSAL IS TOTAL** -- every (dim, overlap) pair that
+    used to crash now refuses by name."""
+    for dim in range(1, 7):
+        for inter in range(0, 9):
+            L = SheafControlLoop(n_stalks=2, dim=dim, dim_intersection=inter)
+            try:
+                L.build_cover(seed=1)
+            except ValueError:
+                pass
+            except IndexError as exc:
+                raise AssertionError(
+                    "dim=%d overlap=%d still crashes with %r"
+                    % (dim, inter, exc))
+
+
+def test_a_negative_codimension_is_refused():
+    L = SheafControlLoop(n_stalks=2, dim=4, dim_intersection=2)
+    with pytest.raises(ValueError) as exc:
+        L.build_cover(codim=-1)
+    assert "cannot be negative" in str(exc.value), str(exc.value)
+
+
+def test_a_codimension_that_eats_the_overlap_is_refused():
+    L = SheafControlLoop(n_stalks=2, dim=4, dim_intersection=2)
+    with pytest.raises(ValueError) as exc:
+        L.build_cover(codim=2)
+    assert "no stalk sees anything" in str(exc.value), str(exc.value)
+
+
+def test_the_possible_covers_still_work():
+    """**AND THE REFUSAL DOES NOT REFUSE THE GOOD CASES.**"""
+    for dim, inter in ((4, 0), (4, 4), (4, 2), (6, 3), (8, 4)):
+        L = SheafControlLoop(n_stalks=2, dim=dim, dim_intersection=inter)
+        out = L.run_once()
+        assert out["h1_dim"] >= 0
+        assert "h0_dim" in out

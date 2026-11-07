@@ -91,6 +91,42 @@ class SheafControlLoop:
         falsifiable.
         """
         overlap = self.dim_intersection or max(1, self.dim // 2)
+
+        # AND THE COVER IS CHECKED BEFORE IT IS BUILT, and it was NOT
+        # checked at all. MEASURED 2026-11-07: `dim_intersection > dim`
+        # -- the overlap is wider than the stalk space it sits in --
+        # crashed with a bare `IndexError: index 3 is out of bounds for
+        # axis 1 with size 3`, from the line `proj_a[i, i] = 1.0`.
+        #
+        # **AND THE CRASH WAS A SHAPE ERROR AND NOT A CLAIM**, so it said
+        # nothing about WHY the cover was impossible. The stalk space
+        # cannot be wider than the overlap it maps into, and the overlap
+        # cannot be wider than the stalk space -- and a system that
+        # computes cohomology should REFUSE an impossible cover by NAME
+        # rather than fail on an array index.
+        #
+        # AND THE ROUND TRIP MATTERS: `codim` makes the stalk space
+        # NARROWER than the overlap on purpose -- that is the whole
+        # mechanism that produces a non-zero H^1. So the bound is on the
+        # overlap against the stalk space, not on the codimension.
+        if overlap > self.dim:
+            raise ValueError(
+                "the cover is impossible: the overlap is %d-dimensional "
+                "and the stalk space is %d-dimensional, and a stalk "
+                "space cannot be wider than the overlap it maps into. "
+                "Use dim_intersection <= dim, or a codimension to make "
+                "the stalks narrower than the overlap."
+                % (overlap, self.dim))
+        if codim < 0:
+            raise ValueError(
+                "the codimension is %d, and a codimension cannot be "
+                "negative" % codim)
+        if codim >= overlap:
+            raise ValueError(
+                "the codimension is %d and the overlap is %d, so no "
+                "stalk sees anything at all and the cover is empty"
+                % (codim, overlap))
+
         stalk_overlap = max(1, overlap - codim)
 
         proj_a = np.zeros((overlap, self.dim))
