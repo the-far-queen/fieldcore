@@ -170,6 +170,14 @@ CONTROL_MODULES: Tuple[str, ...] = (
     "testimony_layer", "agenda_read", "agenda_tuner", "goals",
     "integrate", "curate", "scavenge", "spark", "initiative",
     "watch_log", "qualification", "wiring", "sheaf_loop", "sheaves",
+    # AND THE BRIDGE, because it is a control instrument and not a
+    # document: it READS two sheafs and REFUSES when they disagree.
+    # MEASURED 2026-11-07: without it here, the word "compatible" fell
+    # to an enrichment of 1.652 against a threshold of 2.000 and left
+    # the derived set -- because `sheaf_bridge` uses the word and is
+    # not in the family. **AND THE FAMILY IS A LIST OF WHAT THE MODULE
+    # IS, and the bridge is what makes the two sheafs one claim.**
+    "sheaf_bridge",
     "predicate_registry", "grounding", "locus", "identity",
     "provenance_scope", "chain_audit", "adversarial_chain",
     "measure_gate_margin", "gate_staleness", "gate_truth_diagnostic",

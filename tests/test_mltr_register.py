@@ -67,14 +67,14 @@ import mltr_register as REG  # noqa: E402
 #: The derived count is asserted separately, because a count that
 #: cannot say WHICH population it is counting is a count that cannot
 #: be checked.
-EXPECTED_COUNT = 412
+EXPECTED_COUNT = 416
 EXPECTED_CURATED = 306
-EXPECTED_DERIVED = 106
+EXPECTED_DERIVED = 110
 
 #: THE FIVE DOMAINS, and their measured sizes.
 EXPECTED_DOMAINS = {
     "py-builtin": 91,
-    "control": 172,
+    "control": 176,
     "engineering": 77,
     "process": 40,
     "affect": 32,
@@ -82,7 +82,7 @@ EXPECTED_DOMAINS = {
 
 #: THE SPEC, and it is NOT the measurement. Bobby, 2026-10-28: "give
 #: it 450 common words in machine language technica register". The
-#: register holds 412, and the gap of 38 is stated rather than
+#: register holds 416, and the gap of 34 is stated rather than
 #: padded -- the test below asserts the gap is computed from the
 #: count, so it cannot be quietly redefined.
 SPEC_TARGET = 450
@@ -334,8 +334,8 @@ def test_the_gap_is_stated_not_padded():
     RED: change EXPECTED_COUNT without changing the register.
     """
     gap = SPEC_TARGET - len(REG.REGISTER)
-    assert gap == 38, (
-        "the gap to the spec is %d, not 38 -- the register holds %d of "
+    assert gap == 34, (
+        "the gap to the spec is %d, not 34 -- the register holds %d of "
         "the %d asked for" % (gap, len(REG.REGISTER), SPEC_TARGET))
     assert len(REG.REGISTER) <= SPEC_TARGET, (
         "the register holds %d, which is MORE than the %d asked for"
