@@ -68,6 +68,40 @@ It also does not implement cohomology. There is no H^1, no Cech
 complex, no differential. The corpus named `CechCohomology` as a class
 and left it empty; this file leaves it unnamed and honest instead.
 
+WHAT IT REACHES, AND WHAT IT DOES NOT
+-------------------------------------
+MEASURED 2026-11-07 by `tools/reach_census.py`: this module reaches
+NOTHING of the fc's own -- no ledger, no subprocess probe, no path
+into the fc's source. It is pure algebra.
+
+**AND THE FC'S OWN REACHES IT, and that is the other direction.** The
+census measures reach in one direction -- "does this module reach the
+fc's own?" -- and it also measures the reverse, because a module the
+fc is BUILT ON and a module NOTHING TOUCHES are not the same module.
+MEASURED: three of the fc's own modules import this one --
+
+    fieldcore/src/evacuated.py           the evacuation uses the sheaf
+    fieldcore/src/predicate_registry.py  the fc's own ASKED PREDICATES
+    fieldcore/src/sheaf_bridge.py        the bridge between the two
+                                         algebras
+
+**AND THE PREDICATE REGISTRY IS THE IMPORTANT ONE.** It does not
+merely import this module -- it ASKS it two questions, and the fc's
+ground holds the answers:
+
+    naive_monotonicity_fails  does the structure's coherence FAIL at
+                               a seam?              the answer is YES
+    coherence_is_computed     is the coherence computed from
+                               structure?            the answer is YES
+
+**SO THIS MODULE IS NOT STANDALONE AND IT IS NOT REACHING -- IT IS THE
+SCALAR SHEAF THE FC IS BUILT ON, AND THE FC'S GROUND ASKS IT
+QUESTIONS.** The `src/sheaf_bridge.py` module is the link: it reads
+this scalar sheaf and the linear sheaf in `src/sheaf_loop.py` and
+checks the two against each other, in two different algebras. **THE
+FC HAD THE OBSTRUCTION IN TWO FILES AND THE LINK BETWEEN THEM IN
+NEITHER**, and this file is one of the two halves.
+
 Run: python src/coherence_spine.py --selftest
 """
 
@@ -280,6 +314,19 @@ def selftest() -> None:
     for v in sh.violations():
         print(f"      {v}")
     assert not sh.globally_consistent(), "a seam break must be visible"
+    # AND THE VIOLATION NAMES THE SEAM AND THE GAP. MEASURED
+    # 2026-11-07: the module's own selftest printed the violation and
+    # asserted nothing about it -- so a violation that said "something
+    # is wrong" passed the selftest, and only the pytest file caught
+    # it. **A CLAIM THE MODULE'S OWN SELFTEST DOES NOT ASSERT IS A
+    # CLAIM THE MODULE DOES NOT MAKE.** And the violation is the only
+    # thing a caller reads when a seam breaks, so a caller that cannot
+    # tell WHICH seam broke cannot act on it.
+    _v = sh.violations()
+    assert len(_v) == 1, _v
+    assert "b->c" in _v[0], _v[0]
+    assert "gap" in _v[0], _v[0]
+    assert "tolerance" in _v[0], _v[0]
     print()
     print("  >>> two internally-consistent halves, an inconsistent union.")
     print("      A global average would have called both halves fine. This")
@@ -320,6 +367,32 @@ def selftest() -> None:
     assert sh2.coherence() < 1.0, "coherence must respond to a seam"
     print("  >>> the number moves because the STRUCTURE moved, not because")
     print("      anyone scored it.")
+
+    # AND THE GLUING RULE IS HONOURED, and a fresh site does not look
+    # moved. MEASURED 2026-11-07: neither claim was asserted by the
+    # module's own selftest -- the pytest file asserted both, and the
+    # selftest is what the mutation check exercises. **A CLAIM THE
+    # MODULE'S OWN SELFTEST DOES NOT ASSERT IS A CLAIM THE MODULE
+    # DOES NOT MAKE.** And these two are the difference between a
+    # sheaf and a bag of points:
+    #   - a rule that is IGNORED looks exactly like the identity rule,
+    #     so the seam never opens and the coherence never moves
+    #   - a fresh site that reports drift looks like a system that
+    #     just moved a lot, and a system at rest is not that
+    sh3 = Sheaf("d3")
+    sh3.add(Site("p", 1.0, 0.01))
+    sh3.add(Site("q", 1.0, 0.01))
+    sh3.glue("p", "q", lambda v: v * 2.0)
+    _restricted = sh3.maps[0].apply(1.0)
+    assert _restricted == 2.0, (
+        "the gluing rule was not applied: %r" % _restricted)
+    assert sh3.violations(), (
+        "a doubling rule against a held value of 1.0 must break the seam")
+    _fresh = Site("still", value=0.4, tolerance=0.01)
+    assert _fresh.drift() == 0.0, (
+        "a site that has never been updated reports drift %r, so a "
+        "system at rest looks like it had just moved" % _fresh.drift())
+    print("  >>> the rule is honoured, and a site at rest is at rest.")
 
     print()
     print("=" * 70)
