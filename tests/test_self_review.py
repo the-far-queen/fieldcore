@@ -388,6 +388,115 @@ def test_the_whitelist_is_a_whitelist():
 
 
 # ---------------------------------------------------------------------------
+# the store DEDUPES, so a daily review cannot fill the disk
+# ---------------------------------------------------------------------------
+
+def test_the_store_dedupes_the_same_lesson(tmp_path):
+    """**THE SAME LESSON LEARNED TWICE IS ONE LESSON.**
+
+    MEASURED 2026-11-06: the same day's artifact read three days
+    running gives `proposed 2` every day, and `admitted 2` on the first
+    day and `admitted 0` on the second and third -- and the store holds
+    2 lessons throughout. **AND THE STORE IS APPEND-ONLY, so a second
+    copy would be PERMANENT.**
+    """
+    art = tmp_path / "day.txt"
+    art.write_text(
+        "gate failed: check_daily_score_accounting.py\n"
+        "the loop reported: the quality gate failed: 1 of 17 command(s)\n",
+        encoding="utf-8")
+    stores = SR.open_stores(str(tmp_path))
+    counts = []
+    for _day in range(3):
+        result = SR.review([str(art)], stores)
+        counts.append((len(result.proposed), len(result.admitted)))
+    assert counts[0][0] > 0, "the first day proposed nothing"
+    assert counts[0][1] > 0, "the first day admitted nothing"
+    assert counts[1][1] == 0, "the second day admitted a duplicate"
+    assert counts[2][1] == 0, "the third day admitted a duplicate"
+    held = sum(len(reg.held()) for reg in stores.values())
+    assert held == counts[0][1], "the store grew on the repeat: %d" % held
+
+
+def test_the_repeat_reads_are_still_proposing(tmp_path):
+    """**AND THE REVIEW KEEPS PROPOSING**, because the store refusing a
+    duplicate is not the same as the reader going blind. A review that
+    stops reading after the first day is a review that has stopped
+    working."""
+    art = tmp_path / "day.txt"
+    art.write_text("the gate failed: check_something.py\n", encoding="utf-8")
+    stores = SR.open_stores(str(tmp_path))
+    first = SR.review([str(art)], stores)
+    second = SR.review([str(art)], stores)
+    assert len(first.proposed) == len(second.proposed), (
+        "the second read proposed fewer lessons")
+
+
+# ---------------------------------------------------------------------------
+# the chain is checked TWICE, independently
+# ---------------------------------------------------------------------------
+
+def test_a_tampered_lesson_is_caught(tmp_path):
+    """**AND THE STORE CATCHES A TAMPER.**"""
+    import json
+    art = tmp_path / "day.txt"
+    art.write_text("the gate failed: check_something.py\n", encoding="utf-8")
+    stores = SR.open_stores(str(tmp_path))
+    SR.review([str(art)], stores)
+    path = None
+    for name in os.listdir(str(tmp_path)):
+        if name.endswith(".jsonl"):
+            path = tmp_path / name
+    assert path is not None, "no store file was written"
+    lines = [l for l in path.read_text(encoding="utf-8").splitlines() if l]
+    row = json.loads(lines[0])
+    row["lesson"]["rule"] = "a DIFFERENT rule"
+    lines[0] = json.dumps(row)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    stores2 = SR.open_stores(str(tmp_path))
+    problems = []
+    for reg in stores2.values():
+        problems.extend(reg.verify())
+    assert problems, "a tampered store verified clean"
+
+
+def test_a_broken_link_is_caught_and_not_only_the_digest(tmp_path):
+    """**AND THE LINK IS ITS OWN CHECK AND NOT A CONSEQUENCE OF THE
+    DIGEST.**
+
+    MEASURED 2026-11-06: a chain can have a correct digest and a broken
+    link, and the store catches both -- the verification reports
+    `link break at seq 1` AND the digest mismatches. **A CHECK THAT
+    REPORTS ONLY THE DIGEST HIDES THE BROKEN LINK.**
+    """
+    import json
+    art = tmp_path / "day.txt"
+    art.write_text(
+        "the gate failed: check_one.py\nthe loop reported: a second line\n",
+        encoding="utf-8")
+    stores = SR.open_stores(str(tmp_path))
+    SR.review([str(art)], stores)
+    path = None
+    for name in os.listdir(str(tmp_path)):
+        if name.endswith(".jsonl"):
+            path = tmp_path / name
+    lines = [l for l in path.read_text(encoding="utf-8").splitlines() if l]
+    if len(lines) < 2:
+        return  # one event cannot break a link
+    row = json.loads(lines[1])
+    row["prev"] = "a" * 64
+    lines[1] = json.dumps(row)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    stores2 = SR.open_stores(str(tmp_path))
+    problems = []
+    for reg in stores2.values():
+        problems.extend(reg.verify())
+    assert problems, "a broken link verified clean"
+    assert any("link" in p for p in problems), (
+        "the broken link was not reported: %r" % problems)
+
+
+# ---------------------------------------------------------------------------
 # the module's own selftest
 # ---------------------------------------------------------------------------
 

@@ -200,11 +200,27 @@ def main() -> int:
     rc, out = _run_tests(mut_src)
     report("M6", "the chain's head is not read", rc, out)
 
+    # -- M7: the chain's DIGEST check goes -----------------------------
+    #
+    # AND THIS ONE IS NOT A CONSEQUENCE OF M3. MEASURED 2026-11-06: a
+    # store whose lesson rule was changed in place reported "digest
+    # mismatch at seq 0" -- and a store whose 'prev' was changed
+    # reported BOTH "link break at seq 1" AND the digest mismatches.
+    # So the digest and the link are TWO checks, and removing one must
+    # leave the other.
+    fresh_tree()
+    mutated('            if digest != ev.get("digest"):\n'
+            '                problems.append("digest mismatch at seq %d" % i)',
+            '            if False:\n'
+            '                problems.append("")')
+    rc, out = _run_tests(mut_src)
+    report("M7", "the chain's digest check removed", rc, out)
+
     shutil.rmtree(tmpdir, ignore_errors=True)
 
     print("=" * 78)
     if ok:
-        print("VERDICT: PASS -- 6 of 6 mutations caught")
+        print("VERDICT: PASS -- 7 of 7 mutations caught")
         print("  the self-review's rules are load-bearing.")
         return 0
     print("VERDICT: FAIL")
