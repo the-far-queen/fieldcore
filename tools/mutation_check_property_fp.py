@@ -27,6 +27,7 @@ Exit: 0 when every mutation went RED, 1 otherwise.
 """
 from __future__ import annotations
 
+import os
 import pathlib
 import re
 import subprocess
@@ -133,6 +134,13 @@ def run_tests() -> tuple:
 def main() -> int:
     src = TARGET.read_text(encoding="utf-8")
     original = src
+    # AND THE MTIME IS RECORDED, because the bytes are not the only
+    # thing the gate watches. MEASURED 2026-11-07: `gate_staleness.py`
+    # fingerprints the mtime of every rule file, so a tool that writes
+    # a real source file and restores its BYTES leaves the tree looking
+    # changed -- and the gate says STALE and names the file. **THE GATE
+    # WAS RIGHT.** See `tools/mutation_restore.py`.
+    _orig_stat = TARGET.stat()
     print("MUTATION CHECK  the property layer's false positives")
     print("-" * 72)
 
@@ -166,6 +174,8 @@ def main() -> int:
                 print("    ^^ this mutation stayed GREEN: the checks it "
                       "targets do not catch it")
             TARGET.write_text(original, encoding="utf-8")
+            os.utime(TARGET,
+                     ns=(_orig_stat.st_atime_ns, _orig_stat.st_mtime_ns))
 
         print("-" * 72)
         print("every mutation went RED" if all_red
@@ -173,6 +183,8 @@ def main() -> int:
         return 0 if all_red else 1
     finally:
         TARGET.write_text(original, encoding="utf-8")
+        # AND THE MTIME GOES BACK TO WHERE IT WAS.
+        os.utime(TARGET, ns=(_orig_stat.st_atime_ns, _orig_stat.st_mtime_ns))
 
 
 if __name__ == "__main__":

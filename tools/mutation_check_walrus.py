@@ -104,6 +104,29 @@ def main() -> int:
     print()
 
     original = TARGET.read_text(encoding="utf-8")
+    # AND THE FILE IS RESTORED BY THE SHARED HELPER, because the
+    # file's CONTENT is not the only thing the gate watches.
+    #
+    # MEASURED 2026-11-07: this mutation check rewrites the REAL
+    # `src/walrus_memory.py` and restores its bytes, but the write moves
+    # the file's mtime -- and `fieldcore/src/gate_staleness.py`
+    # fingerprints the mtime of every rule file. So after this tool
+    # runs, the gate's IMPORT-TIME record is behind the disk and the
+    # gate says STALE:
+    #
+    #     moved=walrus_memory.py
+    #     built=4316721aa20c (369 files) disk=368a2bc086a2 (369 files)
+    #
+    # **AND THE GATE WAS RIGHT.** It watched a file that moved, and it
+    # named the file that moved. The defect was OURS: the mutation
+    # check left the tree looking changed when it was not.
+    #
+    # **AND THIS IS A WHOLE-CLASS DEFECT**: any tool that writes a real
+    # source file and restores its bytes leaves the tree looking
+    # changed. So `tools/mutation_restore.py` puts BOTH the bytes and
+    # the mtime back, and the tree ends byte-identical AND
+    # stat-identical.
+    _orig_stat = TARGET.stat()
     backup = TARGET.with_suffix(".py.bak")
 
     ok, out = _run_selftest()
@@ -132,7 +155,9 @@ def main() -> int:
                         break
                 print("  [RED  ] %-52s %s" % (name, first))
     finally:
+        # AND THE MTIME GOES BACK TO WHERE IT WAS.
         TARGET.write_text(original, encoding="utf-8")
+        os.utime(TARGET, ns=(_orig_stat.st_atime_ns, _orig_stat.st_mtime_ns))
         if backup.exists():
             backup.unlink()
 
