@@ -17,6 +17,22 @@ than the elegance:
 
     H^1 != 0 is a PROOF that the local data cannot be glued.
 
+WHAT IT REACHES, AND WHAT IT DOES NOT. MEASURED 2026-11-07 by
+`tools/reach_census.py`: this module reaches NOTHING of the fc's own --
+no ledger, no subprocess probe, no path into the fc's source.
+
+**AND THAT IS NOT THE WHOLE STORY ANY MORE.** The SCALAR sheaf in
+`coherence_spine.py` is the same phenomenon in another algebra -- a
+seam break -- and `src/sheaf_bridge.py` is the instrument that reads
+the two together and checks them against each other. **SO THIS MODULE
+REACHES THE FC THROUGH THE BRIDGE, and the bridge is what makes the two
+algebras one claim instead of two.**
+
+AND BEFORE THE BRIDGE, THE ANSWER WAS: this module computed the
+obstruction and the fc had no way to compare it with the scalar sheaf's
+seam break. **THE FC HAD THE OBSTRUCTION IN TWO FILES AND THE LINK
+BETWEEN THEM IN NEITHER.**
+
 That is a different kind of statement from "the solver failed". It means
 no global section exists for those stalks, no matter how much compute is
 spent. The loop's job is to convert that impossibility into a question,

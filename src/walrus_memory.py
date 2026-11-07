@@ -22,6 +22,22 @@ Storage layout:
 References:
 - fieldcore/docs/walrus-memory-spec-2026-09-15.md (design)
 - Sui walrus docs (api contract this implements)
+
+WHAT IT REACHES, AND WHAT IT DOES NOT. MEASURED 2026-11-07 by
+`tools/reach_census.py`: this module reaches NOTHING of the fc's own --
+no ledger, no subprocess probe, no path into the fc's source. It reaches
+the FILESYSTEM.
+
+AND THAT IS CORRECT AND DELIBERATE. A content-addressed blob store is a
+storage substrate, and the fc's ledgers hold what is TRUE -- a blob
+store holds BYTES, and it has no opinion about whether they are true.
+Wiring it to the claim register would mean the register asserting that
+some bytes are a claim, and that is the confabulation the register
+exists to refuse.
+
+**SO THIS IS A STANDALONE INSTRUMENT, AND IT SAYS SO.** It reaches the
+filesystem, it records the measurement (the hash, the size, the label),
+and it has a NAMED REFUSAL that names the store it looked in.
 """
 from __future__ import annotations
 
