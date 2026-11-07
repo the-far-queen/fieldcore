@@ -106,6 +106,10 @@ class Reach:
     has_selftest: bool = False
     #: DOES IT HAVE A NAMED REFUSAL?
     has_refusal: bool = False
+    #: HOW MANY OF THE FC'S OWN DOCS NAME THIS MODULE. And this is the
+    #: MEASUREMENT OF HOW MUCH THE FC'S OWN WRITE-UP NEEDS IT -- so the
+    #: 117 are ordered by something measured and not by a guess.
+    named_by_docs: int = 0
 
     @property
     def reaches(self) -> bool:
@@ -128,6 +132,7 @@ class Reach:
             "names_it": self.names_it, "has_main": self.has_main,
             "has_selftest": self.has_selftest,
             "has_refusal": self.has_refusal,
+            "named_by_docs": self.named_by_docs,
         }
 
 
@@ -248,6 +253,34 @@ def measure_module(path: str, module: str, repo: str,
     )
 
 
+def _doc_mentions(repo: str, module: str) -> int:
+    """How many of the fc's own docs name this module.
+
+    **AND THIS IS THE MEASUREMENT OF HOW MUCH THE FC'S WRITE-UP NEEDS
+    IT**, so the modules that reach nothing are ordered by something
+    measured and not by a guess.
+
+    AND THE DOCS ARE THE FC'S OWN -- `docs/` in each repo -- and not the
+    whole filesystem, so a stray mention in a chat transcript does not
+    make a module look important.
+    """
+    docs_dir = os.path.join(WORK_REPOS, repo, "docs")
+    if not os.path.isdir(docs_dir):
+        return 0
+    n = 0
+    for f in os.listdir(docs_dir):
+        if not f.endswith(".md"):
+            continue
+        try:
+            text = open(os.path.join(docs_dir, f), encoding="utf-8",
+                        errors="replace").read()
+        except Exception:                          # noqa: BLE001
+            continue
+        if ("src/%s.py" % module) in text or ("`%s`" % module) in text:
+            n += 1
+    return n
+
+
 def census(repos: Sequence[str] = ("fieldcore", "simself", "far-coding",
                                    "far-writing")) -> Dict[str, Any]:
     """The whole fc, measured for reach."""
@@ -272,6 +305,7 @@ def census(repos: Sequence[str] = ("fieldcore", "simself", "far-coding",
             path = os.path.join(src_dir, f)
             r = measure_module(path, f[:-3], repo, fc_modules)
             if r is not None:
+                r.named_by_docs = _doc_mentions(repo, f[:-3])
                 rows.append(r)
 
     bins: Dict[str, int] = {"REACHES": 0, "STANDALONE": 0, "NAMES-IT": 0}
@@ -383,13 +417,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if not rows:
             continue
         print("  --- %s (%d) ---" % (want, len(rows)))
-        for r in sorted(rows, key=lambda x: (x.repo, x.module)):
-            print("    %-11s %-30s %5d lines  %s%s%s" % (
-                r.repo, r.module, r.lines,
+        for r in sorted(rows, key=lambda x: (-x.named_by_docs, x.repo,
+                                            x.module)):
+            print("    %-11s %-30s %5d lines  docs=%-2d %s%s%s" % (
+                r.repo, r.module, r.lines, r.named_by_docs,
                 ("ledger=" + ",".join(r.ledgers)) if r.ledgers else "",
                 " probe" if r.probes else "",
                 " path" if r.path_probe else ""))
         print()
+
+    # AND THE ORDER OF THE WORK, measured: the modules that reach nothing
+    # and are NAMED BY THE FC'S OWN DOCS are the ones the fc's write-up
+    # says matter, and they come first.
+    names_it = [r for r in result["rows"] if r.bin == "NAMES-IT"]
+    named = [r for r in names_it if r.named_by_docs]
+    print("  --- THE ORDER OF THE WORK (%d of the %d name it, and the "
+          "fc's docs name %d of those) ---" % (len(named), len(names_it),
+                                               len(named)))
+    for r in sorted(named, key=lambda x: (-x.named_by_docs, x.module))[:20]:
+        print("    %-11s %-30s named by %d doc(s)" % (
+            r.repo, r.module, r.named_by_docs))
+    print()
     return 0
 
 
