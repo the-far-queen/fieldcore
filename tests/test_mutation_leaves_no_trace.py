@@ -49,7 +49,14 @@ REPO = os.path.dirname(HERE)
 #: checked here.
 REAL_WRITERS = ("mutation_check_walrus.py",
                 "mutation_check_gate_staleness.py",
-                "mutation_check_property_fp.py")
+                "mutation_check_property_fp.py",
+                # AND THE SPINE'S, added 2026-11-07. It writes
+                # `src/coherence_spine.py` and restores it through the
+                # SHARED RESTORE -- so it restores the mtime as well as
+                # the bytes, and the tree ends stat-identical. **AND THE
+                # LIST IS THE MEASUREMENT, so a new writer cannot join
+                # without this file noticing.**
+                "mutation_check_coherence_spine.py")
 
 
 def _tree_state() -> dict:

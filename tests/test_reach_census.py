@@ -170,19 +170,50 @@ def test_the_census_over_the_real_fc():
     assert result["total"] > 200, result["total"]
     assert sum(result["bins"].values()) == result["total"], result["bins"]
     for r in result["rows"]:
-        assert r.bin in ("REACHES", "STANDALONE", "NAMES-IT"), r.bin
+        assert r.bin in ("REACHES", "SUBSTRATE", "STANDALONE",
+                         "NAMES-IT"), r.bin
 
 
 def test_the_sheaf_bridge_reaches_and_the_sheaf_loop_says_so():
-    """**AND THE TWO MODULES I FIXED ARE IN THE RIGHT BINS.**"""
+    """**AND THE TWO MODULES I FIXED ARE IN THE RIGHT BINS.**
+
+    **AND `sheaf_loop` IS A SUBSTRATE, NOT A STANDALONE.** MEASURED
+    2026-11-07: the census measured reach in ONE direction -- "does
+    this module reach the fc's own?" -- and never asked the other
+    question. So a module the fc is BUILT ON and a module NOTHING
+    TOUCHES landed in the same bin, and the bin's own name was wrong
+    for half of its members.
+
+    `sheaf_loop` says "this module REACHES THE FC THROUGH THE BRIDGE"
+    -- the same claim in the other order -- and three of the fc's own
+    modules import it. So it is a SUBSTRATE, and the bin says so.
+    """
     result = RC.census()
     by = {(r.repo, r.module): r for r in result["rows"]}
     bridge = by.get(("fieldcore", "sheaf_bridge"))
     assert bridge is not None and bridge.bin == "REACHES", bridge
     loop = by.get(("fieldcore", "sheaf_loop"))
-    assert loop is not None and loop.bin == "STANDALONE", loop
+    assert loop is not None and loop.bin == "SUBSTRATE", loop.bin
+    assert loop.is_reached, "the reverse reach was not measured"
+    assert loop.names_the_reverse, "the honest sentence was not seen"
     walrus = by.get(("fieldcore", "walrus_memory"))
     assert walrus is not None and walrus.bin == "STANDALONE", walrus
+    # AND NOTHING REACHES THE WALRUS, so STANDALONE IS RIGHT FOR IT.
+    assert not walrus.is_reached, walrus.reached_by
+
+
+def test_the_spine_is_a_substrate_and_says_so():
+    """**AND THE SPINE IS A SUBSTRATE.** MEASURED 2026-11-07: three of
+    the fc's own modules import it -- `evacuated`,
+    `predicate_registry`, `sheaf_bridge` -- and the fc's GROUND asks it
+    two questions. So it is what the fc is built on, and it says so."""
+    result = RC.census()
+    by = {(r.repo, r.module): r for r in result["rows"]}
+    spine = by.get(("fieldcore", "coherence_spine"))
+    assert spine is not None and spine.bin == "SUBSTRATE", spine.bin
+    assert spine.is_reached, spine.reached_by
+    assert spine.names_the_reverse, "the honest sentence was not seen"
+    assert "fieldcore/sheaf_bridge" in spine.reached_by, spine.reached_by
 
 
 # ---------------------------------------------------------------------------
