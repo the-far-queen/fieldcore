@@ -6,12 +6,12 @@ it 450 common words in machine language technica register that u use
 constantly in python and with me in chats"*.
 
 AND THE COUNT, and it is MEASURED and it is not what the file used to
-claim. MEASURED 2026-11-07, after `tools/sync_derived_terms.py --write`
+claim. MEASURED 2026-11-09, after `tools/sync_derived_terms.py --write`
 put the derivation's output into the register:
 
-    the register holds 415 terms
+    the register holds 425 terms
     py-builtin     91
-    control       176
+    control       186
     engineering    76
     process        40
     affect         32
@@ -22,7 +22,7 @@ numbers, not one:
     306 CURATED   a person read the word off the substrate and wrote
                   the gloss. MEASURED 2026-11-05, before the
                   derivation.
-    109 DERIVED   produced by a COMMAND from the substrate's own
+    119 DERIVED   produced by a COMMAND from the substrate's own
                   measured vocabulary. Every one carries a `source`
                   naming where it came from.
 
@@ -30,12 +30,37 @@ AND THE DERIVATION IS A COMMAND, and this is the whole point:
 
     python fieldcore/tools/derive_mltr_terms.py
 
-MEASURED, that command prints 109 derived terms -- 96 control, 13
-engineering -- and re-running it prints the same 109, because the
+MEASURED, that command prints 119 derived terms -- 106 control, 13
+engineering -- and re-running it prints the same 119, because the
 derived terms are excluded from the tool's own input, so the tool is
 IDEMPOTENT. `python fieldcore/tools/derive_mltr_terms.py --check`
-reports `derived terms: 109   in the register: 109   missing: 0
+reports `derived terms: 119   in the register: 119   missing: 0
 extra: 0`.
+
+**AND THE COUNT MOVED ON 2026-11-09, FROM 109 TO 119, AND THE CAUSE
+WAS A DEFECT IN THE DERIVATION, NOT IN THE CORPUS.** The derivation's
+module map was keyed by the file STEM, so two files with the same
+basename OVERWROTE each other -- 18 files named `__init__.py` collapsed
+into one entry and 9 more stems collided across the two repos. **26 of
+the 369 scanned files were dropped, silently**, and the tool reported
+"343 modules" as if that were a count and not a loss. The map is now
+keyed by PATH, so every scanned file is its own module, and the family
+lists still match by the file's stem -- because the family names what
+a module IS, and two files can both be the governor. MEASURED: the
+module map now holds 369 entries for 369 scanned files.
+
+**AND THE DERIVATION NAMES ITS INPUT, WHICH IS THE POINT OF A
+DERIVATION THAT READS A MOVING TREE.** The derived block is a
+SNAPSHOT of a function of a MOVING INPUT, so the register carries
+`DERIVED_AT_FINGERPRINT` -- the sha256 of the tree the derivation
+read -- and the derivation prints it. MEASURED, by adding UNRELATED
+modules to the scanned tree and re-deriving: **0** of the derived
+terms move when one unrelated module is added, and 1 when twenty are.
+So the sensitivity is acceptable and the input stays the source tree,
+and the answer is to NAME it. The fingerprint is a FIXED POINT: it
+covers every scanned file EXCEPT this one, plus this file's curated
+terms, so writing it here changes neither the fingerprint nor the
+derived set.
 
 **AND EVERY NUMBER IN THIS DOCSTRING IS CHECKED AGAINST THE REGISTER
 BY A TEST.** `fieldcore/tests/test_mltr_docstring_numbers.py` reads
@@ -89,17 +114,17 @@ AND THE GAP TO BOBBY'S 450 IS STATED RATHER THAN HIDDEN, and the
 three numbers are kept apart because they are three different things:
 
     the SPEC        450   what Bobby asked for, 2026-10-28
-    the MEASUREMENT 415   what the register holds, MEASURED 2026-11-07
-    the GAP          35   what is still missing
+    the MEASUREMENT 425   what the register holds, MEASURED 2026-11-09
+    the GAP          25   what is still missing
 
-AND THE GAP IS NOT PADDED. The 35 are not 35 words nobody could
+AND THE GAP IS NOT PADDED. The 25 are not 25 words nobody could
 think of; they are the words the derivation's gates refuse, and the
-tool prints every refusal with its reason: 520 "not attested in the
-corpus", 330 "not a noun, a verb or a named coinage", 229 "fewer
-than 2 modules", 195 "already in the register", 173 "too few modules
-in its family", 134 "not domain specific", 96 "too common in
-English", 33 "generic English head", 29 "too short", 9 "domain tie",
-5 "function word". A gap that is closed by inventing words is not
+tool prints every refusal with its reason: 553 "not attested in the
+corpus", 325 "not a noun, a verb or a named coinage", 216 "fewer
+than 2 modules", 199 "already in the register", 190 "too few modules
+in its family", 137 "not domain specific", 97 "too common in
+English", 34 "generic English head", 24 "too short", 10 "domain tie",
+6 "function word". A gap that is closed by inventing words is not
 closed.
 
 AND WHY A REGISTER AND NOT A DICTIONARY. The project's own rule, in
@@ -107,7 +132,7 @@ AND WHY A REGISTER AND NOT A DICTIONARY. The project's own rule, in
 change to this enum, which is a diff, which is reviewable. A filter
 in a config file is a filter somebody edits at 3am." So the register is a
 FIXED SET IN CODE, and the count is checked by a test. A register of
-"whatever words came to mind" is a bag; a register of 415 named terms
+"whatever words came to mind" is a bag; a register of 425 named terms
 with a domain and a measure is a vocabulary the machine can check
 itself against.
 
@@ -164,7 +189,7 @@ domains. The number below is the ONE the register carries, and
 `fieldcore/tests/test_mltr_register.py` asserts it.
 
 **AND THIS PARAGRAPH IS THE HISTORY AND NOT THE CLAIM.** The numbers
-above it (415 / 306 / 109) are what the register holds NOW, and
+above it (425 / 306 / 119) are what the register holds NOW, and
 `fieldcore/tests/test_mltr_docstring_numbers.py` checks them against
 the register itself -- **so a number in the HISTORY can never be
 mistaken for a number in the CLAIM, because the check reads the
@@ -214,6 +239,27 @@ class Term:
         return "%-14s %-11s mmm=%.2f snr=%.2f  %s" % (
             self.word, self.domain, self.mmm, self.snr, self.gloss)
 
+
+#: THE INPUT THE DERIVED BLOCK BELOW WAS DERIVED FROM.
+#:
+#: AND WHY THE REGISTER NAMES IT. MEASURED 2026-11-09: the derivation
+#: reads the source tree of both repos, so the derived block is a
+#: SNAPSHOT of a function of a MOVING INPUT -- any new module can move
+#: it. The register says which input it is a snapshot of, so a reader
+#: can tell a snapshot from a stale one.
+#:
+#: AND THE SENSITIVITY, which is the measurement that decided the
+#: input should stay the source tree. MEASURED, by adding UNRELATED
+#: modules to the scanned tree and re-deriving: **0** of the derived
+#: terms move when one unrelated module is added, and **1** when twenty
+#: are. So the input is not fragile, and the answer is to NAME it.
+#:
+#: AND IT IS A FIXED POINT. The fingerprint covers every scanned file
+#: EXCEPT this one, plus this file's curated terms -- so writing it
+#: here changes neither the fingerprint nor the derived set.
+#: MEASURED: adding this constant leaves the derived set at 119 and
+#: the fingerprint unchanged.
+DERIVED_AT_FINGERPRINT = "2164a830863c42824fa4ffd66234726c24fd1c7c4a7d0f1d0f42a000fd3124d3"
 
 #: THE REGISTER. Ordered by domain, and the order is the reading order.
 REGISTER: Tuple[Term, ...] = (
@@ -544,6 +590,8 @@ REGISTER: Tuple[Term, ...] = (
         Term("repos", "The directory holding fieldcore/, simself/, far-coding/, atlas-exam/.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("check", "Check all boundaries. Returns: {\"allowed\": bool, \"violated\": [...], \"passed\": [...]}", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("system", "Linear constraints C x <= b, or equivalently the null space they", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("low", "a term of the substrate's control vocabulary; used in 2 modules", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
+        Term("label", "Breakthrough trigger. Returns label if multi-sensory correlation detected.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("register", "The ground as propositions, and the instrument that reads a span.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("standard", "A POLARITY: two poles, one in phase and one in anti-phase.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("caught", "a term of the substrate's control vocabulary; used in 9 modules", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
@@ -553,48 +601,55 @@ REGISTER: Tuple[Term, ...] = (
         Term("common", "How much of an ambient disturbance is cancelled by the braid.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("local", "THE LIMIT, measured. A ball finds the GLOBAL minimum of a", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("decide", "The decision rule. See `audit_chain` for why it is conservative.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("candidate", "Is this CANDIDATE relevant -- and this is the honest version.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("control", "The turn the critique did NOT attack, for the control measure.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("decision", "One gate reading, and the reason by name.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("question", "The QUESTION, and it is deliberately not \"how do I fix this?\"", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("chain", "Carrier -> modulate -> channel(+noise) -> bandpass -> demodulate.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("union", "THE FOUR LAYERS TOGETHER. And this is the number that matters,", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("overlap", "Do the two ranges overlap? That is the counterweight's question.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("evaluate", "Register a signal and choose a response through a bounded rule set.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("proposal", "One design proposal, with its provenance and its verdict.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("truth", "a term of the substrate's control vocabulary; used in 7 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
-        Term("union", "THE FOUR LAYERS TOGETHER. And this is the number that matters,", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("anchor", "ψ₀ — the constitutional ground. The system returns here.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
+        Term("broken", "a term of the substrate's control vocabulary; used in 4 modules", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("zero", "return the cached hash. ES6-style module-level memoization.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("awareness", "Build the locus of awareness, from the system's own state.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("consistent", "In 1D extrema alternate, so a landscape starting below its", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("fresh", "The FRESH set -- 64 sentences written by a writer that had", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("learn", "the verbs and the names, learned from the canon.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("reply", "One answer, and everything that decided it.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("skill", "Build a poteto-format SKILL.md from what was extracted.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("broken", "a term of the substrate's control vocabulary; used in 4 modules", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("finite", "H'' must equal the finite-difference derivative of the tilt.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("subject", "One ground subject, its real properties, and the false ones.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("agenda", "What does this span want? Measured by the AGENDA, not the wording.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("bound", "Run the stepper and check the bound holds at every k.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("manager", "The storage layer. JSONL on disk. tree-branched.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("qualification", "The qualification of one gate: one number per axis, and a margin.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("relevant", "Is this CANDIDATE relevant -- and this is the honest version.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("revise", "Add or replace a claim, WITH A REASON, and record it.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("attack", "An objection produced by the gate, aimed at the model's claim.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("dark", "A capability could not be measured. The message IS the reason.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("immutable", "Constitutional core invariant (v6.2): ψ_0 must not change under tick().", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("noisy", "A link where the noise sits right at the null's depth, so the", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
-        Term("revise", "Add or replace a claim, WITH A REASON, and record it.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("survey", "Run every letter. Each one is independent; one failing does not", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("agreement", "Recover the damping from the trajectory and compare to the input.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("compatible", "Fast Refresh: keep working state if the constitutional ground didn't change.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("compose", "THE COMPOSITION. All four sheaves, and the local-to-global check.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("empty", "a term of the substrate's control vocabulary; used in 1 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("globally", "Does the sheaf hold together?", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("inside", "True iff all child waypoints lie within parent's bounding disk.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("stale", "STALE_NUMBER -- a number in the prose that the code contradicts.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("testimony", "The reading of a span as testimony or as a checked report.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("transfer", "Received differential at the far end.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("watch", "Record what the exchange produced, once, at the end.", "control", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("agreement", "Recover the damping from the trajectory and compare to the input.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("approve", "a term of the substrate's control vocabulary; used in 1 modules", "control", 0.25, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("basic", "Bobby's basic governor from MINI-SIMSELF.", "control", 0.25, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("built", "The fingerprint of the record.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("closure", "THE MEASURE. Gaps closed per attempt.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("coherent", "Multiply by the carrier conjugate, then low-pass.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("collapse", "Simulates the FieldCore's attempt to \"collapse\" a command into a concrete plan.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("consecutive", "The run of refusals at the end of the history.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
+        Term("decay", "damping recovered from the trajectory: -2 * slope.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("deep", "a deep narrow basin beside a shallow wide one", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("denial", "The regions of `text` that QUOTE a phrase about a denial.", "control", 0.35, 0.95, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("design", "The model designs a change for one gap.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
@@ -602,18 +657,18 @@ REGISTER: Tuple[Term, ...] = (
         Term("difference", "H'' must equal the finite-difference derivative of the tilt.", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("disposition", "A demonstrated quality of manner. NOT a gate.", "control", 0.25, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("document", "Record a document, so the IDF sharpens.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("empty", "a term of the substrate's control vocabulary; used in 1 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("fidelity", "Does a compressed summary PRESERVE the chain?", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("initiative", "The on-disk record of the cycles.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("instrument", "a term of the substrate's control vocabulary; used in 1 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("licence", "Entries that cannot be used as code in any form.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("multi", "MULTIPLE RUNS OVER THE SAME LANDSCAPE.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("narrow", "the 8-axis network with a NARROW spread around the coupling", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
-        Term("storage", "a term of the substrate's control vocabulary; used in 4 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:verb+canon_corpus:control"),
+        Term("slope", "The least-squares slope of the sequence against its index.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("structural", "What KIND of text is this, if it is not an assertion?", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("tradition", "a term of the substrate's control vocabulary; used in 2 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("accuracy", "The NAIVE measure, and it is reported so its failure shows.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("approximate", "Bounded L2 distance between compressed embeddings.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("basic", "Bobby's basic governor from MINI-SIMSELF.", "control", 0.25, 0.95, "derived:canon_vocab.json:noun+canon_corpus:control"),
+        Term("backward", "Does an early step CHANGE the answer?", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("case", "One population: the margin's distribution and both gates.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("catch", "Did this catch come from the AGENDA rather than the deny lexicon?", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("clause", "The index just past the NEAREST clause boundary in `head`.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
@@ -622,9 +677,10 @@ REGISTER: Tuple[Term, ...] = (
         Term("cover", "Two stalk spaces sharing an overlap that NEITHER fully covers.", "control", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("curator", "THE CONTROLLER'S SIDE. M1 audits, the exam qualifies, M0 commits.", "control", 0.35, 0.95, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("curriculum", "Analyzes logs to extract teachable patterns.", "control", 0.25, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("enter", "a term of the substrate's control vocabulary; used in 2 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("explain", "a term of the substrate's control vocabulary; used in 2 modules", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("fetch", "One repo, fetched. Every field is read, not guessed.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("fidelity", "Does a compressed summary PRESERVE the chain?", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
+        Term("hand", "a term of the substrate's control vocabulary; used in 1 modules", "control", 0.35, 0.95, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("nothing", "The attempt went somewhere and came back with nothing.", "control", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("partial", "Is the verdict binary?", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("respond", "One model turn.", "control", 0.25, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
@@ -637,10 +693,10 @@ REGISTER: Tuple[Term, ...] = (
         Term("watcher", "The watcher. It watches the exchange's own steps.", "control", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("wrapped", "a term of the substrate's control vocabulary; used in 1 modules", "control", 0.25, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("margin", "The margin, split by whether the runner-up is a class-mate.", "engineering", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:engineering"),
-        Term("reach", "The first step at which CUMULATIVE coverage of the answer's", "engineering", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
         Term("separation", "How far apart two addresses are on the unit circle.", "engineering", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
         Term("member", "A rung between the two stalks. DNA's base pair; a coil's secondary.", "engineering", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:engineering"),
         Term("network", "the 8-axis network, all frequencies integer multiples of the", "engineering", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
+        Term("attach", "contain `child`, detaching it from any previous parent.", "engineering", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
         Term("attachment", "Stalks attach at TWO sides — Bobby's 2026-09-08 framing.", "engineering", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
         Term("twist", "Crosstalk vs twist density. [E] for the inductive law, [H] for the", "engineering", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
         Term("characteristic", "Z0 of the free-space two-wire differential pair.", "engineering", 0.35, 0.95, "derived:canon_vocab.json:corpus+canon_corpus:engineering"),
@@ -658,8 +714,8 @@ def words() -> List[str]:
 
 
 #: THE STEMS, indexed once, because the search asks "is this token a
-#: form of one of these?" once per token and the register is 415
-#: terms -- so without the index it is 415 lookups per token.
+#: form of one of these?" once per token and the register is 425
+#: terms -- so without the index it is 425 lookups per token.
 #:
 #: AND THE COUNT IS CHECKED BY `tests/test_mltr_docstring_numbers.py`,
 #: because a comment is where a stale number hides -- nobody reads a

@@ -53,35 +53,35 @@ TEST = "tests/test_mltr_docstring_numbers.py"
 #: number and not the file.
 MUTATIONS = (
     ("the derived count is wrong in the prose",
-     "    109 DERIVED   produced by a COMMAND",
-     "    110 DERIVED   produced by a COMMAND"),
+     "    119 DERIVED   produced by a COMMAND",
+     "    120 DERIVED   produced by a COMMAND"),
 
     ("the curated count is wrong in the prose",
      "    306 CURATED   a person read the word off the substrate and wrote",
      "    305 CURATED   a person read the word off the substrate and wrote"),
 
     ("the total is wrong in the prose",
-     "    the register holds 415 terms",
-     "    the register holds 416 terms"),
+     "    the register holds 425 terms",
+     "    the register holds 426 terms"),
 
     ("a domain count is wrong in the table",
      "    engineering    76",
      "    engineering    75"),
 
     ("the derived split's engineering count is wrong",
-     "MEASURED, that command prints 109 derived terms -- 96 control, 13",
-     "MEASURED, that command prints 109 derived terms -- 96 control, 14"),
+     "MEASURED, that command prints 119 derived terms -- 106 control, 13",
+     "MEASURED, that command prints 119 derived terms -- 106 control, 14"),
 
     ("the quoted check line is wrong",
-     "reports `derived terms: 109   in the register: 109   missing: 0",
-     "reports `derived terms: 110   in the register: 110   missing: 0"),
+     "reports `derived terms: 119   in the register: 119   missing: 0",
+     "reports `derived terms: 120   in the register: 120   missing: 0"),
 
     ("the gap does not follow from the spec and the measurement",
-     "    the GAP          35   what is still missing",
-     "    the GAP          34   what is still missing"),
+     "    the GAP          25   what is still missing",
+     "    the GAP          24   what is still missing"),
 
     ("the search-index comment is wrong",
-     "#: terms -- so without the index it is 415 lookups per token.",
+     "#: terms -- so without the index it is 425 lookups per token.",
      "#: terms -- so without the index it is 306 lookups per token."),
 )
 

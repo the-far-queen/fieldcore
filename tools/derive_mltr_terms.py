@@ -141,6 +141,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple
@@ -333,7 +334,30 @@ def read(path: str) -> str:
 
 
 def source_paths() -> List[Tuple[str, str]]:
-    """(module stem, path) for every .py under both repos' src."""
+    """(module id, path) for every .py under both repos' src.
+
+    AND WHY THE ID IS NOT THE FILE STEM. MEASURED 2026-11-09: the
+    stem-keyed map dropped **26 of the 369** scanned files, and it
+    dropped them SILENTLY. Eighteen files named `__init__.py` collapsed
+    into ONE entry, and nine more stems collided across the two repos
+    -- governor, gate, wiring, memory, psb, core, chain_audit,
+    coherence, end_to_end_demo. The collapse was an OVERWRITE: the
+    second file replaced the first, so those files' words never
+    reached the derivation and the module count was 343, not 369.
+
+    **A SILENT COLLAPSE IS THE WORST KIND**, because the tool
+    reported a plausible number either way -- 343 modules looked like
+    a count and not like a loss. So the id is the PATH, relative to
+    the workspace root, and it is unique by construction.
+
+    AND WHY THE FAMILY LISTS STILL MATCH. The families name modules
+    ("governor", "gate", "sheaf_bridge"), and TWO files can be the
+    governor -- `fieldcore/src/governor.py` and
+    `simself/src/distributed/governor.py`. So family membership is
+    tested by the file's STEM while the map's key is the path: the
+    map holds every file, and the family still says which NAME a file
+    answers to.
+    """
     out: List[Tuple[str, str]] = []
     for _repo, root in REPOS:
         for dirpath, dirnames, filenames in os.walk(root):
@@ -341,9 +365,139 @@ def source_paths() -> List[Tuple[str, str]]:
                            if d != "__pycache__" and not d.startswith(".")]
             for f in filenames:
                 if f.endswith(".py"):
-                    out.append((os.path.splitext(f)[0],
-                                os.path.join(dirpath, f)))
+                    path = os.path.join(dirpath, f)
+                    out.append((module_id(path), path))
     return out
+
+
+def module_id(path: str) -> str:
+    """the unique id of a scanned file, relative to the workspace."""
+    try:
+        rel = os.path.relpath(path, WORK_REPOS)
+    except ValueError:
+        rel = path
+    return rel.replace("\\", "/")
+
+
+#: THE REGISTER FILE ITSELF, and it is EXCLUDED from the source
+#: fingerprint. AND WHY. The register carries the fingerprint, so the
+#: fingerprint would otherwise cover the file that holds it -- and
+#: writing the fingerprint would change the fingerprint. So the
+#: fingerprint covers every OTHER scanned file, and the register's own
+#: contribution to the derivation -- its CURATED terms -- is covered by
+#: a second digest, taken over the curated rows themselves. Writing
+#: the derived block and the fingerprint constant changes neither, so
+#: the fingerprint is a FIXED POINT and the tool stays idempotent.
+REGISTER_FILE = os.path.join(FC_SRC, "mltr_register.py")
+
+
+def file_digest(path: str) -> str:
+    """the sha256 of a file's bytes, or "" if it cannot be read."""
+    try:
+        with open(path, "rb") as fh:
+            return hashlib.sha256(fh.read()).hexdigest()
+    except OSError:
+        return ""
+
+
+def source_fingerprint(paths: Sequence[Tuple[str, str]],
+                       curated: Sequence[Tuple[str, str, float, float]]
+                       ) -> str:
+    """the sha256 of the INPUT the derivation read, and nothing else.
+
+    AND WHY THIS IS THE ANSWER TO A DESIGN QUESTION. MEASURED
+    2026-11-09: the derivation reads the source tree, so any new
+    module can move its output, and the register is a SNAPSHOT of a
+    function of a MOVING INPUT. The question was what the input
+    should be, and the deciding measurement was how many derived
+    terms move when an UNRELATED module is added. MEASURED: **0** move
+    when one unrelated module is added, and 1 when twenty are. So the
+    sensitivity is acceptable and the input stays the source tree --
+    but the measurement now NAMES its input, which is the fc's own
+    pattern (`bench_canon_vocab.py` prints its `canon_vocab.json
+    sha256`).
+
+    AND WHAT THE DIGEST COVERS. Every scanned file's bytes, EXCEPT
+    the register itself, plus the register's curated rows. The corpus
+    is NOT in here: it is 178MB of text and it is already named by
+    its own digest in the report (`canon_vocab.json sha256`) and by
+    its counts.
+    """
+    h = hashlib.sha256()
+    for module, path in sorted(paths):
+        if os.path.abspath(path) == os.path.abspath(REGISTER_FILE):
+            continue
+        h.update(module.encode("utf-8"))
+        h.update(b"\0")
+        h.update(file_digest(path).encode("utf-8"))
+        h.update(b"\n")
+    # THE REGISTER'S OWN CONTRIBUTION: the curated rows, which are an
+    # input to the derivation (the derived rows are the tool's OUTPUT
+    # and are excluded from it).
+    for row in sorted(curated):
+        h.update(("%s|%s|%.2f|%.2f" % row).encode("utf-8"))
+        h.update(b"\n")
+    return h.hexdigest()
+
+
+def git_revisions() -> Dict[str, Dict[str, object]]:
+    """the git revision of each repo the derivation reads, and whether
+    the working tree is dirty.
+
+    AND WHY THIS IS MEASURED AND NOT GUESSED. A revision names a
+    COMMIT, and a dirty working tree is not a commit -- so the
+    revision alone does not name the input. The fingerprint does; the
+    revision says WHICH commit, which is what a reader wants to know.
+    """
+    out: Dict[str, Dict[str, object]] = {}
+    for name, root in REPOS:
+        entry: Dict[str, object] = {"rev": "", "dirty": 0}
+        try:
+            rev = subprocess.run(["git", "-C", root, "rev-parse", "HEAD"],
+                                 capture_output=True, text=True, timeout=60)
+            if rev.returncode == 0:
+                entry["rev"] = rev.stdout.strip()
+            st = subprocess.run(["git", "-C", root, "status", "--porcelain"],
+                                capture_output=True, text=True, timeout=60)
+            if st.returncode == 0:
+                entry["dirty"] = len([l for l in st.stdout.splitlines()
+                                      if l.strip()])
+        except (OSError, subprocess.SubprocessError):
+            pass
+        out[name] = entry
+    return out
+
+
+def module_stem_of(path: str) -> str:
+    """the file's STEM -- the name the family lists use."""
+    return os.path.splitext(os.path.basename(path))[0]
+
+
+def stem_of_id(module: str) -> str:
+    """the STEM of a module id, which is a path."""
+    return os.path.splitext(os.path.basename(module))[0]
+
+
+def family_modules(family_stems: Sequence[str], modules: Set[str]) -> Set[str]:
+    """the modules of a family, matched by the file's STEM.
+
+    AND WHY THE MATCH IS BY STEM AND NOT BY ID. The family lists name
+    modules -- "governor", "gate", "sheaf_bridge" -- and TWO files can
+    answer to the same name: `fieldcore/src/governor.py` and
+    `simself/src/distributed/governor.py` are BOTH the governor, and
+    the family is a list of what a module IS. So the map's key is the
+    path (every file is its own module) and the family's membership is
+    the stem.
+
+    AND WHY THIS MATTERS FOR THE MEASUREMENT. MEASURED 2026-11-09:
+    with the family matched by the module ID instead of the stem, the
+    family matched NOTHING -- every family member was named by stem
+    and no id equals a stem -- so the derived set was EMPTY. A gate
+    that admits nothing is a gate that never opens, and it looks like
+    a measurement.
+    """
+    stems = set(family_stems)
+    return {m for m in modules if stem_of_id(m) in stems}
 
 
 # ---------------------------------------------------------------------------
@@ -1033,8 +1187,9 @@ def derive(verbose: bool = True) -> Dict:
             refused["no_domain_majority"] += 1
             continue
 
-        fam_mods = set(CONTROL_MODULES if best == "control"
-                       else ENGINEERING_MODULES)
+        fam_mods = family_modules(
+            CONTROL_MODULES if best == "control" else ENGINEERING_MODULES,
+            all_modules)
         own = len(um & fam_mods)
         if own < DOMAIN_MIN_MODULES:
             refused["too_few_modules_in_its_family"] += 1
@@ -1105,6 +1260,10 @@ def derive(verbose: bool = True) -> Dict:
     after = len(curated) + len(rows)
     result = {
         "canon_vocab_sha256": canon_sha,
+        "source_fingerprint": source_fingerprint(paths, curated),
+        "source_revisions": git_revisions(),
+        "modules_scanned": len(paths),
+        "modules_in_map": len(mod_words),
         "canon_verbs": len(verbs),
         "canon_nouns": len(nouns),
         "function_words": len(function_words),
@@ -1145,6 +1304,13 @@ def _print_report(s: Dict) -> None:
     print("DERIVATION  the missing control/engineering terms")
     print("=" * 74)
     print("canon_vocab.json sha256    %s" % s["canon_vocab_sha256"])
+    print("source fingerprint         %s" % s["source_fingerprint"])
+    for repo, info in sorted(s["source_revisions"].items()):
+        print("%-26s %s  (dirty: %d)" % ("%s rev" % repo,
+                                        (info["rev"] or "?")[:12],
+                                        info["dirty"]))
+    print("modules scanned / in map   %d / %d"
+          % (s["modules_scanned"], s["modules_in_map"]))
     print("canon verbs / nouns        %d / %d" % (s["canon_verbs"],
                                                   s["canon_nouns"]))
     print("function words excluded    %d" % s["function_words"])
@@ -1205,8 +1371,8 @@ def calibrate() -> int:
         for w in words:
             stem_modules[w].add(mod)
 
-    fam = {"control": set(CONTROL_MODULES),
-           "engineering": set(ENGINEERING_MODULES)}
+    fam = {"control": family_modules(CONTROL_MODULES, set(mod_words)),
+           "engineering": family_modules(ENGINEERING_MODULES, set(mod_words))}
     fm_snr: List[float] = []
     fm_mmm: List[float] = []
     h_snr: List[float] = []

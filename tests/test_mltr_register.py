@@ -57,41 +57,44 @@ if FC_SRC not in sys.path:
 
 import mltr_register as REG  # noqa: E402
 
-#: THE COUNT, measured 2026-11-07 AFTER the derivation ran.
+#: THE COUNT, measured 2026-11-09 AFTER the derivation ran.
 #:
 #: AND IT IS TWO POPULATIONS, and the test keeps them apart:
 #:
 #:     306 CURATED   the words a person read off the substrate
-#:     109 DERIVED   the words `tools/derive_mltr_terms.py` produced
+#:     119 DERIVED   the words `tools/derive_mltr_terms.py` produced
 #:
 #: The derived count is asserted separately, because a count that
 #: cannot say WHICH population it is counting is a count that cannot
 #: be checked.
 #:
-#: AND THE DERIVED COUNT MOVED FROM 108 TO 109 ON 2026-11-07, and the
-#: cause is MEASURED and it is the derivation reading the SOURCE TREE:
-#: one word -- "fresh" -- in one comment in `src/coherence_spine.py`
-#: moved exactly one derived term. **AND THAT IS QUEUE ITEM 57'S
-#: FINDING, MEASURED AGAIN: A DERIVATION THAT READS THE CODE IS
-#: DERIVING THE CODE'S VOCABULARY.** So the register's derived block is
-#: now written by `tools/sync_derived_terms.py --write`, and the count
-#: follows the derivation rather than a hand-kept number.
-EXPECTED_COUNT = 415
+#: AND THE DERIVED COUNT MOVED FROM 109 TO 119 ON 2026-11-09, and the
+#: cause is MEASURED and it is NOT the corpus: the derivation's module
+#: map was keyed by the file STEM, so two files with the same basename
+#: OVERWROTE each other and **26 of the 369 scanned files were
+#: dropped, silently**. The map is now keyed by PATH. **AND THIS IS
+#: QUEUE ITEM 57'S FINDING: A DERIVATION THAT READS THE CODE IS
+#: DERIVING THE CODE'S VOCABULARY** -- so the register's derived block
+#: is now written by `tools/sync_derived_terms.py --write`, the count
+#: follows the derivation rather than a hand-kept number, and the
+#: register carries `DERIVED_AT_FINGERPRINT` -- the sha256 of the tree
+#: the derivation read, so the snapshot names its input.
+EXPECTED_COUNT = 425
 EXPECTED_CURATED = 306
-EXPECTED_DERIVED = 109
+EXPECTED_DERIVED = 119
 
 #: THE FIVE DOMAINS, and their measured sizes.
 EXPECTED_DOMAINS = {
     "py-builtin": 91,
-    "control": 176,
+    "control": 186,
     "engineering": 76,
     "process": 40,
     "affect": 32,
 }
 
 #: THE SPEC, and it is NOT the measurement. Bobby, 2026-10-28: "give
-#: it 450 common words in machine language technica register". The
-#: register holds 415, and the gap of 35 is stated rather than
+#: it 450 common words in machine language technical register". The
+#: register holds 425, and the gap of 25 is stated rather than
 #: padded -- the test below asserts the gap is computed from the
 #: count, so it cannot be quietly redefined.
 SPEC_TARGET = 450
@@ -343,8 +346,8 @@ def test_the_gap_is_stated_not_padded():
     RED: change EXPECTED_COUNT without changing the register.
     """
     gap = SPEC_TARGET - len(REG.REGISTER)
-    assert gap == 35, (
-        "the gap to the spec is %d, not 35 -- the register holds %d of "
+    assert gap == 25, (
+        "the gap to the spec is %d, not 25 -- the register holds %d of "
         "the %d asked for" % (gap, len(REG.REGISTER), SPEC_TARGET))
     assert len(REG.REGISTER) <= SPEC_TARGET, (
         "the register holds %d, which is MORE than the %d asked for"
