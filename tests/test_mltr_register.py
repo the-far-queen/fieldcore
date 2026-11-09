@@ -79,14 +79,14 @@ import mltr_register as REG  # noqa: E402
 #: follows the derivation rather than a hand-kept number, and the
 #: register carries `DERIVED_AT_FINGERPRINT` -- the sha256 of the tree
 #: the derivation read, so the snapshot names its input.
-EXPECTED_COUNT = 425
+EXPECTED_COUNT = 424
 EXPECTED_CURATED = 306
-EXPECTED_DERIVED = 119
+EXPECTED_DERIVED = 118
 
 #: THE FIVE DOMAINS, and their measured sizes.
 EXPECTED_DOMAINS = {
     "py-builtin": 91,
-    "control": 186,
+    "control": 185,
     "engineering": 76,
     "process": 40,
     "affect": 32,
@@ -94,7 +94,7 @@ EXPECTED_DOMAINS = {
 
 #: THE SPEC, and it is NOT the measurement. Bobby, 2026-10-28: "give
 #: it 450 common words in machine language technical register". The
-#: register holds 425, and the gap of 25 is stated rather than
+#: register holds 424, and the gap of 26 is stated rather than
 #: padded -- the test below asserts the gap is computed from the
 #: count, so it cannot be quietly redefined.
 SPEC_TARGET = 450
@@ -346,8 +346,8 @@ def test_the_gap_is_stated_not_padded():
     RED: change EXPECTED_COUNT without changing the register.
     """
     gap = SPEC_TARGET - len(REG.REGISTER)
-    assert gap == 25, (
-        "the gap to the spec is %d, not 25 -- the register holds %d of "
+    assert gap == 26, (
+        "the gap to the spec is %d, not 26 -- the register holds %d of "
         "the %d asked for" % (gap, len(REG.REGISTER), SPEC_TARGET))
     assert len(REG.REGISTER) <= SPEC_TARGET, (
         "the register holds %d, which is MORE than the %d asked for"

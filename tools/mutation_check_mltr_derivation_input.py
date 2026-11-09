@@ -148,6 +148,24 @@ def _mutate_sensitivity() -> tuple:
     module delivers. Now `identity` crosses on the FIRST unrelated
     module, and the sensitivity checks must go red.
 
+    **AND THE THRESHOLD MOVED ON 2026-11-09, AND THE MOVE WAS
+    MEASURED.** The substrate grew -- `simself/src/autocode/
+    self_coding_cycle.py` and its wiring -- so the nearest REJECTED
+    term is no longer `identity`. MEASURED on the tree as it now
+    stands: the nearest term refused ONLY by the enrichment gate is
+    `property` at 1.991194, then `gap` at 1.982143, then `reason` at
+    1.974548. **AND `property` AND `gap` ARE REFUSED BY AN EARLIER
+    GATE AS WELL**, so lowering the threshold alone does NOT admit
+    them -- MEASURED: at a threshold of 1.9910 the derived set is
+    still 118 terms, and the first threshold that admits anything new
+    is 1.90.
+
+    So the mutation lowers the threshold to 1.90, and MEASURED at
+    that threshold: adding THREE unrelated modules adds three terms
+    (`exchange`, `force`, `manager`), which is ABOVE the bound of two
+    that `test_five_unrelated_modules_move_at_most_two_derived_terms`
+    asserts. So the sensitivity checks go red.
+
     AND THE MUTATION IS A THRESHOLD AND NOT A HACK. `DOMAIN_ENRICH` is
     a named constant in the tool, so moving it is a diff a reviewer
     can read -- which is the register's own rule ("a source not named
@@ -155,7 +173,7 @@ def _mutate_sensitivity() -> tuple:
     """
     src = open(TOOL, encoding="utf-8").read()
     old = "DOMAIN_ENRICH = 2.0"
-    new = "DOMAIN_ENRICH = 1.977"
+    new = "DOMAIN_ENRICH = 1.9"
     if old not in src:
         return None, None
     return old, new

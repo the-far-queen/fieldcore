@@ -9,9 +9,9 @@ AND THE COUNT, and it is MEASURED and it is not what the file used to
 claim. MEASURED 2026-11-09, after `tools/sync_derived_terms.py --write`
 put the derivation's output into the register:
 
-    the register holds 425 terms
+    the register holds 424 terms
     py-builtin     91
-    control       186
+    control       185
     engineering    76
     process        40
     affect         32
@@ -22,7 +22,7 @@ numbers, not one:
     306 CURATED   a person read the word off the substrate and wrote
                   the gloss. MEASURED 2026-11-05, before the
                   derivation.
-    119 DERIVED   produced by a COMMAND from the substrate's own
+    118 DERIVED   produced by a COMMAND from the substrate's own
                   measured vocabulary. Every one carries a `source`
                   naming where it came from.
 
@@ -30,14 +30,14 @@ AND THE DERIVATION IS A COMMAND, and this is the whole point:
 
     python fieldcore/tools/derive_mltr_terms.py
 
-MEASURED, that command prints 119 derived terms -- 106 control, 13
-engineering -- and re-running it prints the same 119, because the
+MEASURED, that command prints 118 derived terms -- 105 control, 13
+engineering -- and re-running it prints the same 118, because the
 derived terms are excluded from the tool's own input, so the tool is
 IDEMPOTENT. `python fieldcore/tools/derive_mltr_terms.py --check`
-reports `derived terms: 119   in the register: 119   missing: 0
+reports `derived terms: 118   in the register: 118   missing: 0
 extra: 0`.
 
-**AND THE COUNT MOVED ON 2026-11-09, FROM 109 TO 119, AND THE CAUSE
+**AND THE COUNT MOVED ON 2026-11-09, FROM 109 TO 118, AND THE CAUSE
 WAS A DEFECT IN THE DERIVATION, NOT IN THE CORPUS.** The derivation's
 module map was keyed by the file STEM, so two files with the same
 basename OVERWROTE each other -- 18 files named `__init__.py` collapsed
@@ -114,10 +114,10 @@ AND THE GAP TO BOBBY'S 450 IS STATED RATHER THAN HIDDEN, and the
 three numbers are kept apart because they are three different things:
 
     the SPEC        450   what Bobby asked for, 2026-10-28
-    the MEASUREMENT 425   what the register holds, MEASURED 2026-11-09
-    the GAP          25   what is still missing
+    the MEASUREMENT 424   what the register holds, MEASURED 2026-11-09
+    the GAP          26   what is still missing
 
-AND THE GAP IS NOT PADDED. The 25 are not 25 words nobody could
+AND THE GAP IS NOT PADDED. The 26 are not 26 words nobody could
 think of; they are the words the derivation's gates refuse, and the
 tool prints every refusal with its reason: 553 "not attested in the
 corpus", 325 "not a noun, a verb or a named coinage", 216 "fewer
@@ -132,7 +132,7 @@ AND WHY A REGISTER AND NOT A DICTIONARY. The project's own rule, in
 change to this enum, which is a diff, which is reviewable. A filter
 in a config file is a filter somebody edits at 3am." So the register is a
 FIXED SET IN CODE, and the count is checked by a test. A register of
-"whatever words came to mind" is a bag; a register of 425 named terms
+"whatever words came to mind" is a bag; a register of 424 named terms
 with a domain and a measure is a vocabulary the machine can check
 itself against.
 
@@ -189,7 +189,7 @@ domains. The number below is the ONE the register carries, and
 `fieldcore/tests/test_mltr_register.py` asserts it.
 
 **AND THIS PARAGRAPH IS THE HISTORY AND NOT THE CLAIM.** The numbers
-above it (425 / 306 / 119) are what the register holds NOW, and
+above it (424 / 306 / 118) are what the register holds NOW, and
 `fieldcore/tests/test_mltr_docstring_numbers.py` checks them against
 the register itself -- **so a number in the HISTORY can never be
 mistaken for a number in the CLAIM, because the check reads the
@@ -257,9 +257,9 @@ class Term:
 #: AND IT IS A FIXED POINT. The fingerprint covers every scanned file
 #: EXCEPT this one, plus this file's curated terms -- so writing it
 #: here changes neither the fingerprint nor the derived set.
-#: MEASURED: adding this constant leaves the derived set at 119 and
+#: MEASURED: adding this constant leaves the derived set at 118 and
 #: the fingerprint unchanged.
-DERIVED_AT_FINGERPRINT = "2164a830863c42824fa4ffd66234726c24fd1c7c4a7d0f1d0f42a000fd3124d3"
+DERIVED_AT_FINGERPRINT = "1a6ace4520e03d1489f2ec8f3704b00ae18a359c14f996086de970a6c70e9c08"
 
 #: THE REGISTER. Ordered by domain, and the order is the reading order.
 REGISTER: Tuple[Term, ...] = (
@@ -601,7 +601,6 @@ REGISTER: Tuple[Term, ...] = (
         Term("common", "How much of an ambient disturbance is cancelled by the braid.", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("local", "THE LIMIT, measured. A ball finds the GLOBAL minimum of a", "control", 0.45, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
         Term("decide", "The decision rule. See `audit_chain` for why it is conservative.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
-        Term("candidate", "Is this CANDIDATE relevant -- and this is the honest version.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("control", "The turn the critique did NOT attack, for the control measure.", "control", 0.45, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("decision", "One gate reading, and the reason by name.", "control", 0.35, 0.80, "derived:canon_vocab.json:corpus+canon_corpus:control"),
         Term("question", "The QUESTION, and it is deliberately not \"how do I fix this?\"", "control", 0.35, 0.80, "derived:canon_vocab.json:noun+canon_corpus:control"),
@@ -714,8 +713,8 @@ def words() -> List[str]:
 
 
 #: THE STEMS, indexed once, because the search asks "is this token a
-#: form of one of these?" once per token and the register is 425
-#: terms -- so without the index it is 425 lookups per token.
+#: form of one of these?" once per token and the register is 424
+#: terms -- so without the index it is 424 lookups per token.
 #:
 #: AND THE COUNT IS CHECKED BY `tests/test_mltr_docstring_numbers.py`,
 #: because a comment is where a stale number hides -- nobody reads a
