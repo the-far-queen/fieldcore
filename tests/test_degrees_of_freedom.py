@@ -118,13 +118,34 @@ def test_dependent_constraints_do_not_remove_extra_dof():
     assert c.rows.shape[0] == 3
 
 
+def _rank_of(rows: np.ndarray) -> int:
+    """The rank of a constraint matrix, INDEPENDENTLY of the substrate.
+
+    **AND WHY THIS IS A HELPER AND NOT A BARE `np.linalg.matrix_rank`.**
+    MEASURED 2026-11-09: on this machine the SAME test passes under the
+    venv's numpy 2.5.3 and FAILS under Python313's numpy 2.2.3, because
+    `np.linalg.matrix_rank` on a ZERO-ROW array raises
+    `ValueError: zero-size array to reduction operation maximum which has
+    no identity` in 2.2.3 and returns 0 in 2.5.3. So the test's own
+    oracle was version-dependent, and the suite's greenness was a
+    property of the INTERPRETER and not of the substrate.
+
+    The rank of a matrix with no rows is 0 -- that is the definition, not
+    a numpy version's opinion -- so the empty case is stated here and
+    the oracle is numpy's for every case numpy can answer.
+    """
+    if rows.shape[0] == 0:
+        return 0
+    return int(np.linalg.matrix_rank(rows))
+
+
 def test_rank_plus_dof_equals_dimension():
     for rows in ([], [[1, 0, 0, 0, 0, 0, 0, 0]],
                  [[1, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0]],
                  [[1, 1, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0], [1, 0, 0, 0, 0, 0]]):
         dim = len(rows[0]) if rows else 8
         c = ConstraintSystem.from_equality(dim, rows) if rows else ConstraintSystem(dimension=dim)
-        assert c.dof() + int(np.linalg.matrix_rank(c.rows)) == dim
+        assert c.dof() + _rank_of(c.rows) == dim
 
 
 def test_null_space_basis_is_orthonormal():

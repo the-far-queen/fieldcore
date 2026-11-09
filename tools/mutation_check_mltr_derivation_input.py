@@ -97,6 +97,64 @@ def _run_tests() -> tuple:
     return p.returncode, (p.stdout or "") + (p.stderr or "")
 
 
+#: THE BACKUP FILES, and why they are files and not variables.
+#:
+#: **MEASURED 2026-11-09, and this harness had the defect it now
+#: fixes.** The harness restored the tree in a `finally` block -- and a
+#: `finally` runs when the process is asked to stop, but NOT when the
+#: process is KILLED. The cron runs this harness under `runbound.py`,
+#: and a run that exceeded its budget was killed with the mutated file
+#: still on disk: MEASURED, `tools/derive_mltr_terms.py` was left with
+#: `DOMAIN_ENRICH = 1.9` instead of `2.0`.
+#:
+#: **AND THE CONSEQUENCE WAS A MEASUREMENT THAT WAS NOT A MEASUREMENT.**
+#: The next run's BASELINE was RED -- 3 tests failed -- and the
+#: baseline is supposed to be the unmutated tree. So the harness
+#: reported "the baseline is RED, so they prove nothing" and exited 1,
+#: which was CORRECT about the tree and wrong about the cause.
+#:
+#: So the original bytes go to a FILE beside the target BEFORE the
+#: mutation, and the file is read back on the next run even if this
+#: process never gets to run its own restore. **A backup that lives in
+#: a variable dies with the process that made it.**
+BACKUP_TOOL = TOOL + ".mutation-backup"
+BACKUP_REGISTER = REGISTER + ".mutation-backup"
+
+
+def _restore_from_backup() -> list:
+    """Restore any tree left mutated by a KILLED run. Returns the names.
+
+    AND WHY THIS RUNS FIRST, BEFORE THE BASELINE. The baseline is the
+    unmutated tree; if a previous run was killed mid-mutation, the tree
+    on disk is NOT the unmutated tree, and a baseline measured against
+    it measures nothing. So the restore comes before the measurement.
+    """
+    restored = []
+    for target, backup in ((TOOL, BACKUP_TOOL), (REGISTER, BACKUP_REGISTER)):
+        if not os.path.isfile(backup):
+            continue
+        try:
+            with open(backup, "rb") as fh:
+                original = fh.read()
+            with open(target, "wb") as fh:
+                fh.write(original)
+            restored.append(os.path.basename(target))
+        except OSError:
+            continue
+        try:
+            os.remove(backup)
+        except OSError:
+            pass
+    if restored:
+        _drop_bytecode()
+        print("RESTORED A TREE LEFT MUTATED BY A KILLED RUN: %s"
+              % ", ".join(restored))
+        print("  (a previous run was killed mid-mutation, so its "
+              "backup files were left behind)")
+        print()
+    return restored
+
+
 def _drop_bytecode() -> None:
     """Remove the cached bytecode of every file this check touches.
 
@@ -180,6 +238,11 @@ def _mutate_sensitivity() -> tuple:
 
 
 def main() -> int:
+    # THE RESTORE FIRST. If a previous run was ended mid-mutation, the
+    # tree on disk is not the unmutated tree, and every measurement
+    # below would be a measurement of the mutation.
+    _restore_from_backup()
+
     with open(TOOL, encoding="utf-8") as f:
         tool_orig = f.read()
     with open(REGISTER, encoding="utf-8") as f:
@@ -207,6 +270,12 @@ def main() -> int:
             failures.append(name)
             continue
         mutated = original.replace(old, new, 1)
+        # THE BACKUP GOES TO A FILE BEFORE THE MUTATION, so a run that
+        # is ended here still leaves a tree that the NEXT run can put
+        # back. See BACKUP_TOOL's own note.
+        backup = (BACKUP_TOOL if path == TOOL else BACKUP_REGISTER)
+        with open(backup, "wb") as f:
+            f.write(original.encode("utf-8"))
         with open(path, "w", encoding="utf-8") as f:
             f.write(mutated)
         _drop_bytecode()
@@ -215,6 +284,10 @@ def main() -> int:
         finally:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(original)
+            try:
+                os.remove(backup)
+            except OSError:
+                pass
             _drop_bytecode()
         ok = rc != 0
         print("mutation: %-56s %s" % (name, "RED" if ok else "GREEN"))
@@ -231,6 +304,8 @@ def main() -> int:
         print("  the anchor text is not in the tool")
         failures.append("sensitivity")
     else:
+        with open(BACKUP_TOOL, "wb") as f:
+            f.write(tool_orig.encode("utf-8"))
         with open(TOOL, "w", encoding="utf-8") as f:
             f.write(tool_orig.replace(old, new, 1))
         _drop_bytecode()
@@ -239,6 +314,10 @@ def main() -> int:
         finally:
             with open(TOOL, "w", encoding="utf-8") as f:
                 f.write(tool_orig)
+            try:
+                os.remove(BACKUP_TOOL)
+            except OSError:
+                pass
             _drop_bytecode()
         ok = rc != 0
         print("mutation: %-56s %s"
